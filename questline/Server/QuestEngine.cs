@@ -33,6 +33,11 @@ public class QuestEngine
     readonly Dictionary<string, Action<int>> inventoryWatchers = [];
 
     public QuestRegistry Registry { get; private set; } = new();
+    public QuestlineConfig Config { get; set; } = new();
+
+    // Task types a player's history records. Obtain follows the inventory instead, and a
+    // checkbox has nothing to remember.
+    static readonly HashSet<string> HistoryTypes = ["kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom"];
     public List<string> Problems { get; private set; } = [];
 
     /// <summary>Fires after a quest's tasks are all done, with the player and quest id.</summary>
@@ -51,6 +56,16 @@ public class QuestEngine
 
     public void Start()
     {
+        try
+        {
+            Config = api.LoadModConfig<QuestlineConfig>(QuestlineConfig.FileName) ?? new QuestlineConfig();
+            api.StoreModConfig(Config, QuestlineConfig.FileName);
+        }
+        catch (Exception e)
+        {
+            api.Logger.Error("[questline] can't read ModConfig/{0}, using defaults: {1}", QuestlineConfig.FileName, e.Message);
+        }
+
         channel = api.Network.RegisterChannel(ChannelName)
             .RegisterMessageType<DefinitionsPacket>()
             .RegisterMessageType<StatePacket>()
@@ -154,9 +169,15 @@ public class QuestEngine
     public void Report(IServerPlayer player, string type, AssetLocation code, int amount)
     {
         if (player == null || code == null || amount <= 0) return;
-        if (!tasksByType.TryGetValue(type, out var tasks)) return;
 
         var p = ProgressOf(player.PlayerUID);
+        if (HistoryTypes.Contains(type))
+        {
+            string key = PlayerProgress.HistoryKey(type, code.ToString());
+            p.History[key] = p.History.GetValueOrDefault(key) + amount;
+        }
+        if (!tasksByType.TryGetValue(type, out var tasks)) return;
+
         bool changed = false;
         foreach (var (quest, index) in tasks)
         {
@@ -195,14 +216,52 @@ public class QuestEngine
         return cached;
     }
 
+    // Set whenever quests may have unlocked or the inventory changed: newly unlocked quests take
+    // credit from history and from what the player carries.
     void ScanDirtyInventories()
     {
         if (inventoryDirty.Count == 0) return;
         foreach (string uid in inventoryDirty.ToList())
         {
             inventoryDirty.Remove(uid);
-            if (api.World.PlayerByUid(uid) is IServerPlayer { ConnectionState: EnumClientState.Playing } player) ScanInventory(player);
+            if (api.World.PlayerByUid(uid) is not IServerPlayer { ConnectionState: EnumClientState.Playing } player) continue;
+            SeedFromHistory(player);
+            ScanInventory(player);
         }
+    }
+
+    /// <summary>Credits each newly unlocked quest, once, with what the player did before it unlocked.</summary>
+    public void SeedFromHistory(IServerPlayer player)
+    {
+        if (!Config.CreditEarlierWork) return;
+
+        var p = ProgressOf(player.PlayerUID);
+        bool changed = false;
+        foreach (var quest in Registry.Quests.Values)
+        {
+            if (p.Find(quest.Id)?.Seeded == true || !quest.Tasks.Any(t => HistoryTypes.Contains(t.Type)) || !IsActive(quest, p)) continue;
+
+            var qp = p.GetOrCreate(quest);
+            qp.Seeded = true;
+            for (int i = 0; i < quest.Tasks.Count; i++)
+            {
+                var task = quest.Tasks[i];
+                if (!HistoryTypes.Contains(task.Type)) continue;
+
+                string prefix = task.Type + "|";
+                var pattern = Pattern(task);
+                int done = p.History
+                    .Where(h => h.Key.StartsWith(prefix) && WildcardUtil.Match(pattern, new AssetLocation(h.Key[prefix.Length..])))
+                    .Sum(h => h.Value);
+                if (done <= qp.Tasks[i]) continue;
+
+                qp.Tasks[i] = Math.Min(task.Count, done);
+                changed = true;
+            }
+            if (TryComplete(player, quest, qp)) changed = true;
+        }
+
+        if (changed) Sync(player);
     }
 
     /// <summary>Sets every active obtain task to what the player carries now.</summary>
@@ -359,6 +418,7 @@ public class QuestEngine
         {
             p.Quests.Clear();
             p.Stages.Clear();
+            p.History.Clear();
         }
         else p.Quests.Remove(questId);
         inventoryDirty.Add(player.PlayerUID);

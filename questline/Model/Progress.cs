@@ -22,6 +22,8 @@ public class QuestProgress
     public bool Claimed;
     /// <summary>In-game day the quest completed, for repeats.</summary>
     public double CompletedDay;
+    /// <summary>Credited from the player's history when it unlocked; done once.</summary>
+    public bool Seeded;
 }
 
 /// <summary>One player's progress through every quest, keyed by quest id.</summary>
@@ -30,6 +32,10 @@ public class PlayerProgress
     public Dictionary<string, QuestProgress> Quests = [];
     /// <summary>Progression flags set by stage rewards (or other mods, through the API).</summary>
     public HashSet<string> Stages = [];
+    /// <summary>Everything the player has done that a task could count, as "type|code" to a running total.</summary>
+    public Dictionary<string, int> History = [];
+
+    public static string HistoryKey(string type, string code) => type + "|" + code;
 
     public QuestProgress Find(string questId) => Quests.TryGetValue(questId, out var p) ? p : null;
 

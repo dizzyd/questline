@@ -110,23 +110,47 @@ namespace Questline.Tests
         }
 
         [VsTest(TimeoutMs = 60000)]
-        public async Task LockedQuestsDontCountProgress()
+        public async Task EarlierWorkCountsOnceTheQuestUnlocks()
         {
             // Free-standing blocks a few apart, so each aim has a clear line.
-            BlockPos[] soil = [P(2, 1, 4), P(6, 1, 4), P(10, 1, 4)];
+            BlockPos[] soil = [P(2, 1, 4), P(6, 1, 4)];
             foreach (var pos in soil) World.SetBlock("game:soil-medium-normal", pos);
 
             Assert.Equal(QuestState.Locked, StateOf(DigSoil));
             await Break(soil[0]);
             await Ticks(5);
-            Assert.True(Engine.ProgressOf(Me.PlayerUID).Find(DigSoil) == null, "a locked quest took progress");
+            Assert.True(Engine.ProgressOf(Me.PlayerUID).Find(DigSoil) == null, "a locked quest took progress directly");
 
             Engine.ForceComplete(Me, GatherFlint);
-            Assert.Equal(QuestState.Available, StateOf(DigSoil));
+            await Until(() => Engine.ProgressOf(Me.PlayerUID).Find(DigSoil)?.Tasks[0] == 1, 60, "the earlier break credited on unlock");
+
             await Break(soil[1]);
-            await Break(soil[2]);
             // No rewards, so it goes straight to done.
-            await Until(() => StateOf(DigSoil) == QuestState.Done, 60, "two soil broken");
+            await Until(() => StateOf(DigSoil) == QuestState.Done, 60, "the second break completes it");
+        }
+
+        [VsTest(TimeoutMs = 60000)]
+        public async Task WithEarlierWorkOffOnlyUnlockedWorkCounts()
+        {
+            Engine.Config.CreditEarlierWork = false;
+            try
+            {
+                BlockPos[] soil = [P(2, 1, 4), P(6, 1, 4), P(10, 1, 4)];
+                foreach (var pos in soil) World.SetBlock("game:soil-medium-normal", pos);
+
+                await Break(soil[0]);
+                Engine.ForceComplete(Me, GatherFlint);
+                await Ticks(30);
+                Assert.Equal(0, Engine.ProgressOf(Me.PlayerUID).Find(DigSoil)?.Tasks[0] ?? 0);
+
+                await Break(soil[1]);
+                await Break(soil[2]);
+                await Until(() => StateOf(DigSoil) == QuestState.Done, 60, "two breaks after unlocking");
+            }
+            finally
+            {
+                Engine.Config.CreditEarlierWork = true;
+            }
         }
 
         static async Task Break(BlockPos pos)
