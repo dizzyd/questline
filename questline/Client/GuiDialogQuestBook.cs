@@ -271,6 +271,15 @@ public partial class GuiDialogQuestBook : GuiDialog
             new RichTextComponent(capi, text.Title(quest.Id) + "\n", CairoFont.WhiteMediumText()),
             new RichTextComponent(capi, text.State(state) + "\n", CairoFont.WhiteDetailText().WithColor(StateColor(state))),
         };
+        if (state != QuestState.Done)
+        {
+            bool pinned = client.IsPinned(quest.Id);
+            comps.Add(new LinkTextComponent(capi, Lang.Get(pinned ? "questline:unpin" : "questline:pin") + "\n", CairoFont.WhiteDetailText(), _ =>
+            {
+                if (pinned) client.Unpin(quest.Id);
+                else if (!client.Pin(quest.Id)) capi.TriggerIngameError(this, "questline-pins", Lang.Get("questline:pins-full", ClientSettings.MaxPins));
+            }));
+        }
         if (quest.Mode != QuestMode.Individual)
         {
             string shared = quest.Mode == QuestMode.Server ? (quest.Claim == ClaimMode.First ? "questline:mode-server-first" : "questline:mode-server")

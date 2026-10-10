@@ -25,6 +25,8 @@ public class QuestClient
     public PartyPacket Party { get; private set; }
 
     public bool InParty => Party?.Id != null;
+
+    public ClientSettings Settings { get; private set; } = new();
     public bool Ready => Registry != null;
 
     /// <summary>Fires after definitions or states arrive.</summary>
@@ -43,6 +45,48 @@ public class QuestClient
             .SetMessageHandler<DefinitionsPacket>(OnDefinitions)
             .SetMessageHandler<StatePacket>(OnState)
             .SetMessageHandler<PartyPacket>(OnParty);
+
+        try
+        {
+            Settings = capi.LoadModConfig<ClientSettings>(ClientSettings.FileName) ?? new ClientSettings();
+        }
+        catch (Exception e)
+        {
+            capi.Logger.Error("[questline] can't read ModConfig/{0}, using defaults: {1}", ClientSettings.FileName, e.Message);
+        }
+    }
+
+    public void SaveSettings() => capi.StoreModConfig(Settings, ClientSettings.FileName);
+
+    /// <summary>This world's pinned quest ids, in pin order.</summary>
+    public IReadOnlyList<string> Pins => Settings.Pins.TryGetValue(capi.World.SavegameIdentifier, out var pins) ? pins : [];
+
+    public bool IsPinned(string questId) => Pins.Contains(questId);
+
+    /// <summary>Pins a quest to the HUD. False when <see cref="ClientSettings.MaxPins"/> are already pinned.</summary>
+    public bool Pin(string questId)
+    {
+        string world = capi.World.SavegameIdentifier;
+        if (!Settings.Pins.TryGetValue(world, out var pins)) Settings.Pins[world] = pins = [];
+        if (pins.Contains(questId)) return true;
+        if (pins.Count >= ClientSettings.MaxPins) return false;
+        pins.Add(questId);
+        SaveSettings();
+        Changed?.Invoke();
+        return true;
+    }
+
+    public void Unpin(string questId)
+    {
+        if (!Settings.Pins.TryGetValue(capi.World.SavegameIdentifier, out var pins) || !pins.Remove(questId)) return;
+        SaveSettings();
+        Changed?.Invoke();
+    }
+
+    public void SetToasts(bool on)
+    {
+        Settings.Toasts = on;
+        SaveSettings();
     }
 
     void OnDefinitions(DefinitionsPacket packet)
@@ -58,11 +102,17 @@ public class QuestClient
         foreach (var entry in packet.Entries)
         {
             // A change, not the first full sync, finishing a quest gets a toast.
-            if (!packet.Full && entry.State >= QuestState.Claimable && StateOf(entry.QuestId) < QuestState.Claimable)
+            if (Settings.Toasts && !packet.Full && entry.State >= QuestState.Claimable && StateOf(entry.QuestId) < QuestState.Claimable)
             {
                 capi.TriggerIngameDiscovery(this, "questline-complete", Lang.Get("questline:toast-complete", Lang.Get(entry.QuestId + "-title")));
             }
             states[entry.QuestId] = entry;
+        }
+
+        // A pin has done its job once the quest is claimed.
+        if (Settings.Pins.TryGetValue(capi.World.SavegameIdentifier, out var pins) && pins.RemoveAll(id => StateOf(id) == QuestState.Done) > 0)
+        {
+            SaveSettings();
         }
         Changed?.Invoke();
     }

@@ -12,6 +12,7 @@ public class QuestlineModSystem : ModSystem
 {
     ICoreClientAPI capi;
     GuiDialogQuestBook book;
+    HudQuestPins pins;
     HarmonyLib.Harmony harmony;
 
     /// <summary>The server's quest engine. Server side only.</summary>
@@ -22,6 +23,9 @@ public class QuestlineModSystem : ModSystem
 
     /// <summary>The quest book, created on first use. Client side only.</summary>
     public GuiDialogQuestBook Book => book ??= new GuiDialogQuestBook(capi, Client);
+
+    /// <summary>The HUD tracker for pinned quests. Client side only.</summary>
+    public HudQuestPins Pins => pins;
 
     public override void StartPre(ICoreAPI api)
     {
@@ -50,6 +54,20 @@ public class QuestlineModSystem : ModSystem
         base.StartClientSide(api);
         capi = api;
         Client = new QuestClient(api);
+
+        pins = new HudQuestPins(api, Client);
+        api.Event.LevelFinalize += pins.Refresh;
+        api.ChatCommands.Create("questline")
+            .WithDescription("Quest book settings")
+            .BeginSubCommand("toasts")
+                .WithDescription("Turn the quest-complete toasts on or off")
+                .WithArgs(api.ChatCommands.Parsers.Bool("on or off"))
+                .HandleWith(args =>
+                {
+                    Client.SetToasts((bool)args[0]);
+                    return TextCommandResult.Success((bool)args[0] ? "Quest toasts on" : "Quest toasts off");
+                })
+            .EndSubCommand();
 
         api.Input.RegisterHotKey("questline", "Open the quest book", GlKeys.L, HotkeyType.GUIOrOtherControls);
         api.Input.SetHotKeyHandler("questline", _ =>
@@ -129,6 +147,7 @@ public class QuestlineModSystem : ModSystem
     public override void Dispose()
     {
         book?.Dispose();
+        pins?.Dispose();
         harmony?.UnpatchAll(StationPatches.HarmonyId);
         base.Dispose();
     }

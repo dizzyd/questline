@@ -56,5 +56,8 @@
     "mode-party": "Party quest: your party's work counts.",
     "mode-party-alone": "Party quest: in a party, everyone's work would count.",
     "mode-server": "Server quest: everyone's work counts, and each player claims once.",
-    "mode-server-first": "Server quest: everyone's work counts, and the first to claim takes the reward."
+    "mode-server-first": "Server quest: everyone's work counts, and the first to claim takes the reward.",
+    "pin": "[Pin to screen]",
+    "unpin": "[Unpin]",
+    "pins-full": "You can pin {0} quests at most. Unpin one first."
 }

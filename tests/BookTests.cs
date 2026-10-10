@@ -99,6 +99,41 @@ namespace Questline.Tests
             Log(await Shot.Take("questline-book-page.png"));
         }
 
+        [VsTest(TimeoutMs = 30000)]
+        public async Task PinnedQuestsShowOnTheHudUntilClaimed()
+        {
+            await OnClient();
+            var client = ClientSystem.Client;
+            foreach (var id in client.Pins.ToList()) client.Unpin(id);
+
+            Assert.True(client.Pin(GatherFlint), "first pin");
+            Assert.True(client.Pin("qltest:dig-soil"), "second pin");
+            Assert.True(client.Pin("qltest:read-the-book"), "third pin");
+            Assert.False(client.Pin("qltest:lay-cobble"), "a fourth pin is refused");
+
+            await Until(() => ClientSystem.Pins.IsOpened(), 60, "the HUD to open");
+            Assert.Equal(3, ClientSystem.Pins.Shown.Count);
+
+            await OnServer();
+            await Player.Hold("game:flint", 2);
+            await OnClient();
+            await Until(() => client.TasksOf(client.Registry.Get(GatherFlint))[0] == 2, 60, "progress on the client");
+            await Frames.Wait(10);
+            Log(await Shot.Take("questline-pins.png"));
+
+            await OnServer();
+            Engine.ForceComplete(Me, GatherFlint);
+            Assert.Equal(null, Engine.Claim(Me, GatherFlint, null));
+            await OnClient();
+            await Until(() => !client.IsPinned(GatherFlint), 60, "a claimed quest to drop off the HUD");
+            Assert.Equal(2, ClientSystem.Pins.Shown.Count);
+
+            foreach (var id in client.Pins.ToList()) client.Unpin(id);
+            await Until(() => !ClientSystem.Pins.IsOpened(), 60, "the HUD to close with nothing pinned");
+            await OnServer();
+            await Player.Hold("game:stick", 1);
+        }
+
         /// <summary>
         /// A press and release handed to the book, as the game's GUI system does it. Input.Click
         /// goes in through the world's mouse state and doesn't reach dialog elements; configkit's
