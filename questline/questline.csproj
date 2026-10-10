@@ -4,6 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <OutputPath>bin\$(Configuration)\Mods\mod</OutputPath>
+        <!-- Builds export VINTAGE_STORY; this is only for editors and language servers that don't. -->
+        <VINTAGE_STORY Condition="'$(VINTAGE_STORY)' == ''">$(HOME)/.cairn/games/1.22.7</VINTAGE_STORY>
     </PropertyGroup>
 
     <ItemGroup>

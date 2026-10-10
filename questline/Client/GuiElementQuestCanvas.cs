@@ -7,6 +7,8 @@ using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
 
+using questline.Model;
+
 namespace questline.Client;
 
 /// <summary>
@@ -25,7 +27,7 @@ public class GuiElementQuestCanvas : GuiElement
     const int LabelsPerFrame = 8;
     const int AtlasCell = 64;
 
-    // Fill and border per QuestNodeState, in enum order.
+    // Fill and border per QuestState, in enum order.
     static readonly double[][] FrameFill =
     [
         [0.13, 0.13, 0.13, 0.95],
@@ -130,7 +132,7 @@ public class GuiElementQuestCanvas : GuiElement
             foreach (int p in n.Prereqs)
             {
                 var from = nodes[p];
-                int color = from.State == QuestNodeState.Done ? LitEdge : DimEdge;
+                int color = from.State == QuestState.Done ? LitEdge : DimEdge;
                 AddSegment(edges, from.X * CellSize, from.Y * CellSize, n.X * CellSize, n.Y * CellSize, color);
             }
         }

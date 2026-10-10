@@ -1,0 +1,64 @@
+{
+    "id": "basics",
+    "icon": "game:flint",
+    "order": 10,
+    "quests": [
+        {
+            "id": "gather-flint",
+            "pos": [0, 0],
+            "icon": "game:flint",
+            "tasks": [ { "type": "obtain", "item": "game:flint", "count": 3 } ],
+            "rewards": [ { "type": "item", "item": "game:stick", "count": 4 } ]
+        },
+        {
+            "id": "dig-soil",
+            "pos": [2, 0],
+            "icon": "game:soil-medium-normal",
+            "requires": "gather-flint",
+            "tasks": [ { "type": "break", "block": "game:soil-*", "count": 2 } ]
+        },
+        {
+            "id": "lay-cobble",
+            "pos": [2, 2],
+            "icon": "game:cobblestone-granite",
+            "requires": "gather-flint",
+            "tasks": [ { "type": "place", "block": "game:cobblestone-*", "count": 1 } ]
+        },
+        {
+            "id": "hunt",
+            "pos": [4, 1],
+            "icon": "game:bone",
+            "requires": { "any": ["dig-soil", "lay-cobble"] },
+            "tasks": [ { "type": "kill", "entity": "game:chicken-*", "count": 1 } ]
+        },
+        {
+            "id": "read-the-book",
+            "pos": [0, 2],
+            "tasks": [ { "type": "checkbox" } ]
+        },
+        {
+            "id": "trade-sticks",
+            "pos": [0, 4],
+            "icon": "game:stick",
+            "tasks": [ { "type": "obtain", "item": "game:stick", "count": 2, "consume": true } ],
+            "rewards": [
+                { "type": "choice", "options": [
+                    { "type": "item", "item": "game:flint", "count": 1 },
+                    { "type": "item", "item": "game:clay-blue", "count": 5 } ] }
+            ]
+        },
+        {
+            "id": "two-of-three",
+            "pos": [6, 1],
+            "requires": { "atLeast": { "n": 2, "of": ["dig-soil", "lay-cobble", "hunt"] } },
+            "visibility": "whenUnlocked",
+            "tasks": [ { "type": "checkbox" } ]
+        },
+        {
+            "id": "secret",
+            "pos": [6, 3],
+            "visibility": "secret",
+            "tasks": [ { "type": "checkbox" } ]
+        }
+    ]
+}

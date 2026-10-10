@@ -1,0 +1,9 @@
+{
+    "type": "content",
+    "modid": "qltest",
+    "name": "Questline test chapters",
+    "authors": ["dizzyd"],
+    "description": "Fixture chapters for Questline's test suite.",
+    "version": "0.0.1",
+    "dependencies": { "game": "1.22.0", "questline": "0.1.0" }
+}

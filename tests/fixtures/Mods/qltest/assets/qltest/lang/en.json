@@ -1,0 +1,20 @@
+{
+    "gather-flint-title": "Gather flint",
+    "gather-flint-desc": "Pick up three pieces of flint from the ground.",
+    "dig-soil-title": "Dig in",
+    "dig-soil-desc": "Break two blocks of soil.",
+    "lay-cobble-title": "Lay a stone",
+    "lay-cobble-desc": "Place a cobblestone block.",
+    "hunt-title": "First hunt",
+    "hunt-desc": "Hunt a chicken.",
+    "read-the-book-title": "Read the book",
+    "read-the-book-desc": "Tick the box once you've read this.",
+    "trade-sticks-title": "Trade in sticks",
+    "trade-sticks-desc": "Hand over two sticks and pick a reward.",
+    "two-of-three-title": "Two of three",
+    "two-of-three-desc": "Unlocks after any two of the first quests.",
+    "secret-title": "A secret",
+    "secret-desc": "You found it.",
+    "fine-title": "Still fine",
+    "fine-desc": "The broken quests around this one don't stop it loading."
+}

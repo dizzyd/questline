@@ -1,0 +1,5 @@
+{
+    "id": "gated",
+    "requiresMod": ["no-such-mod"],
+    "quests": [ { "id": "never-loaded", "tasks": [ { "type": "checkbox" } ] } ]
+}

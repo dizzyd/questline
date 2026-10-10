@@ -31,7 +31,7 @@ public class GuiDialogQuestBook : GuiDialog
 
     public GuiElementQuestCanvas Canvas => canvas;
 
-    public GuiDialogQuestBook(ICoreClientAPI capi) : base(capi)
+    public GuiDialogQuestBook(ICoreClientAPI capi, QuestClient client) : base(capi)
     {
         nodes = SpikeTree.Build(capi);
     }

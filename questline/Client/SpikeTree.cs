@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using questline.Model;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
@@ -44,10 +45,10 @@ public static class SpikeTree
                         .ToArray();
                 }
 
-                node.State = c < 4 ? QuestNodeState.Done
-                    : node.Prereqs.All(p => nodes[p].State == QuestNodeState.Done)
-                        ? (QuestNodeState)rand.Next((int)QuestNodeState.Available, (int)QuestNodeState.Done)
-                        : QuestNodeState.Locked;
+                node.State = c < 4 ? QuestState.Done
+                    : node.Prereqs.All(p => nodes[p].State == QuestState.Done)
+                        ? (QuestState)rand.Next((int)QuestState.Available, (int)QuestState.Done)
+                        : QuestState.Locked;
 
                 nodes.Add(node);
             }

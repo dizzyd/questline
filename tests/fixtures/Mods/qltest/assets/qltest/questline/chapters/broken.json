@@ -1,0 +1,13 @@
+{
+    "id": "broken",
+    "order": 20,
+    "quests": [
+        { "id": "fine", "tasks": [ { "type": "checkbox" } ] },
+        { "id": "unknown-prereq", "requires": "no-such-quest", "tasks": [ { "type": "checkbox" } ] },
+        { "id": "unknown-task", "tasks": [ { "type": "juggle" } ] },
+        { "id": "unknown-item", "tasks": [ { "type": "obtain", "item": "game:unobtainium" } ] },
+        { "id": "cycle-a", "requires": "cycle-b", "tasks": [ { "type": "checkbox" } ] },
+        { "id": "cycle-b", "requires": "cycle-a", "tasks": [ { "type": "checkbox" } ] },
+        { "id": "needs-missing-mod", "requires": { "mod": "no-such-mod" }, "tasks": [ { "type": "checkbox" } ] }
+    ]
+}
