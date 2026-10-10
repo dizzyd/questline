@@ -141,6 +141,7 @@ public class QuestLoader(ICoreServerAPI api)
             if (errors.Count > 0) broken.Add(quest.Id);
 
             if (quest.Icon != null && !CollectibleExists(quest.Icon)) Problem($"{quest.Id}: icon {quest.Icon} is not an item or block");
+            foreach (var warning in PageWarnings(quest)) Problem($"{quest.Id}: {warning}");
             if (!Lang.HasTranslation(quest.Id + "-title", true, false)) Problem($"{quest.Id}: no lang entry {quest.Id}-title");
         }
 
@@ -199,6 +200,52 @@ public class QuestLoader(ICoreServerAPI api)
                 if (item.Type == "item" && !CollectibleExists(item.Item)) yield return $"reward item {item.Item} is not an item or block";
             }
         }
+    }
+
+    /// <summary>Page problems are warnings: the book skips a block it can't show, and the quest still works.</summary>
+    IEnumerable<string> PageWarnings(QuestDef quest)
+    {
+        foreach (var block in quest.Page)
+        {
+            switch (block.Type)
+            {
+                case "text":
+                    if (block.Lang == null || !Lang.HasTranslation(block.Lang, true, false)) yield return $"page text {block.Lang} has no lang entry";
+                    break;
+                case "image":
+                    if (block.Src == null)
+                    {
+                        yield return "page image has no src";
+                        break;
+                    }
+                    var asset = api.Assets.TryGet(new AssetLocation(PageBlock.TexturePath(block.Src)));
+                    if (asset == null) yield return $"page image {block.Src} not found (looked for {PageBlock.TexturePath(block.Src)})";
+                    else if (PngSize(asset.Data) is var (w, h) && (w > MaxImageSize || h > MaxImageSize))
+                    {
+                        yield return $"page image {block.Src} is {w}×{h}; over {MaxImageSize} px it costs GPU memory on every client";
+                    }
+                    break;
+                case "items":
+                    foreach (var code in block.Items.Where(c => !CollectibleExists(c))) yield return $"page item {code} is not an item or block";
+                    break;
+                case "recipe":
+                    if (!CollectibleExists(block.Output)) yield return $"page recipe output {block.Output} is not an item or block";
+                    break;
+                default:
+                    yield return $"unknown page block type '{block.Type}'";
+                    break;
+            }
+        }
+    }
+
+    const int MaxImageSize = 2048;
+
+    /// <summary>Width and height from a PNG's header, or null if it isn't one.</summary>
+    static (int, int)? PngSize(byte[] data)
+    {
+        if (data == null || data.Length < 24 || data[1] != 'P' || data[2] != 'N' || data[3] != 'G') return null;
+        int Read(int at) => (data[at] << 24) | (data[at + 1] << 16) | (data[at + 2] << 8) | data[at + 3];
+        return (Read(16), Read(20));
     }
 
     bool TargetExists(TaskDef task)

@@ -388,14 +388,20 @@ public class QuestEngine
 
     #region Persistence
 
-    void LoadProgress()
+    /// <summary>Reads every player's progress from the save game, replacing what's in memory.</summary>
+    public void LoadProgress()
     {
         byte[] data = api.WorldManager.SaveGame.GetData(SaveKey);
-        if (data == null) return;
+        if (data == null)
+        {
+            progress = [];
+            return;
+        }
         try
         {
             progress = JsonConvert.DeserializeObject<Dictionary<string, PlayerProgress>>(System.Text.Encoding.UTF8.GetString(data)) ?? [];
             foreach (var p in progress.Values) p.ApplyAliases(Registry.Aliases);
+            sent.Clear();
         }
         catch (Exception e)
         {
@@ -404,7 +410,8 @@ public class QuestEngine
         }
     }
 
-    void SaveProgress()
+    /// <summary>Writes every player's progress into the save game. The world save calls this.</summary>
+    public void SaveProgress()
     {
         api.WorldManager.SaveGame.StoreData(SaveKey, System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(progress)));
     }

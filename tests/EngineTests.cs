@@ -67,6 +67,9 @@ namespace Questline.Tests
                 Assert.True(Engine.Problems.Any(p => p.StartsWith("qltest:" + id + ":")), $"{id} should be reported");
             }
 
+            // A missing page image is only a warning: the quest still loads.
+            Assert.True(Engine.Problems.Any(p => p.StartsWith("qltest:fine:") && p.Contains("missing.png")), "missing page image reported");
+
             // Loads, but is reported as never able to unlock.
             Assert.NotNull(registry.Get("qltest:needs-missing-mod"));
             Assert.True(Engine.Problems.Any(p => p.StartsWith("qltest:needs-missing-mod:") && p.Contains("never unlock")));
@@ -217,6 +220,20 @@ namespace Questline.Tests
 
             Assert.True(Client.IsVisible(registry.Get(Secret)), "secret once done");
             Assert.True(Client.IsVisible(registry.Get(TwoOfThree)), "whenUnlocked once unlocked");
+        }
+
+        [VsTest]
+        public void ProgressSurvivesASaveAndLoad()
+        {
+            Engine.ForceComplete(Me, GatherFlint);
+            Engine.SaveProgress();
+
+            Engine.Reset(Me);
+            Assert.Equal(QuestState.Available, StateOf(GatherFlint));
+
+            Engine.LoadProgress();
+            Assert.Equal(QuestState.Claimable, StateOf(GatherFlint));
+            Assert.Equal(3, Engine.ProgressOf(Me.PlayerUID).Find(GatherFlint).Tasks[0]);
         }
 
         static ItemSlot[] Carried() => new[] { GlobalConstants.hotBarInvClassName, GlobalConstants.backpackInvClassName }

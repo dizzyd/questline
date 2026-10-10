@@ -81,6 +81,24 @@ namespace Questline.Tests
             await Until(() => Engine.StateOf(Me.PlayerUID, GatherFlint) == QuestState.Done, 60, "the claim to reach the server");
         }
 
+        [VsTest(TimeoutMs = 30000)]
+        public async Task QuestPageShowsTextImagesItemsAndARecipe()
+        {
+            await OnClient();
+            Book.SelectQuest("qltest:read-the-book");
+            await Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(20);
+
+            var comps = Book.SingleComposer.GetRichtext("detail").Components;
+            var image = comps.OfType<ImageTextComponent>().SingleOrDefault();
+            Assert.NotNull(image, "an image component");
+            Assert.True(image.Loaded, "the image texture loaded");
+            Assert.Greater(image.BoundsPerLine[0].Height, 10.0);
+            Assert.Equal(1, comps.OfType<SlideshowGridRecipeTextComponent>().Count());
+            Assert.Greater(comps.OfType<ItemstackTextComponent>().Count(), 2);
+            Log(await Shot.Take("questline-book-page.png"));
+        }
+
         /// <summary>
         /// A press and release handed to the book, as the game's GUI system does it. Input.Click
         /// goes in through the world's mouse state and doesn't reach dialog elements; configkit's

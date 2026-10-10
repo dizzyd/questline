@@ -2,7 +2,7 @@
     "id": "broken",
     "order": 20,
     "quests": [
-        { "id": "fine", "tasks": [ { "type": "checkbox" } ] },
+        { "id": "fine", "tasks": [ { "type": "checkbox" } ], "page": [ { "type": "image", "src": "qltest:questline/missing.png" } ] },
         { "id": "unknown-prereq", "requires": "no-such-quest", "tasks": [ { "type": "checkbox" } ] },
         { "id": "unknown-task", "tasks": [ { "type": "juggle" } ] },
         { "id": "unknown-item", "tasks": [ { "type": "obtain", "item": "game:unobtainium" } ] },

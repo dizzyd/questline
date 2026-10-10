@@ -265,9 +265,13 @@ public partial class GuiDialogQuestBook : GuiDialog
         {
             comps.Add(new RichTextComponent(capi, Lang.Get("questline:requires", text.Describe(quest.Requires)) + "\n", CairoFont.WhiteDetailText()));
         }
-        if (text.Description(quest.Id) is { } desc)
+        comps.Add(new ClearFloatTextComponent(capi, 6));
+        if (quest.Page.Count > 0)
         {
-            comps.Add(new ClearFloatTextComponent(capi, 6));
+            foreach (var block in quest.Page) AddPageBlock(comps, block, small);
+        }
+        else if (text.Description(quest.Id) is { } desc)
+        {
             comps.AddRange(VtmlUtil.Richtextify(capi, desc + "\n", small, OnLinkClicked));
         }
 
@@ -305,6 +309,47 @@ public partial class GuiDialogQuestBook : GuiDialog
         }
 
         return comps.ToArray();
+    }
+
+    /// <summary>One block of a quest's page. A block the client can't show is skipped; the server log says why.</summary>
+    void AddPageBlock(List<RichTextComponentBase> comps, PageBlock block, CairoFont font)
+    {
+        switch (block.Type)
+        {
+            case "text" when block.Lang != null:
+                comps.AddRange(VtmlUtil.Richtextify(capi, Lang.Get(block.Lang) + "\n", font, OnLinkClicked));
+                break;
+
+            case "image" when block.Src != null:
+                var image = new ImageTextComponent(capi, new AssetLocation(PageBlock.TexturePath(block.Src)), block.Width) { UnscaledMarginTop = 4 };
+                if (!image.Loaded) break;
+                comps.Add(image);
+                if (block.Caption != null)
+                {
+                    comps.Add(new RichTextComponent(capi, Lang.Get(block.Caption) + "\n", CairoFont.WhiteDetailText().WithSlant(Cairo.FontSlant.Italic)));
+                }
+                break;
+
+            case "items":
+                foreach (var code in block.Items)
+                {
+                    if (text.StackFor(code) is { } stack)
+                    {
+                        comps.Add(new ItemstackTextComponent(capi, stack, 36, 4, EnumFloat.Inline, OnStackClicked));
+                    }
+                }
+                comps.Add(new ClearFloatTextComponent(capi, 4));
+                break;
+
+            case "recipe" when text.StackFor(block.Output) is { } output:
+                var recipes = capi.World.GridRecipes
+                    .Where(r => r.Output.ResolvedItemStack?.Collectible == output.Collectible)
+                    .ToArray();
+                if (recipes.Length == 0) break;
+                comps.Add(new SlideshowGridRecipeTextComponent(capi, recipes, 40, EnumFloat.None, OnStackClicked, AllStacks));
+                comps.Add(new ClearFloatTextComponent(capi, 4));
+                break;
+        }
     }
 
     void AddReward(List<RichTextComponentBase> comps, RewardDef reward, CairoFont font)

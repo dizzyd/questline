@@ -34,6 +34,13 @@
         {
             "id": "read-the-book",
             "pos": [0, 2],
+            "page": [
+                { "type": "text", "lang": "qltest:read-the-book-p1" },
+                { "type": "image", "src": "qltest:questline/test-image.png", "width": 0.8, "caption": "qltest:read-the-book-cap1" },
+                { "type": "items", "items": ["game:flint", "game:stick", "game:firestarter"] },
+                { "type": "recipe", "output": "game:firestarter" },
+                { "type": "text", "lang": "qltest:read-the-book-p2" }
+            ],
             "tasks": [ { "type": "checkbox" } ]
         },
         {
