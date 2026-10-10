@@ -28,5 +28,10 @@
     "station-knap-title": "Any knap",
     "station-clayform-title": "Any clayform",
     "station-cook-title": "Any cook",
-    "station-smelt-title": "Any smelt"
+    "station-smelt-title": "Any smelt",
+    "progression-title": "Progression",
+    "forge-ahead-title": "Forge ahead",
+    "iron-work-title": "Iron work",
+    "iron-age-title": "the Iron Age",
+    "caught-fish-title": "Catch fish (reported by another mod)"
 }

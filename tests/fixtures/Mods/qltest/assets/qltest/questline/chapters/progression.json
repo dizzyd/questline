@@ -1,0 +1,41 @@
+{
+    "id": "progression",
+    "order": 40,
+    "quests": [
+        {
+            "id": "forge-ahead",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "stage",
+                    "stage": "iron-age"
+                }
+            ]
+        },
+        {
+            "id": "iron-work",
+            "pos": [
+                2,
+                0
+            ],
+            "requires": {
+                "stage": "iron-age"
+            },
+            "tasks": [
+                {
+                    "type": "custom",
+                    "key": "qltest:caught-fish",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

@@ -6,6 +6,7 @@ using questline.Model;
 using questline.Network;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
+using Vintagestory.API.Datastructures;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
@@ -37,6 +38,12 @@ public class QuestEngine
     /// <summary>Fires after a quest's tasks are all done, with the player and quest id.</summary>
     public event Action<IServerPlayer, string> QuestCompleted;
 
+    /// <summary>Fires when a player first reaches a stage.</summary>
+    public event Action<IServerPlayer, string> StageSet;
+
+    /// <summary>Event-bus names, for mods that use Questline without referencing it.</summary>
+    public const string ReportEvent = "questline:report", QuestCompletedEvent = "questline:questcompleted", StageSetEvent = "questline:stageset";
+
     public QuestEngine(ICoreServerAPI api)
     {
         this.api = api;
@@ -57,6 +64,16 @@ public class QuestEngine
         api.Event.PlayerNowPlaying += OnPlayerNowPlaying;
         api.Event.PlayerDisconnect += OnPlayerDisconnect;
         api.Event.RegisterGameTickListener(_ => ScanDirtyInventories(), 500);
+        api.Event.RegisterEventBusListener(OnReportEvent, 0.5, ReportEvent);
+    }
+
+    /// <summary>A custom-task report posted on the event bus: playeruid, key and amount (default 1).</summary>
+    void OnReportEvent(string eventName, ref EnumHandling handling, IAttribute data)
+    {
+        if (data is not ITreeAttribute tree) return;
+        if (api.World.PlayerByUid(tree.GetString("playeruid")) is not IServerPlayer player) return;
+        string key = tree.GetString("key");
+        if (key != null) Report(player, "custom", new AssetLocation(key), tree.GetInt("amount", 1));
     }
 
     /// <summary>Re-reads every chapter and resends definitions and state to everyone online.</summary>
@@ -122,6 +139,7 @@ public class QuestEngine
         // Newly unlocked quests may already be satisfied by what the player carries.
         inventoryDirty.Add(player.PlayerUID);
         QuestCompleted?.Invoke(player, quest.Id);
+        api.Event.PushEvent(QuestCompletedEvent, new TreeAttribute { ["playeruid"] = new StringAttribute(player.PlayerUID), ["questid"] = new StringAttribute(quest.Id) });
         return true;
     }
 
@@ -262,8 +280,12 @@ public class QuestEngine
         }
         foreach (var task in consumed) TakeCarried(player, Pattern(task), task.Count);
 
-        foreach (var gift in gifts) Give(player, gift);
         qp.Claimed = true;
+        foreach (var gift in gifts)
+        {
+            if (gift.Type == "stage") SetStage(player, gift.Stage);
+            else Give(player, gift);
+        }
         Sync(player);
         return null;
     }
@@ -300,6 +322,23 @@ public class QuestEngine
 
     #endregion
 
+    #region Stages
+
+    public bool HasStage(string playerUid, string stage) => ProgressOf(playerUid).Stages.Contains(stage);
+
+    /// <summary>Gives a player a stage. Quests gated on it unlock; other mods hear about it.</summary>
+    public void SetStage(IServerPlayer player, string stage)
+    {
+        if (!ProgressOf(player.PlayerUID).Stages.Add(stage)) return;
+
+        inventoryDirty.Add(player.PlayerUID);
+        StageSet?.Invoke(player, stage);
+        api.Event.PushEvent(StageSetEvent, new TreeAttribute { ["playeruid"] = new StringAttribute(player.PlayerUID), ["stage"] = new StringAttribute(stage) });
+        Sync(player);
+    }
+
+    #endregion
+
     #region Commands and tests
 
     /// <summary>Completes every task of a quest for a player, unlocked or not.</summary>
@@ -316,7 +355,11 @@ public class QuestEngine
     public void Reset(IServerPlayer player, string questId = null)
     {
         var p = ProgressOf(player.PlayerUID);
-        if (questId == null) p.Quests.Clear();
+        if (questId == null)
+        {
+            p.Quests.Clear();
+            p.Stages.Clear();
+        }
         else p.Quests.Remove(questId);
         inventoryDirty.Add(player.PlayerUID);
         Sync(player);
@@ -422,8 +465,7 @@ public class QuestEngine
     {
         public bool IsQuestComplete(string questId) => p.IsComplete(questId);
         public bool IsModLoaded(string modId) => engine.api.ModLoader.IsModEnabled(modId);
-        // Stages arrive in phase 2.
-        public bool HasStage(string stage) => false;
+        public bool HasStage(string stage) => p.Stages.Contains(stage);
         public bool IsChapterComplete(string chapterId) =>
             engine.Registry.ChaptersById.TryGetValue(chapterId, out var chapter) && chapter.Quests.All(q => p.IsComplete(q.Id));
     }

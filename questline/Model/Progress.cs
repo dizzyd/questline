@@ -28,6 +28,8 @@ public class QuestProgress
 public class PlayerProgress
 {
     public Dictionary<string, QuestProgress> Quests = [];
+    /// <summary>Progression flags set by stage rewards (or other mods, through the API).</summary>
+    public HashSet<string> Stages = [];
 
     public QuestProgress Find(string questId) => Quests.TryGetValue(questId, out var p) ? p : null;
 

@@ -31,9 +31,13 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
         return collectible == null ? null : new ItemStack(collectible, size);
     }
 
+    /// <summary>A stage or custom key's own lang entry (<c>&lt;name&gt;-title</c>) if it has one, or the name itself.</summary>
+    static string Named(string name) => Lang.HasTranslation(name + "-title", true, false) ? Lang.Get(name + "-title") : name;
+
     public string TaskLine(TaskDef task)
     {
         if (task.Type == "checkbox") return Lang.Get("questline:task-checkbox");
+        if (task.Type == "custom") return Named(task.Key);
         return Lang.Get("questline:task-" + task.Type, TargetName(task));
     }
 
@@ -55,6 +59,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
 
     public string RewardLine(RewardDef reward)
     {
+        if (reward.Type == "stage") return Lang.Get("questline:reward-stage", Named(reward.Stage));
         var stack = StackFor(reward.Item, reward.Count);
         return $"{reward.Count}× {stack?.GetName() ?? reward.Item}";
     }
@@ -66,7 +71,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
         {
             QuestRequirement q => client.Registry?.Get(q.QuestId) != null ? Title(q.QuestId) : q.QuestId,
             ModRequirement m => Lang.Get("questline:req-mod", m.ModId),
-            StageRequirement s => Lang.Get("questline:req-stage", s.Stage),
+            StageRequirement s => Lang.Get("questline:req-stage", Named(s.Stage)),
             ChapterCompleteRequirement c => Lang.Get("questline:req-chapter", ChapterTitle(c.ChapterId)),
             AllRequirement a => string.Join(Lang.Get("questline:req-and"), a.Of.Select(x => Describe(x, true))),
             AnyRequirement a => string.Join(Lang.Get("questline:req-or"), a.Of.Select(x => Describe(x, true))),

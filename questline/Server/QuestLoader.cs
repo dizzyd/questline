@@ -16,9 +16,9 @@ namespace questline.Server;
 /// </summary>
 public class QuestLoader(ICoreServerAPI api)
 {
-    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "checkbox"];
+    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom", "checkbox"];
     static readonly HashSet<string> BlockTasks = ["place", "break"];
-    static readonly HashSet<string> RewardTypes = ["item", "choice"];
+    static readonly HashSet<string> RewardTypes = ["item", "choice", "stage"];
 
     public List<string> Problems { get; } = [];
 
@@ -126,6 +126,7 @@ public class QuestLoader(ICoreServerAPI api)
             }
             quest.Id = Requirement.QualifyId(quest.Id, domain);
             quest.Requires?.Qualify(domain);
+            foreach (var reward in quest.Rewards.Where(r => r.Stage != null)) reward.Stage = Requirement.QualifyId(reward.Stage, domain);
         }
         return true;
     }
@@ -185,6 +186,12 @@ public class QuestLoader(ICoreServerAPI api)
             }
             if (task.Count < 1) yield return $"{task.Type} task count must be at least 1";
             if (task.Type == "checkbox") continue;
+            if (task.Type == "custom")
+            {
+                // Another mod reports these, so there's nothing to check the key against.
+                if (task.Key == null) yield return "custom task has no key";
+                continue;
+            }
 
             if (task.Target == null) yield return $"{task.Type} task names nothing to match";
             else if (!TargetExists(task)) yield return $"{task.Type} task target {task.Target} matches nothing";
@@ -194,6 +201,7 @@ public class QuestLoader(ICoreServerAPI api)
         {
             if (!RewardTypes.Contains(reward.Type ?? "")) yield return $"unknown reward type '{reward.Type}'";
             else if (reward.Type == "choice" && reward.Options.Count == 0) yield return "choice reward has no options";
+            else if (reward.Type == "stage" && string.IsNullOrEmpty(reward.Stage)) yield return "stage reward names no stage";
 
             foreach (var item in reward.Type == "choice" ? reward.Options : [reward])
             {

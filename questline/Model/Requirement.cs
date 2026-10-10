@@ -54,8 +54,9 @@ public class ModRequirement(string modId) : Requirement
 
 public class StageRequirement(string stage) : Requirement
 {
-    public string Stage { get; } = stage;
+    public string Stage { get; private set; } = stage;
     public override bool Evaluate(IRequirementContext ctx) => ctx.HasStage(Stage);
+    public override void Qualify(string domain) => Stage = QualifyId(Stage, domain);
 }
 
 public class ChapterCompleteRequirement(string chapterId) : Requirement

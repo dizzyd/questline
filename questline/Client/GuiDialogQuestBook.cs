@@ -280,7 +280,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         for (int i = 0; i < quest.Tasks.Count; i++)
         {
             var task = quest.Tasks[i];
-            if (task.Type != "checkbox" && task.Type != "kill" && text.StackFor(task.Target) is { } stack)
+            if (task.Type is not ("checkbox" or "kill" or "custom") && text.StackFor(task.Target) is { } stack)
             {
                 comps.Add(new ItemstackTextComponent(capi, stack, 30, 6, EnumFloat.Inline, OnStackClicked) { ShowStacksize = false, VerticalAlign = EnumVerticalAlign.Middle });
             }
@@ -354,7 +354,7 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void AddReward(List<RichTextComponentBase> comps, RewardDef reward, CairoFont font)
     {
-        if (text.StackFor(reward.Item, reward.Count) is { } stack)
+        if (reward.Type == "item" && text.StackFor(reward.Item, reward.Count) is { } stack)
         {
             comps.Add(new ItemstackTextComponent(capi, stack, 30, 6, EnumFloat.Inline, OnStackClicked) { VerticalAlign = EnumVerticalAlign.Middle });
         }

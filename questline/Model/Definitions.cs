@@ -111,25 +111,29 @@ public class PageBlock
 
 public class TaskDef
 {
-    /// <summary>obtain, kill, place, break, craft, knap, clayform or checkbox.</summary>
+    /// <summary>obtain, kill, place, break, craft, knap, clayform, smith, cook, smelt, custom or checkbox.</summary>
     public string Type;
     public string Item;
     public string Block;
     public string Entity;
+    /// <summary>custom only: the key another mod reports progress under, e.g. mymod:caught-salmon.</summary>
+    public string Key;
     public int Count = 1;
     /// <summary>obtain only: take the items when the reward is claimed.</summary>
     public bool Consume;
 
     /// <summary>The code the task matches, whichever field the author used. May carry wildcards.</summary>
-    [JsonIgnore] public string Target => Item ?? Block ?? Entity;
+    [JsonIgnore] public string Target => Item ?? Block ?? Entity ?? Key;
 }
 
 public class RewardDef
 {
-    /// <summary>item or choice.</summary>
+    /// <summary>item, choice or stage.</summary>
     public string Type;
     public string Item;
     public int Count = 1;
+    /// <summary>stage only: the stage this reward sets, e.g. mypack:iron.</summary>
+    public string Stage;
     /// <summary>choice only: the player picks one of these.</summary>
     public List<RewardDef> Options = [];
 }

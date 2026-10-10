@@ -35,6 +35,7 @@
     "task-smelt": "Cast or smelt {0}",
     "task-checkbox": "Read this and tick it off",
     "any-of": "any {0}",
+    "reward-stage": "Reaches the stage: {0}",
 
     "req-and": " and ",
     "req-or": " or ",
