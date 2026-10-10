@@ -6,6 +6,7 @@ using questline.Model;
 using questline.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using VsTestkit.Testing;
 using static VsTestkit.Testing.Vs;
@@ -97,6 +98,33 @@ namespace Questline.Tests
             Assert.Equal(1, comps.OfType<SlideshowGridRecipeTextComponent>().Count());
             Assert.Greater(comps.OfType<ItemstackTextComponent>().Count(), 2);
             Log(await Shot.Take("questline-book-page.png"));
+        }
+
+        /// <summary>
+        /// The book is 80% of the screen each way on ordinary monitors, and on a small window
+        /// it grows towards the whole screen rather than below its minimum, but never off it.
+        /// </summary>
+        [VsTest]
+        public async Task BookTakesEightyPercentOfTheScreen()
+        {
+            await OnClient();
+            double pad = 2 * GuiStyle.ElementToDialogPadding, chrome = 66;
+            foreach (var (w, h, scale) in new[] { (1920.0, 1080.0, 1.0), (2560.0, 1440.0, 1.0), (3840.0, 2160.0, 2.0), (1600.0, 900.0, 1.0) })
+            {
+                var layout = BookLayout.For(w, h, scale, chrome);
+                double outerW = layout.Width + pad, outerH = layout.ContentHeight + chrome + pad + GuiStyle.TitleBarHeight;
+                double shareW = outerW * scale / w, shareH = outerH * scale / h;
+                Log($"{w}×{h} at {scale}: book {outerW:0}×{outerH:0}, {shareW:P0} × {shareH:P0}; rail {layout.RailWidth:0}, canvas {layout.CanvasWidth:0}, detail {layout.DetailWidth:0}");
+                Assert.True(System.Math.Abs(shareW - 0.8) < 0.01 && System.Math.Abs(shareH - 0.8) < 0.01, $"{w}×{h}: 80% each way");
+                Assert.Greater(layout.CanvasWidth, layout.DetailWidth, "the canvas gets the most room");
+            }
+
+            // The test window: 80% would be too cramped, so the book uses most of it, inside it.
+            var small = Book.Layout;
+            double screenW = Capi.Render.FrameWidth / RuntimeEnv.GUIScale, screenH = Capi.Render.FrameHeight / RuntimeEnv.GUIScale;
+            Log($"{Capi.Render.FrameWidth}×{Capi.Render.FrameHeight}: book {small.Width + pad:0}×{small.ContentHeight + chrome + pad + GuiStyle.TitleBarHeight:0}");
+            Assert.True(small.Width + pad <= screenW && small.ContentHeight + chrome + pad + GuiStyle.TitleBarHeight <= screenH, "fits the window");
+            Assert.Greater(small.Width + pad, screenW * 0.85, "uses most of a small window");
         }
 
         /// <summary>Photographs the book's screens in the states a layout has to cope with, for review.</summary>

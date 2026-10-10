@@ -41,15 +41,13 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     public override string ToggleKeyCombinationCode => "questline";
 
-    // Sized to the screen, in unscaled GUI units: the rail and the detail panel take a share
-    // within limits, and the canvas gets the rest.
-    double ScreenWidth => capi.Render.FrameWidth / RuntimeEnv.GUIScale - 2 * GuiStyle.ElementToDialogPadding - 40;
-    double ScreenHeight => capi.Render.FrameHeight / RuntimeEnv.GUIScale - 2 * GuiStyle.ElementToDialogPadding - 40;
-    double RailWidth => Math.Clamp(ScreenWidth * 0.17, 170, 230);
-    double DetailWidth => Math.Clamp(ScreenWidth * 0.28, 260, 360);
-    double CanvasWidth => Math.Clamp(ScreenWidth - RailWidth - DetailWidth - 2 * Gap, 240, 1000);
-    double Width => RailWidth + Gap + CanvasWidth + Gap + DetailWidth;
-    double ContentHeight => Math.Clamp(ScreenHeight - ContentY, 300, 720);
+    /// <summary>The book's size and columns for the current window; see <see cref="BookLayout"/>.</summary>
+    public BookLayout Layout => BookLayout.For(capi.Render.FrameWidth, capi.Render.FrameHeight, RuntimeEnv.GUIScale, ContentY);
+    double RailWidth => Layout.RailWidth;
+    double DetailWidth => Layout.DetailWidth;
+    double CanvasWidth => Layout.CanvasWidth;
+    double Width => Layout.Width;
+    double ContentHeight => Layout.ContentHeight;
     /// <summary>The height of a panel with a row of buttons under it.</summary>
     double PanelHeight => ContentHeight - ButtonHeight - Gap / 2;
     double ButtonY => ContentY + ContentHeight - ButtonHeight;
