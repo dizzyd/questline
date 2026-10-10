@@ -20,6 +20,11 @@ public class QuestClient
     readonly Dictionary<string, QuestStateEntry> states = [];
 
     public QuestRegistry Registry { get; private set; }
+
+    /// <summary>The player's party and invites, as the server last sent them. Null until the server says.</summary>
+    public PartyPacket Party { get; private set; }
+
+    public bool InParty => Party?.Id != null;
     public bool Ready => Registry != null;
 
     /// <summary>Fires after definitions or states arrive.</summary>
@@ -33,8 +38,11 @@ public class QuestClient
             .RegisterMessageType<StatePacket>()
             .RegisterMessageType<ClaimRequest>()
             .RegisterMessageType<CheckboxRequest>()
+            .RegisterMessageType<PartyPacket>()
+            .RegisterMessageType<PartyRequest>()
             .SetMessageHandler<DefinitionsPacket>(OnDefinitions)
-            .SetMessageHandler<StatePacket>(OnState);
+            .SetMessageHandler<StatePacket>(OnState)
+            .SetMessageHandler<PartyPacket>(OnParty);
     }
 
     void OnDefinitions(DefinitionsPacket packet)
@@ -56,6 +64,15 @@ public class QuestClient
             }
             states[entry.QuestId] = entry;
         }
+        Changed?.Invoke();
+    }
+
+    void OnParty(PartyPacket packet)
+    {
+        // protobuf sends an empty list as null.
+        packet.Members ??= [];
+        packet.Invites ??= [];
+        Party = packet;
         Changed?.Invoke();
     }
 
@@ -88,4 +105,7 @@ public class QuestClient
     public void Claim(string questId, int[] choices) => channel.SendPacket(new ClaimRequest { QuestId = questId, Choices = choices });
 
     public void Check(string questId, int taskIndex) => channel.SendPacket(new CheckboxRequest { QuestId = questId, TaskIndex = taskIndex });
+
+    /// <summary>Asks the server to create, invite, accept, decline, leave or kick. See <see cref="PartyRequest"/>.</summary>
+    public void PartyAction(string action, string arg = null) => channel.SendPacket(new PartyRequest { Action = action, Arg = arg });
 }

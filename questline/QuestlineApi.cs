@@ -34,12 +34,13 @@ public class QuestlineApi : ModSystem
     /// <summary>Credits <paramref name="amount"/> towards every active custom task with this key.</summary>
     public void Report(IServerPlayer player, string key, int amount = 1) => engine.Report(player, "custom", new AssetLocation(key), amount);
 
+    /// <summary>Whether the player has the stage: their own, their party's or the server's.</summary>
     public bool HasStage(IPlayer player, string stage) => engine.HasStage(player.PlayerUID, stage);
 
     public void SetStage(IServerPlayer player, string stage) => engine.SetStage(player, stage);
 
-    /// <summary>Whether every task of the quest is done (claimed or not).</summary>
-    public bool IsComplete(IPlayer player, string questId) => engine.ProgressOf(player.PlayerUID).IsComplete(questId);
+    /// <summary>Whether every task of the quest is done (claimed or not), by the player, their party or the server as the quest's mode says.</summary>
+    public bool IsComplete(IPlayer player, string questId) => engine.IsComplete(player.PlayerUID, questId);
 
     /// <summary>A player finished every task of a quest.</summary>
     public event Action<IServerPlayer, string> QuestCompleted;

@@ -33,5 +33,15 @@
     "forge-ahead-title": "Forge ahead",
     "iron-work-title": "Iron work",
     "iron-age-title": "the Iron Age",
-    "caught-fish-title": "Catch fish (reported by another mod)"
+    "caught-fish-title": "Catch fish (reported by another mod)",
+    "together-title": "Together",
+    "party-work-title": "Pull together",
+    "party-work-desc": "Any member's work counts.",
+    "party-milestone-title": "Party milestone",
+    "party-age-title": "the party age",
+    "after-milestone-title": "After the milestone",
+    "server-goal-title": "Server goal",
+    "server-race-title": "First come",
+    "teamwork-title": "Teamwork (reported by the tests)",
+    "townwork-title": "Town work (reported by the tests)"
 }

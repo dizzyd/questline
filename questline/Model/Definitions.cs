@@ -24,12 +24,26 @@ public enum ChapterVisibility
     Hidden
 }
 
+/// <summary>Whose progress a quest counts, and whose rewards it gives.</summary>
 [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
 public enum QuestMode
 {
+    /// <summary>Each player separately.</summary>
     Individual,
+    /// <summary>The player's party, pooled; each member claims once. A player with no party counts alone.</summary>
     Party,
+    /// <summary>Everyone on the server, pooled.</summary>
     Server
+}
+
+/// <summary>Who may claim a server quest.</summary>
+[JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
+public enum ClaimMode
+{
+    /// <summary>Every player claims their own copy once.</summary>
+    Each,
+    /// <summary>The first player to claim takes the reward, and the quest is done for everyone.</summary>
+    First
 }
 
 /// <summary>assets/&lt;domain&gt;/questline/questline.json: one progression the book can switch to.</summary>
@@ -70,6 +84,8 @@ public class QuestDef
     public Requirement Requires;
     public QuestVisibility Visibility = QuestVisibility.Always;
     public QuestMode Mode = QuestMode.Individual;
+    /// <summary>server quests only: one claim for the whole server, or one each.</summary>
+    public ClaimMode Claim = ClaimMode.Each;
     /// <summary>In-game days between repeats, or null for a one-off quest.</summary>
     public double? Repeat;
     public List<TaskDef> Tasks = [];

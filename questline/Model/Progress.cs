@@ -24,9 +24,14 @@ public class QuestProgress
     public double CompletedDay;
     /// <summary>Credited from the player's history when it unlocked; done once.</summary>
     public bool Seeded;
+    /// <summary>The obtain tasks marked consume have been taken. A shared quest takes them on its first claim only.</summary>
+    public bool Consumed;
 }
 
-/// <summary>One player's progress through every quest, keyed by quest id.</summary>
+/// <summary>
+/// Progress through every quest, keyed by quest id: one player's, or a party's or the server's
+/// for the quests they share. A player's own record also holds whether they've claimed a shared quest.
+/// </summary>
 public class PlayerProgress
 {
     public Dictionary<string, QuestProgress> Quests = [];
@@ -58,11 +63,28 @@ public class PlayerProgress
         }
     }
 
-    public static QuestState StateOf(QuestDef quest, QuestProgress progress, bool unlocked)
+    /// <param name="progress">The quest's tasks, from whoever holds them: the player, their party or the server.</param>
+    /// <param name="claimed">Whether this player's claim is spent.</param>
+    public static QuestState StateOf(QuestDef quest, QuestProgress progress, bool claimed, bool unlocked)
     {
-        if (progress?.Claimed == true) return QuestState.Done;
-        if (progress?.Complete == true) return QuestState.Claimable;
+        if (progress?.Complete == true) return claimed || quest.Rewards.Count == 0 ? QuestState.Done : QuestState.Claimable;
+        if (claimed) return QuestState.Done;
         if (!unlocked) return QuestState.Locked;
         return progress != null && Array.Exists(progress.Tasks, t => t > 0) ? QuestState.InProgress : QuestState.Available;
     }
+}
+
+/// <summary>Players who share progress on party quests.</summary>
+public class Party
+{
+    public string Id;
+    public string Name;
+    /// <summary>The member who can invite and kick.</summary>
+    public string Owner;
+    /// <summary>Player uids, the owner included.</summary>
+    public List<string> Members = [];
+    /// <summary>Uids of players invited and not yet answered.</summary>
+    public HashSet<string> Invited = [];
+    /// <summary>The party's own progress on party quests, and its stages.</summary>
+    public PlayerProgress Progress = new();
 }

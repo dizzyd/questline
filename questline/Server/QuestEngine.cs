@@ -13,23 +13,29 @@ using Vintagestory.API.Util;
 namespace questline.Server;
 
 /// <summary>
-/// The authority on every quest: holds the registry and each player's progress, turns task
+/// The authority on every quest: holds the registry and everyone's progress, turns task
 /// reports into progress, grants rewards on a valid claim, and keeps each client's copy of its
 /// quest states current.
+///
+/// A quest's tasks are held by whoever its mode says (<see cref="Holder"/>): the player, their
+/// party, or the server. Whether a player has claimed it is always in the player's own record,
+/// except for a server quest claimed once for everyone.
 /// </summary>
-public class QuestEngine
+public partial class QuestEngine
 {
     public const string ChannelName = "questline";
-    const string SaveKey = "questline-progress";
+    const string SaveKey = "questline-progress", PartiesKey = "questline-parties", ServerKey = "questline-server";
 
     readonly ICoreServerAPI api;
     IServerNetworkChannel channel;
     Dictionary<string, PlayerProgress> progress = [];
+    PlayerProgress serverProgress = new();
     // What each client was last told, so syncs send only changes.
     readonly Dictionary<string, Dictionary<string, QuestStateEntry>> sent = [];
     Dictionary<string, List<(QuestDef Quest, int Index)>> tasksByType = [];
     readonly Dictionary<AssetLocation, AssetLocation> patternCache = [];
     readonly HashSet<string> inventoryDirty = [];
+    readonly HashSet<string> syncDirty = [];
     readonly Dictionary<string, Action<int>> inventoryWatchers = [];
 
     public QuestRegistry Registry { get; private set; } = new();
@@ -40,10 +46,10 @@ public class QuestEngine
     static readonly HashSet<string> HistoryTypes = ["kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom"];
     public List<string> Problems { get; private set; } = [];
 
-    /// <summary>Fires after a quest's tasks are all done, with the player and quest id.</summary>
+    /// <summary>Fires after a quest's tasks are all done, once for each online player it was done for.</summary>
     public event Action<IServerPlayer, string> QuestCompleted;
 
-    /// <summary>Fires when a player first reaches a stage.</summary>
+    /// <summary>Fires when a stage is first reached, once for each online player who now has it.</summary>
     public event Action<IServerPlayer, string> StageSet;
 
     /// <summary>Event-bus names, for mods that use Questline without referencing it.</summary>
@@ -71,8 +77,11 @@ public class QuestEngine
             .RegisterMessageType<StatePacket>()
             .RegisterMessageType<ClaimRequest>()
             .RegisterMessageType<CheckboxRequest>()
+            .RegisterMessageType<PartyPacket>()
+            .RegisterMessageType<PartyRequest>()
             .SetMessageHandler<ClaimRequest>((player, req) => Claim(player, req.QuestId, req.Choices))
-            .SetMessageHandler<CheckboxRequest>((player, req) => Check(player, req.QuestId, req.TaskIndex));
+            .SetMessageHandler<CheckboxRequest>((player, req) => Check(player, req.QuestId, req.TaskIndex))
+            .SetMessageHandler<PartyRequest>(OnPartyRequest);
 
         api.Event.SaveGameLoaded += LoadProgress;
         api.Event.GameWorldSave += SaveProgress;
@@ -86,9 +95,8 @@ public class QuestEngine
     void OnReportEvent(string eventName, ref EnumHandling handling, IAttribute data)
     {
         if (data is not ITreeAttribute tree) return;
-        if (api.World.PlayerByUid(tree.GetString("playeruid")) is not IServerPlayer player) return;
-        string key = tree.GetString("key");
-        if (key != null) Report(player, "custom", new AssetLocation(key), tree.GetInt("amount", 1));
+        string uid = tree.GetString("playeruid"), key = tree.GetString("key");
+        if (uid != null && key != null) Report(uid, "custom", new AssetLocation(key), tree.GetInt("amount", 1));
     }
 
     /// <summary>Re-reads every chapter and resends definitions and state to everyone online.</summary>
@@ -109,7 +117,7 @@ public class QuestEngine
             }
         }
 
-        foreach (var p in progress.Values) p.ApplyAliases(Registry.Aliases);
+        foreach (var p in AllRecords()) p.ApplyAliases(Registry.Aliases);
 
         foreach (IServerPlayer player in api.World.AllOnlinePlayers)
         {
@@ -118,28 +126,72 @@ public class QuestEngine
         }
     }
 
+    IEnumerable<PlayerProgress> AllRecords() => progress.Values.Concat(parties.Values.Select(p => p.Progress)).Append(serverProgress);
+
     #region Progress and state
 
+    /// <summary>A player's own record: their individual quests, their claims and their history.</summary>
     public PlayerProgress ProgressOf(string playerUid)
     {
         if (!progress.TryGetValue(playerUid, out var p)) progress[playerUid] = p = new PlayerProgress();
         return p;
     }
 
-    public bool IsUnlocked(QuestDef quest, PlayerProgress p) =>
-        quest.Requires == null || quest.Requires.Evaluate(new PlayerContext(this, p));
+    /// <summary>The server's record, for server quests.</summary>
+    public PlayerProgress ServerProgress => serverProgress;
+
+    /// <summary>Whoever holds a quest's tasks for this player: the player, their party, or the server.</summary>
+    public PlayerProgress Holder(QuestDef quest, string playerUid) => quest.Mode switch
+    {
+        QuestMode.Server => serverProgress,
+        QuestMode.Party when PartyOf(playerUid) is { } party => party.Progress,
+        _ => ProgressOf(playerUid),
+    };
+
+    /// <summary>The record whose <see cref="QuestProgress.Claimed"/> says whether this player's claim is spent.</summary>
+    PlayerProgress ClaimHolder(QuestDef quest, string playerUid) =>
+        quest.Mode == QuestMode.Server && quest.Claim == ClaimMode.First ? serverProgress : ProgressOf(playerUid);
+
+    /// <summary>The quest's tasks as this player sees them, or null if nothing is recorded.</summary>
+    public QuestProgress TasksFor(string playerUid, string questId) =>
+        Registry.Get(questId) is { } quest ? Holder(quest, playerUid).Find(questId) : ProgressOf(playerUid).Find(questId);
+
+    /// <summary>The players whose work counts towards this player's copy of the quest.</summary>
+    IEnumerable<string> Contributors(QuestDef quest, string playerUid) => quest.Mode switch
+    {
+        QuestMode.Server => api.World.AllOnlinePlayers.Select(p => p.PlayerUID),
+        QuestMode.Party when PartyOf(playerUid) is { } party => party.Members,
+        _ => [playerUid],
+    };
+
+    /// <summary>The players who see a change to this player's copy of the quest.</summary>
+    IEnumerable<string> Sharers(QuestDef quest, string playerUid) => quest.Mode switch
+    {
+        QuestMode.Server => api.World.AllOnlinePlayers.Select(p => p.PlayerUID).Append(playerUid).Distinct(),
+        QuestMode.Party when PartyOf(playerUid) is { } party => party.Members,
+        _ => [playerUid],
+    };
+
+    public bool IsUnlocked(QuestDef quest, string playerUid) =>
+        quest.Requires == null || quest.Requires.Evaluate(new PlayerContext(this, playerUid));
 
     public QuestState StateOf(string playerUid, string questId)
     {
         var quest = Registry.Get(questId) ?? throw new ArgumentException($"No quest {questId}");
-        var p = ProgressOf(playerUid);
-        return PlayerProgress.StateOf(quest, p.Find(questId), IsUnlocked(quest, p));
+        return StateOf(playerUid, quest);
     }
 
-    bool IsActive(QuestDef quest, PlayerProgress p) => p.Find(quest.Id)?.Complete != true && IsUnlocked(quest, p);
+    QuestState StateOf(string playerUid, QuestDef quest) => PlayerProgress.StateOf(quest,
+        Holder(quest, playerUid).Find(quest.Id),
+        ClaimHolder(quest, playerUid).Find(quest.Id)?.Claimed == true,
+        IsUnlocked(quest, playerUid));
+
+    public bool IsComplete(string playerUid, string questId) => TasksFor(playerUid, questId)?.Complete == true;
+
+    bool IsActive(QuestDef quest, string playerUid) => Holder(quest, playerUid).Find(quest.Id)?.Complete != true && IsUnlocked(quest, playerUid);
 
     /// <summary>Marks the quest complete if every task has reached its count.</summary>
-    bool TryComplete(IServerPlayer player, QuestDef quest, QuestProgress qp)
+    bool TryComplete(QuestDef quest, string playerUid, QuestProgress qp)
     {
         if (qp.Complete) return false;
         for (int i = 0; i < quest.Tasks.Count; i++)
@@ -149,13 +201,22 @@ public class QuestEngine
 
         qp.Complete = true;
         qp.CompletedDay = api.World.Calendar.TotalDays;
-        if (quest.Rewards.Count == 0) qp.Claimed = true;
 
-        // Newly unlocked quests may already be satisfied by what the player carries.
-        inventoryDirty.Add(player.PlayerUID);
-        QuestCompleted?.Invoke(player, quest.Id);
-        api.Event.PushEvent(QuestCompletedEvent, new TreeAttribute { ["playeruid"] = new StringAttribute(player.PlayerUID), ["questid"] = new StringAttribute(quest.Id) });
+        foreach (string uid in Sharers(quest, playerUid).ToList())
+        {
+            // Newly unlocked quests may already be satisfied by what the player carries.
+            inventoryDirty.Add(uid);
+            syncDirty.Add(uid);
+            if (api.World.PlayerByUid(uid) is IServerPlayer player) QuestCompleted?.Invoke(player, quest.Id);
+            api.Event.PushEvent(QuestCompletedEvent, new TreeAttribute { ["playeruid"] = new StringAttribute(uid), ["questid"] = new StringAttribute(quest.Id) });
+        }
         return true;
+    }
+
+    /// <summary>Marks everyone who sees this quest as needing a sync.</summary>
+    void Touch(QuestDef quest, string playerUid)
+    {
+        foreach (string uid in Sharers(quest, playerUid)) syncDirty.Add(uid);
     }
 
     #endregion
@@ -168,30 +229,35 @@ public class QuestEngine
     /// </summary>
     public void Report(IServerPlayer player, string type, AssetLocation code, int amount)
     {
-        if (player == null || code == null || amount <= 0) return;
+        if (player != null) Report(player.PlayerUID, type, code, amount);
+    }
 
-        var p = ProgressOf(player.PlayerUID);
+    /// <summary>As <see cref="Report(IServerPlayer, string, AssetLocation, int)"/>, by uid: the player needn't be online.</summary>
+    public void Report(string playerUid, string type, AssetLocation code, int amount)
+    {
+        if (playerUid == null || code == null || amount <= 0) return;
+
+        var own = ProgressOf(playerUid);
         if (HistoryTypes.Contains(type))
         {
             string key = PlayerProgress.HistoryKey(type, code.ToString());
-            p.History[key] = p.History.GetValueOrDefault(key) + amount;
+            own.History[key] = own.History.GetValueOrDefault(key) + amount;
         }
         if (!tasksByType.TryGetValue(type, out var tasks)) return;
 
-        bool changed = false;
         foreach (var (quest, index) in tasks)
         {
             var task = quest.Tasks[index];
-            if (!WildcardUtil.Match(Pattern(task), code) || !IsActive(quest, p)) continue;
+            if (!WildcardUtil.Match(Pattern(task), code) || !IsActive(quest, playerUid)) continue;
 
-            var qp = p.GetOrCreate(quest);
+            var qp = Holder(quest, playerUid).GetOrCreate(quest);
             if (qp.Tasks[index] >= task.Count) continue;
             qp.Tasks[index] = Math.Min(task.Count, qp.Tasks[index] + amount);
-            TryComplete(player, quest, qp);
-            changed = true;
+            TryComplete(quest, playerUid, qp);
+            Touch(quest, playerUid);
         }
 
-        if (changed) Sync(player);
+        FlushSync();
     }
 
     /// <summary>Ticks a checkbox task, on the player's request from the book.</summary>
@@ -199,14 +265,13 @@ public class QuestEngine
     {
         var quest = Registry.Get(questId);
         if (quest == null || taskIndex < 0 || taskIndex >= quest.Tasks.Count || quest.Tasks[taskIndex].Type != "checkbox") return;
+        if (!IsActive(quest, player.PlayerUID)) return;
 
-        var p = ProgressOf(player.PlayerUID);
-        if (!IsActive(quest, p)) return;
-
-        var qp = p.GetOrCreate(quest);
+        var qp = Holder(quest, player.PlayerUID).GetOrCreate(quest);
         qp.Tasks[taskIndex] = quest.Tasks[taskIndex].Count;
-        TryComplete(player, quest, qp);
-        Sync(player);
+        TryComplete(quest, player.PlayerUID, qp);
+        Touch(quest, player.PlayerUID);
+        FlushSync();
     }
 
     AssetLocation Pattern(TaskDef task)
@@ -224,25 +289,30 @@ public class QuestEngine
         foreach (string uid in inventoryDirty.ToList())
         {
             inventoryDirty.Remove(uid);
-            if (api.World.PlayerByUid(uid) is not IServerPlayer { ConnectionState: EnumClientState.Playing } player) continue;
-            SeedFromHistory(player);
-            ScanInventory(player);
+            if (api.World.PlayerByUid(uid) is not IServerPlayer { ConnectionState: EnumClientState.Playing }) continue;
+            SeedFromHistory(uid);
+            ScanInventory(uid);
         }
+        FlushSync();
     }
 
-    /// <summary>Credits each newly unlocked quest, once, with what the player did before it unlocked.</summary>
-    public void SeedFromHistory(IServerPlayer player)
+    /// <summary>
+    /// Credits each newly unlocked quest, once, with what was done before it unlocked: by the
+    /// player, or by every member for a party quest. Server quests count only live work.
+    /// </summary>
+    public void SeedFromHistory(string playerUid)
     {
         if (!Config.CreditEarlierWork) return;
 
-        var p = ProgressOf(player.PlayerUID);
-        bool changed = false;
         foreach (var quest in Registry.Quests.Values)
         {
-            if (p.Find(quest.Id)?.Seeded == true || !quest.Tasks.Any(t => HistoryTypes.Contains(t.Type)) || !IsActive(quest, p)) continue;
+            if (quest.Mode == QuestMode.Server || !quest.Tasks.Any(t => HistoryTypes.Contains(t.Type))) continue;
+            var holder = Holder(quest, playerUid);
+            if (holder.Find(quest.Id)?.Seeded == true || !IsActive(quest, playerUid)) continue;
 
-            var qp = p.GetOrCreate(quest);
+            var qp = holder.GetOrCreate(quest);
             qp.Seeded = true;
+            var histories = Contributors(quest, playerUid).Select(uid => ProgressOf(uid).History).ToList();
             for (int i = 0; i < quest.Tasks.Count; i++)
             {
                 var task = quest.Tasks[i];
@@ -250,44 +320,44 @@ public class QuestEngine
 
                 string prefix = task.Type + "|";
                 var pattern = Pattern(task);
-                int done = p.History
+                int done = histories.SelectMany(h => h)
                     .Where(h => h.Key.StartsWith(prefix) && WildcardUtil.Match(pattern, new AssetLocation(h.Key[prefix.Length..])))
                     .Sum(h => h.Value);
                 if (done <= qp.Tasks[i]) continue;
 
                 qp.Tasks[i] = Math.Min(task.Count, done);
-                changed = true;
+                Touch(quest, playerUid);
             }
-            if (TryComplete(player, quest, qp)) changed = true;
+            if (TryComplete(quest, playerUid, qp)) Touch(quest, playerUid);
         }
-
-        if (changed) Sync(player);
     }
 
-    /// <summary>Sets every active obtain task to what the player carries now.</summary>
-    void ScanInventory(IServerPlayer player)
+    /// <summary>Sets every active obtain task to what is carried now: by the player, or pooled across whoever shares the quest.</summary>
+    void ScanInventory(string playerUid)
     {
         if (!tasksByType.TryGetValue("obtain", out var tasks)) return;
 
-        var p = ProgressOf(player.PlayerUID);
-        bool changed = false;
         foreach (var (quest, index) in tasks)
         {
-            if (!IsActive(quest, p)) continue;
+            if (!IsActive(quest, playerUid)) continue;
 
             var task = quest.Tasks[index];
-            int held = Math.Min(task.Count, CountCarried(player, Pattern(task)));
-            var qp = p.Find(quest.Id);
+            var pattern = Pattern(task);
+            int held = Math.Min(task.Count, OnlineContributors(quest, playerUid).Sum(p => CountCarried(p, pattern)));
+            var holder = Holder(quest, playerUid);
+            var qp = holder.Find(quest.Id);
             if ((qp == null ? 0 : qp.Tasks[index]) == held) continue;
 
-            qp = p.GetOrCreate(quest);
+            qp = holder.GetOrCreate(quest);
             qp.Tasks[index] = held;
-            TryComplete(player, quest, qp);
-            changed = true;
+            TryComplete(quest, playerUid, qp);
+            Touch(quest, playerUid);
         }
-
-        if (changed) Sync(player);
     }
+
+    IEnumerable<IServerPlayer> OnlineContributors(QuestDef quest, string playerUid) => Contributors(quest, playerUid)
+        .Select(uid => api.World.PlayerByUid(uid) as IServerPlayer)
+        .Where(p => p is { ConnectionState: EnumClientState.Playing });
 
     static IEnumerable<ItemSlot> CarriedSlots(IServerPlayer player)
     {
@@ -313,9 +383,11 @@ public class QuestEngine
         var quest = Registry.Get(questId);
         if (quest == null) return Refuse(player, $"no quest {questId}");
 
-        var qp = ProgressOf(player.PlayerUID).Find(questId);
+        string uid = player.PlayerUID;
+        var qp = Holder(quest, uid).Find(questId);
         if (qp?.Complete != true) return Refuse(player, $"{questId} isn't complete");
-        if (qp.Claimed) return Refuse(player, $"{questId} is already claimed");
+        var claim = ClaimHolder(quest, uid).GetOrCreate(quest);
+        if (claim.Claimed) return Refuse(player, $"{questId} is already claimed");
 
         var gifts = new List<RewardDef>();
         int choiceIndex = 0;
@@ -332,20 +404,29 @@ public class QuestEngine
             gifts.Add(reward.Options[pick]);
         }
 
-        var consumed = quest.Tasks.Where(t => t.Type == "obtain" && t.Consume).ToList();
+        // Items to hand in go once per quest: on a shared quest, at the first claim, from
+        // whoever shares it, the claimer first.
+        var consumed = qp.Consumed ? [] : quest.Tasks.Where(t => t.Type == "obtain" && t.Consume).ToList();
+        var givers = OnlineContributors(quest, uid).OrderBy(p => p.PlayerUID == uid ? 0 : 1).ToList();
         foreach (var task in consumed)
         {
-            if (CountCarried(player, Pattern(task)) < task.Count) return Refuse(player, $"{questId}: you no longer carry {task.Count}× {task.Target}");
+            if (givers.Sum(p => CountCarried(p, Pattern(task))) < task.Count) return Refuse(player, $"{questId}: you no longer carry {task.Count}× {task.Target}");
         }
-        foreach (var task in consumed) TakeCarried(player, Pattern(task), task.Count);
+        foreach (var task in consumed)
+        {
+            int left = task.Count;
+            foreach (var giver in givers) left = TakeCarried(giver, Pattern(task), left);
+        }
+        qp.Consumed = true;
 
-        qp.Claimed = true;
+        claim.Claimed = true;
         foreach (var gift in gifts)
         {
-            if (gift.Type == "stage") SetStage(player, gift.Stage);
+            if (gift.Type == "stage") SetStage(StageHolder(quest, uid), gift.Stage, Sharers(quest, uid));
             else Give(player, gift);
         }
-        Sync(player);
+        Touch(quest, uid);
+        FlushSync();
         return null;
     }
 
@@ -355,17 +436,19 @@ public class QuestEngine
         return why;
     }
 
-    static void TakeCarried(IServerPlayer player, AssetLocation pattern, int count)
+    /// <summary>Takes up to <paramref name="count"/> matching items from what the player carries; returns how many are still owed.</summary>
+    static int TakeCarried(IServerPlayer player, AssetLocation pattern, int count)
     {
         foreach (var slot in CarriedSlots(player))
         {
-            if (count <= 0) return;
+            if (count <= 0) break;
             if (slot.Itemstack?.Collectible?.Code == null || !WildcardUtil.Match(pattern, slot.Itemstack.Collectible.Code)) continue;
             int take = Math.Min(count, slot.StackSize);
             slot.TakeOut(take);
             slot.MarkDirty();
             count -= take;
         }
+        return count;
     }
 
     void Give(IServerPlayer player, RewardDef reward)
@@ -383,17 +466,40 @@ public class QuestEngine
 
     #region Stages
 
-    public bool HasStage(string playerUid, string stage) => ProgressOf(playerUid).Stages.Contains(stage);
+    /// <summary>A player's stages: their own, their party's and the server's.</summary>
+    public bool HasStage(string playerUid, string stage) =>
+        ProgressOf(playerUid).Stages.Contains(stage)
+        || PartyOf(playerUid)?.Progress.Stages.Contains(stage) == true
+        || serverProgress.Stages.Contains(stage);
 
-    /// <summary>Gives a player a stage. Quests gated on it unlock; other mods hear about it.</summary>
+    /// <summary>Where a quest's stage reward goes: the server for a server quest, the party for a party quest, else the player.</summary>
+    PlayerProgress StageHolder(QuestDef quest, string playerUid) => quest.Mode switch
+    {
+        QuestMode.Server => serverProgress,
+        QuestMode.Party when PartyOf(playerUid) is { } party => party.Progress,
+        _ => ProgressOf(playerUid),
+    };
+
+    /// <summary>Gives a player a stage of their own. Quests gated on it unlock; other mods hear about it.</summary>
     public void SetStage(IServerPlayer player, string stage)
     {
-        if (!ProgressOf(player.PlayerUID).Stages.Add(stage)) return;
+        SetStage(ProgressOf(player.PlayerUID), stage, [player.PlayerUID]);
+        FlushSync();
+    }
 
-        inventoryDirty.Add(player.PlayerUID);
-        StageSet?.Invoke(player, stage);
-        api.Event.PushEvent(StageSetEvent, new TreeAttribute { ["playeruid"] = new StringAttribute(player.PlayerUID), ["stage"] = new StringAttribute(stage) });
-        Sync(player);
+    void SetStage(PlayerProgress holder, string stage, IEnumerable<string> sharers)
+    {
+        if (!holder.Stages.Add(stage)) return;
+
+        // A server stage reaches everyone, not only who shared the quest.
+        var uids = holder == serverProgress ? api.World.AllOnlinePlayers.Select(p => p.PlayerUID) : sharers;
+        foreach (string uid in uids.ToList())
+        {
+            inventoryDirty.Add(uid);
+            syncDirty.Add(uid);
+            if (api.World.PlayerByUid(uid) is IServerPlayer player) StageSet?.Invoke(player, stage);
+            api.Event.PushEvent(StageSetEvent, new TreeAttribute { ["playeruid"] = new StringAttribute(uid), ["stage"] = new StringAttribute(stage) });
+        }
     }
 
     #endregion
@@ -401,28 +507,106 @@ public class QuestEngine
     #region Commands and tests
 
     /// <summary>Completes every task of a quest for a player, unlocked or not.</summary>
-    public void ForceComplete(IServerPlayer player, string questId)
+    public void ForceComplete(IServerPlayer player, string questId) => ForceComplete(player.PlayerUID, questId);
+
+    public void ForceComplete(string playerUid, string questId)
     {
         var quest = Registry.Get(questId) ?? throw new ArgumentException($"No quest {questId}");
-        var qp = ProgressOf(player.PlayerUID).GetOrCreate(quest);
+        var qp = Holder(quest, playerUid).GetOrCreate(quest);
         for (int i = 0; i < quest.Tasks.Count; i++) qp.Tasks[i] = quest.Tasks[i].Count;
-        TryComplete(player, quest, qp);
-        Sync(player);
+        TryComplete(quest, playerUid, qp);
+        Touch(quest, playerUid);
+        FlushSync();
     }
 
-    /// <summary>Forgets a player's progress on one quest, or on every quest when <paramref name="questId"/> is null.</summary>
-    public void Reset(IServerPlayer player, string questId = null)
+    /// <summary>
+    /// Makes a quest available to a player by meeting its requirements: completes the quests it
+    /// needs (and theirs, all the way back), and grants the stages. Where it may pick, as in an
+    /// any or an at-least, it meets the first options. A missing mod can't be met.
+    /// </summary>
+    public void Unlock(string playerUid, string questId)
     {
-        var p = ProgressOf(player.PlayerUID);
+        var quest = Registry.Get(questId) ?? throw new ArgumentException($"No quest {questId}");
+        if (quest.Requires != null) Satisfy(playerUid, quest.Requires, []);
+        Touch(quest, playerUid);
+        FlushSync();
+    }
+
+    void Satisfy(string playerUid, Requirement r, HashSet<string> seen)
+    {
+        switch (r)
+        {
+            case QuestRequirement q when Registry.Get(q.QuestId) is { } pre && seen.Add(pre.Id):
+                if (pre.Requires != null) Satisfy(playerUid, pre.Requires, seen);
+                if (!IsComplete(playerUid, pre.Id)) ForceComplete(playerUid, pre.Id);
+                break;
+            case StageRequirement s when !HasStage(playerUid, s.Stage):
+                SetStage(ProgressOf(playerUid), s.Stage, [playerUid]);
+                break;
+            case ChapterCompleteRequirement c when Registry.ChaptersById.TryGetValue(c.ChapterId, out var chapter):
+                foreach (var each in chapter.Quests) Satisfy(playerUid, new QuestRequirement(each.Id), seen);
+                break;
+            case AllRequirement all:
+                foreach (var each in all.Of) Satisfy(playerUid, each, seen);
+                break;
+            case AnyRequirement any when any.Of.Count > 0:
+                Satisfy(playerUid, any.Of[0], seen);
+                break;
+            case AtLeastRequirement atLeast:
+                foreach (var each in atLeast.Of.Take(atLeast.N)) Satisfy(playerUid, each, seen);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Forgets a player's progress on one quest, wherever it's held, or on every quest when
+    /// <paramref name="questId"/> is null: their own record and their party's. Server quests
+    /// are only reset one at a time, or by <see cref="ResetServer"/>.
+    /// </summary>
+    public void Reset(IServerPlayer player, string questId = null) => Reset(player.PlayerUID, questId);
+
+    public void Reset(string playerUid, string questId = null)
+    {
+        var own = ProgressOf(playerUid);
+        var party = PartyOf(playerUid);
         if (questId == null)
         {
-            p.Quests.Clear();
-            p.Stages.Clear();
-            p.History.Clear();
+            own.Quests.Clear();
+            own.Stages.Clear();
+            own.History.Clear();
+            party?.Progress.Quests.Clear();
+            party?.Progress.Stages.Clear();
         }
-        else p.Quests.Remove(questId);
-        inventoryDirty.Add(player.PlayerUID);
-        Sync(player);
+        else
+        {
+            own.Quests.Remove(questId);
+            party?.Progress.Quests.Remove(questId);
+            if (Registry.Get(questId) is { Mode: QuestMode.Server }) serverProgress.Quests.Remove(questId);
+        }
+
+        foreach (string uid in party?.Members ?? [playerUid])
+        {
+            inventoryDirty.Add(uid);
+            syncDirty.Add(uid);
+        }
+        if (questId != null && Registry.Get(questId) is { } quest) Touch(quest, playerUid);
+        FlushSync();
+    }
+
+    /// <summary>Forgets the server's progress and stages, for every player.</summary>
+    public void ResetServer()
+    {
+        serverProgress = new PlayerProgress();
+        foreach (var p in progress.Values)
+        {
+            foreach (var quest in Registry.Quests.Values.Where(q => q.Mode == QuestMode.Server)) p.Quests.Remove(quest.Id);
+        }
+        foreach (var player in api.World.AllOnlinePlayers)
+        {
+            inventoryDirty.Add(player.PlayerUID);
+            syncDirty.Add(player.PlayerUID);
+        }
+        FlushSync();
     }
 
     #endregion
@@ -432,6 +616,7 @@ public class QuestEngine
     void OnPlayerNowPlaying(IServerPlayer player)
     {
         SendDefinitions(player);
+        SendParty(player.PlayerUID);
 
         var watcher = (Action<int>)(_ => inventoryDirty.Add(player.PlayerUID));
         inventoryWatchers[player.PlayerUID] = watcher;
@@ -441,16 +626,25 @@ public class QuestEngine
             if (inv != null) inv.SlotModified += watcher;
         }
         inventoryDirty.Add(player.PlayerUID);
+
+        // Party members see who's online.
+        foreach (string uid in PartyOf(player.PlayerUID)?.Members ?? []) SendParty(uid);
     }
 
     void OnPlayerDisconnect(IServerPlayer player)
     {
         sent.Remove(player.PlayerUID);
-        if (!inventoryWatchers.Remove(player.PlayerUID, out var watcher)) return;
-        foreach (string name in new[] { GlobalConstants.hotBarInvClassName, GlobalConstants.backpackInvClassName })
+        if (inventoryWatchers.Remove(player.PlayerUID, out var watcher))
         {
-            var inv = player.InventoryManager.GetOwnInventory(name);
-            if (inv != null) inv.SlotModified -= watcher;
+            foreach (string name in new[] { GlobalConstants.hotBarInvClassName, GlobalConstants.backpackInvClassName })
+            {
+                var inv = player.InventoryManager.GetOwnInventory(name);
+                if (inv != null) inv.SlotModified -= watcher;
+            }
+        }
+        foreach (string uid in PartyOf(player.PlayerUID)?.Members ?? [])
+        {
+            if (uid != player.PlayerUID) SendParty(uid);
         }
     }
 
@@ -461,22 +655,32 @@ public class QuestEngine
         Sync(player);
     }
 
+    /// <summary>Syncs every online player whose quest states may have changed.</summary>
+    void FlushSync()
+    {
+        if (syncDirty.Count == 0) return;
+        foreach (string uid in syncDirty.ToList())
+        {
+            if (api.World.PlayerByUid(uid) is IServerPlayer { ConnectionState: EnumClientState.Playing } player) Sync(player);
+        }
+        syncDirty.Clear();
+    }
+
     /// <summary>Sends the player every quest state that changed since the last sync (all of them, the first time).</summary>
     public void Sync(IServerPlayer player)
     {
-        bool full = !sent.TryGetValue(player.PlayerUID, out var last);
-        if (full) sent[player.PlayerUID] = last = [];
+        string uid = player.PlayerUID;
+        bool full = !sent.TryGetValue(uid, out var last);
+        if (full) sent[uid] = last = [];
 
-        var p = ProgressOf(player.PlayerUID);
         var packet = new StatePacket { Full = full };
         foreach (var quest in Registry.Quests.Values)
         {
-            var qp = p.Find(quest.Id);
             var entry = new QuestStateEntry
             {
                 QuestId = quest.Id,
-                State = PlayerProgress.StateOf(quest, qp, IsUnlocked(quest, p)),
-                Tasks = qp?.Tasks.ToArray() ?? new int[quest.Tasks.Count],
+                State = StateOf(uid, quest),
+                Tasks = Holder(quest, uid).Find(quest.Id)?.Tasks.ToArray() ?? new int[quest.Tasks.Count],
             };
 
             if (last.TryGetValue(quest.Id, out var prev) && prev.State == entry.State && prev.Tasks.SequenceEqual(entry.Tasks)) continue;
@@ -491,42 +695,51 @@ public class QuestEngine
 
     #region Persistence
 
-    /// <summary>Reads every player's progress from the save game, replacing what's in memory.</summary>
+    /// <summary>Reads everyone's progress, the parties and the server's progress from the save game, replacing what's in memory.</summary>
     public void LoadProgress()
     {
-        byte[] data = api.WorldManager.SaveGame.GetData(SaveKey);
-        if (data == null)
-        {
-            progress = [];
-            return;
-        }
+        progress = Read<Dictionary<string, PlayerProgress>>(SaveKey) ?? [];
+        parties = (Read<List<Party>>(PartiesKey) ?? []).ToDictionary(p => p.Id);
+        serverProgress = Read<PlayerProgress>(ServerKey) ?? new PlayerProgress();
+        IndexParties();
+        foreach (var p in AllRecords()) p.ApplyAliases(Registry.Aliases);
+        sent.Clear();
+    }
+
+    T Read<T>(string key) where T : class
+    {
+        byte[] data = api.WorldManager.SaveGame.GetData(key);
+        if (data == null) return null;
         try
         {
-            progress = JsonConvert.DeserializeObject<Dictionary<string, PlayerProgress>>(System.Text.Encoding.UTF8.GetString(data)) ?? [];
-            foreach (var p in progress.Values) p.ApplyAliases(Registry.Aliases);
-            sent.Clear();
+            return JsonConvert.DeserializeObject<T>(System.Text.Encoding.UTF8.GetString(data));
         }
         catch (Exception e)
         {
-            api.Logger.Error("[questline] can't read saved quest progress, starting fresh: {0}", e.Message);
-            progress = [];
+            api.Logger.Error("[questline] can't read saved {0}, starting fresh: {1}", key, e.Message);
+            return null;
         }
     }
 
-    /// <summary>Writes every player's progress into the save game. The world save calls this.</summary>
+    /// <summary>Writes everything into the save game. The world save calls this.</summary>
     public void SaveProgress()
     {
-        api.WorldManager.SaveGame.StoreData(SaveKey, System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(progress)));
+        Write(SaveKey, progress);
+        Write(PartiesKey, parties.Values.ToList());
+        Write(ServerKey, serverProgress);
     }
+
+    void Write(string key, object value) =>
+        api.WorldManager.SaveGame.StoreData(key, System.Text.Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(value)));
 
     #endregion
 
-    class PlayerContext(QuestEngine engine, PlayerProgress p) : IRequirementContext
+    class PlayerContext(QuestEngine engine, string playerUid) : IRequirementContext
     {
-        public bool IsQuestComplete(string questId) => p.IsComplete(questId);
+        public bool IsQuestComplete(string questId) => engine.IsComplete(playerUid, questId);
         public bool IsModLoaded(string modId) => engine.api.ModLoader.IsModEnabled(modId);
-        public bool HasStage(string stage) => p.Stages.Contains(stage);
+        public bool HasStage(string stage) => engine.HasStage(playerUid, stage);
         public bool IsChapterComplete(string chapterId) =>
-            engine.Registry.ChaptersById.TryGetValue(chapterId, out var chapter) && chapter.Quests.All(q => p.IsComplete(q.Id));
+            engine.Registry.ChaptersById.TryGetValue(chapterId, out var chapter) && chapter.Quests.All(q => engine.IsComplete(playerUid, q.Id));
     }
 }

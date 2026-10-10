@@ -1,0 +1,42 @@
+{
+    "id": "together",
+    "order": 50,
+    "icon": "game:stick",
+    "quests": [
+        {
+            "id": "party-work",
+            "pos": [0, 0],
+            "mode": "party",
+            "tasks": [{ "type": "custom", "key": "qltest:teamwork", "count": 3 }],
+            "rewards": [{ "type": "item", "item": "game:stick", "count": 1 }]
+        },
+        {
+            "id": "party-milestone",
+            "pos": [2, 0],
+            "mode": "party",
+            "tasks": [{ "type": "checkbox" }],
+            "rewards": [{ "type": "stage", "stage": "party-age" }]
+        },
+        {
+            "id": "after-milestone",
+            "pos": [4, 0],
+            "requires": { "stage": "party-age" },
+            "tasks": [{ "type": "checkbox" }]
+        },
+        {
+            "id": "server-goal",
+            "pos": [0, 2],
+            "mode": "server",
+            "tasks": [{ "type": "custom", "key": "qltest:townwork", "count": 5 }],
+            "rewards": [{ "type": "item", "item": "game:stick", "count": 2 }]
+        },
+        {
+            "id": "server-race",
+            "pos": [2, 2],
+            "mode": "server",
+            "claim": "first",
+            "tasks": [{ "type": "checkbox" }],
+            "rewards": [{ "type": "item", "item": "game:stick", "count": 1 }]
+        }
+    ]
+}

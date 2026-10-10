@@ -10,4 +10,7 @@ public class QuestlineConfig
     /// items crafted, creatures killed. Off means only work done while a quest is unlocked counts.
     /// </summary>
     public bool CreditEarlierWork = true;
+
+    /// <summary>Players can form parties that share progress on party quests. Off, every party quest counts per player.</summary>
+    public bool Parties = true;
 }

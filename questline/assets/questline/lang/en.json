@@ -1,6 +1,5 @@
 {
     "default-title": "Survival",
-
     "book-title": "Quest book",
     "tab-quests": "Quests",
     "tab-reference": "Reference",
@@ -16,13 +15,11 @@
     "back": "Back",
     "handbook-loading": "The handbook hasn't finished loading.",
     "toast-complete": "Quest complete: {0}",
-
     "state-locked": "Locked",
     "state-available": "Available",
     "state-inprogress": "In progress",
     "state-claimable": "Ready to claim",
     "state-done": "Done",
-
     "task-obtain": "Have {0}",
     "task-kill": "Kill {0}",
     "task-place": "Place {0}",
@@ -36,11 +33,28 @@
     "task-checkbox": "Read this and tick it off",
     "any-of": "any {0}",
     "reward-stage": "Reaches the stage: {0}",
-
     "req-and": " and ",
     "req-or": " or ",
     "req-atleast": "{0} of: {1}",
     "req-mod": "the mod {0}",
     "req-stage": "the stage {0}",
-    "req-chapter": "every quest in {0}"
+    "req-chapter": "every quest in {0}",
+    "tab-party": "Party",
+    "party-waiting": "Waiting for the server.",
+    "party-off": "Parties are turned off on this server.",
+    "party-none": "You're not in a party. In a party, everyone's work counts towards party quests, and each member claims their own rewards.",
+    "party-shares": "Party quests count everyone's work. Each member claims their own rewards.",
+    "party-owner": "(owner)",
+    "party-kick": "[Remove]",
+    "party-invites": "Invites",
+    "party-invite-from": "{0}, from {1}",
+    "party-accept": "[Join]",
+    "party-decline": "[Decline]",
+    "party-create": "Start a party",
+    "party-leave": "Leave party",
+    "party-invite": "Invite",
+    "mode-party": "Party quest: your party's work counts.",
+    "mode-party-alone": "Party quest: in a party, everyone's work would count.",
+    "mode-server": "Server quest: everyone's work counts, and each player claims once.",
+    "mode-server-first": "Server quest: everyone's work counts, and the first to claim takes the reward."
 }

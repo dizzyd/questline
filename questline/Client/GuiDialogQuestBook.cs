@@ -17,7 +17,7 @@ namespace questline.Client;
 public partial class GuiDialogQuestBook : GuiDialog
 {
     const double Gap = 10, ContentY = 70;
-    const int QuestsTab = 0, ReferenceTab = 1;
+    const int QuestsTab = 0, ReferenceTab = 1, PartyTab = 2;
 
     readonly QuestClient client;
     readonly QuestText text;
@@ -78,6 +78,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         [
             new() { Name = Lang.Get("questline:tab-quests"), DataInt = QuestsTab },
             new() { Name = Lang.Get("questline:tab-reference"), DataInt = ReferenceTab },
+            new() { Name = Lang.Get("questline:tab-party"), DataInt = PartyTab },
         ];
 
         var composer = capi.Gui.CreateCompo("questline-book", dialogBounds)
@@ -88,19 +89,28 @@ public partial class GuiDialogQuestBook : GuiDialog
                 CairoFont.WhiteSmallText(), CairoFont.WhiteSmallText().WithWeight(Cairo.FontWeight.Bold), "tabs");
 
         if (tab == QuestsTab) ComposeQuests(composer);
+        else if (tab == PartyTab) ComposeParty(composer);
         else ComposeReference(composer);
 
         SingleComposer = composer.EndChildElements().Compose();
         SingleComposer.GetHorizontalTabs("tabs").SetValue(tab, false);
 
         if (tab == ReferenceTab) InitReferenceScroll();
-        else InitDetailScroll();
+        else if (tab == QuestsTab) InitDetailScroll();
     }
 
     void OnTabClicked(int dataInt)
     {
         tab = dataInt;
         Compose();
+    }
+
+    /// <summary>Switches to a tab (0 quests, 1 reference, 2 party), opening the book if it's closed.</summary>
+    public void SelectTab(int index)
+    {
+        tab = index;
+        if (IsOpened()) Compose();
+        else TryOpen();
     }
 
     #region Quests tab
@@ -261,6 +271,12 @@ public partial class GuiDialogQuestBook : GuiDialog
             new RichTextComponent(capi, text.Title(quest.Id) + "\n", CairoFont.WhiteMediumText()),
             new RichTextComponent(capi, text.State(state) + "\n", CairoFont.WhiteDetailText().WithColor(StateColor(state))),
         };
+        if (quest.Mode != QuestMode.Individual)
+        {
+            string shared = quest.Mode == QuestMode.Server ? (quest.Claim == ClaimMode.First ? "questline:mode-server-first" : "questline:mode-server")
+                : client.InParty ? "questline:mode-party" : "questline:mode-party-alone";
+            comps.Add(new RichTextComponent(capi, Lang.Get(shared) + "\n", CairoFont.WhiteDetailText().WithSlant(Cairo.FontSlant.Italic)));
+        }
         if (state == QuestState.Locked && quest.Requires != null)
         {
             comps.Add(new RichTextComponent(capi, Lang.Get("questline:requires", text.Describe(quest.Requires)) + "\n", CairoFont.WhiteDetailText()));

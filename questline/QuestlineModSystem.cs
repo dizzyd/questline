@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using questline.Client;
 using questline.Server;
 using Vintagestory.API.Client;
@@ -61,6 +63,25 @@ public class QuestlineModSystem : ModSystem
     void RegisterCommands(ICoreServerAPI api)
     {
         var parsers = api.ChatCommands.Parsers;
+
+        // The player a command acts on: the one named, else whoever ran it.
+        static (string Uid, string Name) Target(TextCommandCallingArgs args, int index)
+        {
+            if (args.Parsers[index].IsMissing) return (args.Caller.Player?.PlayerUID, args.Caller.Player?.PlayerName);
+            var named = ((PlayerUidName[])args[index]).FirstOrDefault();
+            return (named?.Uid, named?.Name);
+        }
+
+        TextCommandResult ForQuest(TextCommandCallingArgs args, Action<string, string> act, string done)
+        {
+            string id = (string)args[0];
+            if (Engine.Registry.Get(id) == null) return TextCommandResult.Error($"No quest {id}");
+            var (uid, name) = Target(args, 1);
+            if (uid == null) return TextCommandResult.Error("Name a player");
+            act(uid, id);
+            return TextCommandResult.Success(string.Format(done, id, name));
+        }
+
         api.ChatCommands.Create("questline")
             .WithDescription("Quest book administration")
             .RequiresPrivilege(Privilege.controlserver)
@@ -73,26 +94,34 @@ public class QuestlineModSystem : ModSystem
                 })
             .EndSubCommand()
             .BeginSubCommand("complete")
-                .WithDescription("Complete a quest's tasks for yourself")
-                .RequiresPlayer()
-                .WithArgs(parsers.Word("quest id"))
-                .HandleWith(args =>
-                {
-                    string id = (string)args[0];
-                    if (Engine.Registry.Get(id) == null) return TextCommandResult.Error($"No quest {id}");
-                    Engine.ForceComplete((IServerPlayer)args.Caller.Player, id);
-                    return TextCommandResult.Success($"Completed {id}");
-                })
+                .WithDescription("Complete a quest's tasks for a player, or for yourself")
+                .WithArgs(parsers.Word("quest id"), parsers.OptionalPlayerUids("player"))
+                .HandleWith(args => ForQuest(args, Engine.ForceComplete, "Completed {0} for {1}"))
+            .EndSubCommand()
+            .BeginSubCommand("unlock")
+                .WithDescription("Complete what a quest needs, so a player can start it")
+                .WithArgs(parsers.Word("quest id"), parsers.OptionalPlayerUids("player"))
+                .HandleWith(args => ForQuest(args, Engine.Unlock, "Unlocked {0} for {1}"))
             .EndSubCommand()
             .BeginSubCommand("reset")
-                .WithDescription("Forget your progress on one quest, or on all of them")
-                .RequiresPlayer()
-                .WithArgs(parsers.OptionalWord("quest id"))
+                .WithDescription("Forget a player's progress on one quest, or on all of them (their party's too)")
+                .WithArgs(parsers.OptionalWord("quest id"), parsers.OptionalPlayerUids("player"))
                 .HandleWith(args =>
                 {
                     string id = (string)args[0];
-                    Engine.Reset((IServerPlayer)args.Caller.Player, id);
-                    return TextCommandResult.Success(id == null ? "Reset every quest" : $"Reset {id}");
+                    if (id != null && Engine.Registry.Get(id) == null) return TextCommandResult.Error($"No quest {id}");
+                    var (uid, name) = Target(args, 1);
+                    if (uid == null) return TextCommandResult.Error("Name a player");
+                    Engine.Reset(uid, id);
+                    return TextCommandResult.Success(id == null ? $"Reset every quest for {name}" : $"Reset {id} for {name}");
+                })
+            .EndSubCommand()
+            .BeginSubCommand("resetserver")
+                .WithDescription("Forget the progress and stages of every server quest")
+                .HandleWith(_ =>
+                {
+                    Engine.ResetServer();
+                    return TextCommandResult.Success("Reset every server quest");
                 })
             .EndSubCommand();
     }

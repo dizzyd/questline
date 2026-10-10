@@ -141,6 +141,7 @@ public class QuestLoader(ICoreServerAPI api)
             foreach (var e in errors) Problem($"{quest.Id}: {e}; quest disabled");
             if (errors.Count > 0) broken.Add(quest.Id);
 
+            if (quest.Claim == ClaimMode.First && quest.Mode != QuestMode.Server) Problem($"{quest.Id}: claim 'first' only applies to server quests; each player claims their own");
             if (quest.Icon != null && !CollectibleExists(quest.Icon)) Problem($"{quest.Id}: icon {quest.Icon} is not an item or block");
             foreach (var warning in PageWarnings(quest)) Problem($"{quest.Id}: {warning}");
             if (!Lang.HasTranslation(quest.Id + "-title", true, false)) Problem($"{quest.Id}: no lang entry {quest.Id}-title");
