@@ -30,6 +30,8 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
     {
         if (code == null) return null;
         var loc = new AssetLocation(code);
+        // "Anything at all" has no one item that stands for it.
+        if (loc.Path == "*") return null;
         CollectibleObject collectible = capi.World.GetItem(loc) ?? (CollectibleObject)capi.World.GetBlock(loc);
         collectible ??= capi.World.Collectibles.FirstOrDefault(c => c.Code != null && WildcardUtil.Match(loc, c.Code));
         return collectible == null ? null : new ItemStack(collectible, size);
@@ -50,9 +52,17 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
         bool wildcard = task.Target.Contains('*');
         if (task.Type == "kill")
         {
+            // Creatures are named by their spawn item, item-creature-<code>. A wildcard such as
+            // chicken-* is named by what comes before the star: a first match would say "Rooster".
             var loc = new AssetLocation(task.Target);
-            string key = (wildcard ? loc.Path.Split('-')[0] : loc.Path);
-            return Lang.GetMatching(loc.Domain + ":item-creature-" + key);
+            if (wildcard)
+            {
+                string prefix = loc.Path[..loc.Path.IndexOf('*')].TrimEnd('-');
+                string key = loc.Domain + ":item-creature-" + prefix;
+                string kind = Lang.HasTranslation(key, true, false) ? Lang.Get(key) : prefix.Replace('-', ' ');
+                return Lang.Get("questline:any-of", kind);
+            }
+            return capi.World.EntityTypes.Any(e => e.Code.Equals(loc)) ? Lang.Get(loc.Domain + ":item-creature-" + loc.Path) : task.Target;
         }
 
         var stack = StackFor(task.Target);

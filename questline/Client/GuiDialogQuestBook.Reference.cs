@@ -38,44 +38,30 @@ public partial class GuiDialogQuestBook
     {
         EnsurePageIndex();
 
-        var textBounds = ElementBounds.Fixed(3, ContentY + 3, Width - 36, ContentHeight - 40);
-        var clipBounds = textBounds.ForkBoundingParent();
-        var insetBounds = textBounds.FlatCopy().FixedGrow(6).WithFixedOffset(-3, -3);
-        var scrollbarBounds = clipBounds.CopyOffsetedSibling(textBounds.fixedWidth + 10, -3, 0, 6).WithFixedWidth(20);
-
-        composer.BeginClip(clipBounds).AddInset(insetBounds, 3);
-
         if (pageCode != null && stackByPageCode != null && stackByPageCode.TryGetValue(pageCode, out var stack))
         {
+            // The handbook composes its page into our bounds under the key "richtext"; the panel
+            // around it is the same as every other text panel's.
+            double width = Width, height = PanelHeight;
+            composer.AddInset(ElementBounds.Fixed(0, ContentY, width, height), 3);
+            var textBounds = ElementBounds.Fixed(BookStyle.Pad, ContentY + BookStyle.Pad, width - 2 * BookStyle.Pad - ScrollbarWidth - 4, height - 2 * BookStyle.Pad);
+            composer.BeginClip(textBounds.ForkBoundingParent());
             new GuiHandbookItemStackPage(capi, stack).ComposePage(composer, textBounds, AllStacks, OpenPage);
+            composer.EndClip()
+                .AddVerticalScrollbar(value => ScrollPanel("richtext", value),
+                    ElementBounds.Fixed(width - ScrollbarWidth - 4, ContentY + 4, ScrollbarWidth, height - 8), "richtext-scroll");
+            panels["richtext"] = height - 2 * BookStyle.Pad;
         }
         else
         {
-            composer.AddStaticText(Lang.Get("questline:handbook-loading"), CairoFont.WhiteSmallText(), textBounds, "richtext");
+            AddTextPanel(composer, "richtext", 0, ContentY, Width, PanelHeight,
+                [new RichTextComponent(capi, Lang.Get(pageCode == null ? "questline:reference-empty" : "questline:handbook-loading"), BookStyle.Body().WithColor(BookStyle.Muted))]);
         }
 
-        composer
-            .EndClip()
-            .AddVerticalScrollbar(OnReferenceScroll, scrollbarBounds, "scrollbar")
-            .AddSmallButton(Lang.Get("questline:back"), GoBack, ElementBounds.Fixed(Width - 100, ContentY + ContentHeight - 26, 100, 24));
-    }
-
-    void InitReferenceScroll()
-    {
-        var page = SingleComposer.GetRichtext("richtext");
-        if (page == null) return;
-
-        SingleComposer.GetScrollbar("scrollbar").SetHeights((float)(ContentHeight - 40), (float)page.Bounds.fixedHeight);
-        OnReferenceScroll(0);
-    }
-
-    void OnReferenceScroll(float value)
-    {
-        var page = SingleComposer.GetRichtext("richtext");
-        if (page == null) return;
-
-        page.Bounds.fixedY = ContentY + 3 - value;
-        page.Bounds.CalcWorldBounds();
+        if (history.Count > 0)
+        {
+            composer.AddSmallButton(Lang.Get("questline:back"), GoBack, ElementBounds.Fixed(0, ButtonY, 120, BookStyle.ButtonHeight), EnumButtonStyle.Small, "back");
+        }
     }
 
     /// <summary>

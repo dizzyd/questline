@@ -27,7 +27,7 @@ public class GuiElementQuestCanvas : GuiElement
     public const float NodeSize = 40;
     const float EdgeWidth = 3;
     const float MinZoom = 0.2f, MaxZoom = 3f;
-    const float LabelMinZoom = 0.9f;
+    const float LabelMinZoom = 0.6f;
     const int LabelsPerFrame = 8;
     const int AtlasCell = 64;
     /// <summary>The dialog's own texture is drawn at 50; the background and art go just above it, then edges and frames.</summary>
@@ -131,6 +131,8 @@ public class GuiElementQuestCanvas : GuiElement
         ctxStatic.SetSourceRGBA(0, 0, 0, 0.35);
         ctxStatic.Rectangle(Bounds.drawX, Bounds.drawY, Bounds.OuterWidth, Bounds.OuterHeight);
         ctxStatic.Fill();
+        // Framed like the book's other panels.
+        EmbossRoundRectangleElement(ctxStatic, Bounds, true, 2, 1);
 
         ComposeAtlases();
         LoadArt();

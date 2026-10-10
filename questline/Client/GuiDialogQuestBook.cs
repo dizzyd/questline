@@ -6,18 +6,23 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.MathTools;
+using static questline.Client.BookStyle;
 
 namespace questline.Client;
 
 /// <summary>
 /// The quest book. The Quests tab has the chapter rail, the chapter's tree on the canvas and
-/// the selected quest's details; the Reference tab hosts the vanilla handbook's item pages.
-/// Everything is recomposed when the server sends new state, so each chapter's view is kept
-/// here, not in the canvas.
+/// the selected quest's details; the Reference tab hosts the vanilla handbook's item pages;
+/// the Party tab manages the player's party. Everything is recomposed when the server sends
+/// new state, so each chapter's view is kept here, not in the canvas.
+///
+/// Every tab lays out on one grid: content starts under the tabs at <see cref="ContentY"/>,
+/// columns are <see cref="BookStyle.Gap"/> apart, each panel is an inset, and a panel's
+/// buttons sit in a row under it, aligned to its edges.
 /// </summary>
 public partial class GuiDialogQuestBook : GuiDialog
 {
-    const double Gap = 10, ContentY = 70;
+    const double TabsY = 30, TabsHeight = 26, ContentY = TabsY + TabsHeight + 10;
     const int QuestsTab = 0, ReferenceTab = 1, PartyTab = 2;
 
     readonly QuestClient client;
@@ -26,6 +31,7 @@ public partial class GuiDialogQuestBook : GuiDialog
     readonly Dictionary<string, int[]> picks = [];
 
     GuiElementQuestCanvas canvas;
+    GuiElementChapterRail rail;
     List<QuestDef> canvasQuests = [];
     List<QuestCanvasNode> spikeNodes;
     int tab;
@@ -39,13 +45,17 @@ public partial class GuiDialogQuestBook : GuiDialog
     // within limits, and the canvas gets the rest.
     double ScreenWidth => capi.Render.FrameWidth / RuntimeEnv.GUIScale - 2 * GuiStyle.ElementToDialogPadding - 40;
     double ScreenHeight => capi.Render.FrameHeight / RuntimeEnv.GUIScale - 2 * GuiStyle.ElementToDialogPadding - 40;
-    double RailWidth => Math.Clamp(ScreenWidth * 0.16, 150, 220);
-    double DetailWidth => Math.Clamp(ScreenWidth * 0.27, 240, 340);
+    double RailWidth => Math.Clamp(ScreenWidth * 0.17, 170, 230);
+    double DetailWidth => Math.Clamp(ScreenWidth * 0.28, 260, 360);
     double CanvasWidth => Math.Clamp(ScreenWidth - RailWidth - DetailWidth - 2 * Gap, 240, 1000);
     double Width => RailWidth + Gap + CanvasWidth + Gap + DetailWidth;
     double ContentHeight => Math.Clamp(ScreenHeight - ContentY, 300, 720);
+    /// <summary>The height of a panel with a row of buttons under it.</summary>
+    double PanelHeight => ContentHeight - ButtonHeight - Gap / 2;
+    double ButtonY => ContentY + ContentHeight - ButtonHeight;
 
     public GuiElementQuestCanvas Canvas => canvas;
+    public GuiElementChapterRail Rail => rail;
     public string SelectedChapter => chapterId;
     public string SelectedQuest => questId;
 
@@ -72,8 +82,11 @@ public partial class GuiDialogQuestBook : GuiDialog
         // Saved under the chapter the canvas was showing, which may not be the one about to be shown.
         if (canvas != null && canvasChapter != null) views[canvasChapter] = canvas.View;
         canvasChapter = null;
+        float detailScroll = tab == QuestsTab ? PanelScroll("detail") : 0;
         SingleComposer?.Dispose();
         canvas = null;
+        rail = null;
+        panels.Clear();
 
         var bg = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bg.BothSizing = ElementSizing.FitToChildren;
@@ -90,8 +103,13 @@ public partial class GuiDialogQuestBook : GuiDialog
             .AddShadedDialogBG(bg)
             .AddDialogTitleBar(Lang.Get("questline:book-title"), () => TryClose())
             .BeginChildElements(bg)
-            .AddHorizontalTabs(tabs, ElementBounds.Fixed(0, 30, 400, 24), OnTabClicked,
+            .AddHorizontalTabs(tabs, ElementBounds.Fixed(0, TabsY, Width, TabsHeight), OnTabClicked,
                 CairoFont.WhiteSmallText(), CairoFont.WhiteSmallText().WithWeight(Cairo.FontWeight.Bold), "tabs");
+        // The tabs are measured in the regular weight; room for the bold one on the active tab.
+        composer.GetHorizontalTabs("tabs").unscaledTabPadding = 12;
+
+        // Every tab keeps the row of buttons at the bottom, so the book is the same size on all of them.
+        composer.AddStaticText("", Small(), ElementBounds.Fixed(0, ButtonY, Width, ButtonHeight));
 
         if (tab == QuestsTab) ComposeQuests(composer);
         else if (tab == PartyTab) ComposeParty(composer);
@@ -99,9 +117,8 @@ public partial class GuiDialogQuestBook : GuiDialog
 
         SingleComposer = composer.EndChildElements().Compose();
         SingleComposer.GetHorizontalTabs("tabs").SetValue(tab, false);
-
-        if (tab == ReferenceTab) InitReferenceScroll();
-        else if (tab == QuestsTab) InitDetailScroll();
+        InitPanels();
+        if (detailScroll > 0) RestorePanelScroll("detail", detailScroll);
     }
 
     void OnTabClicked(int dataInt)
@@ -126,22 +143,23 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void ComposeQuests(GuiComposer composer)
     {
-        var railBounds = ElementBounds.Fixed(0, ContentY, RailWidth, ContentHeight);
         var canvasBounds = ElementBounds.Fixed(RailWidth + Gap, ContentY, CanvasWidth, ContentHeight);
 
         if (spikeNodes != null)
         {
             canvas = new GuiElementQuestCanvas(capi, canvasBounds, spikeNodes);
-            composer
-                .AddStaticText("Benchmark tree", CairoFont.WhiteSmallText(), railBounds)
-                .AddInteractiveElement(canvas, "canvas");
+            rail = new GuiElementChapterRail(capi, ElementBounds.Fixed(0, ContentY, RailWidth, ContentHeight),
+                [new("spike", "Benchmark tree", null, 0, spikeNodes.Count)], "spike", _ => { });
+            composer.AddInteractiveElement(rail, "rail").AddInteractiveElement(canvas, "canvas");
             ComposeDetail(composer, null);
             return;
         }
 
         if (!client.Ready || client.Registry.Chapters.Count == 0)
         {
-            composer.AddStaticText(Lang.Get("questline:no-quests"), CairoFont.WhiteSmallText(), ElementBounds.Fixed(0, ContentY, Width, 60));
+            composer.AddInset(ElementBounds.Fixed(0, ContentY, Width, ContentHeight), 3);
+            composer.AddStaticText(Lang.Get("questline:no-quests"), Body().WithColor(Muted),
+                ElementBounds.Fixed(Pad * 2, ContentY + Pad * 2, Math.Min(560, Width - Pad * 4), 80));
             return;
         }
 
@@ -156,15 +174,16 @@ public partial class GuiDialogQuestBook : GuiDialog
                 questlines.Select(ql => text.QuestlineTitle(ql.Id)).ToArray(),
                 questlines.FindIndex(ql => ql.Id == questlineId),
                 (code, _) => { questlineId = code; chapterId = questId = null; Compose(); },
-                ElementBounds.Fixed(0, ContentY, RailWidth, 26), "questlines");
-            railTop += 34;
+                ElementBounds.Fixed(0, ContentY, RailWidth, ButtonHeight), "questlines");
+            railTop += ButtonHeight + Gap / 2;
         }
 
         var chapters = VisibleChapters();
         if (chapterId == null || chapters.All(c => c.Id != chapterId)) chapterId = chapters.FirstOrDefault()?.Id;
 
-        composer.AddRichtext(RailComponents(chapters),
-            ElementBounds.Fixed(0, railTop, RailWidth, ContentHeight - (railTop - ContentY)), "rail");
+        rail = new GuiElementChapterRail(capi, ElementBounds.Fixed(0, railTop, RailWidth, ContentHeight - (railTop - ContentY)),
+            chapters.Select(RailRow).ToList(), chapterId, SelectChapter);
+        composer.AddInteractiveElement(rail, "rail");
 
         var chapter = chapterId == null ? null : client.Registry.ChaptersById[chapterId];
         canvasQuests = chapter?.Quests.Where(client.IsVisible).ToList() ?? [];
@@ -183,25 +202,13 @@ public partial class GuiDialogQuestBook : GuiDialog
         ComposeDetail(composer, client.Registry.Get(questId));
     }
 
-    RichTextComponentBase[] RailComponents(List<ChapterDef> chapters)
+    GuiElementChapterRail.Row RailRow(ChapterDef chapter)
     {
-        var comps = new List<RichTextComponentBase>();
-        foreach (var chapter in chapters)
-        {
-            var quests = chapter.Quests.Where(client.IsVisible).ToList();
-            int done = quests.Count(q => client.StateOf(q.Id) >= QuestState.Claimable);
-            var font = CairoFont.WhiteSmallText();
-            if (chapter.Id == chapterId) font = font.WithWeight(Cairo.FontWeight.Bold).WithColor(GuiStyle.ActiveButtonTextColor);
-
-            if (text.StackFor(chapter.Icon) is { } icon)
-            {
-                comps.Add(new ItemstackTextComponent(capi, icon, 28, 4, EnumFloat.Inline) { ShowStacksize = false, VerticalAlign = EnumVerticalAlign.Middle });
-            }
-            string id = chapter.Id;
-            comps.Add(new LinkTextComponent(capi, text.ChapterTitle(id), font, _ => SelectChapter(id)) { VerticalAlign = EnumVerticalAlign.Middle });
-            comps.Add(new RichTextComponent(capi, $"  {done}/{quests.Count}\n", CairoFont.WhiteDetailText()) { VerticalAlign = EnumVerticalAlign.Middle });
-        }
-        return comps.ToArray();
+        var quests = chapter.Quests.Where(client.IsVisible).ToList();
+        int done = quests.Count(q => client.StateOf(q.Id) >= QuestState.Claimable);
+        // A chapter without an icon of its own shows its first quest's.
+        var icon = text.StackFor(chapter.Icon) ?? text.StackFor(chapter.Quests.Select(q => q.Icon ?? q.Tasks.FirstOrDefault()?.Target).FirstOrDefault(c => c != null));
+        return new(chapter.Id, text.ChapterTitle(chapter.Id), icon == null ? null : new DummySlot(icon), done, quests.Count);
     }
 
     List<QuestCanvasNode> BuildNodes(List<QuestDef> quests)
@@ -294,102 +301,120 @@ public partial class GuiDialogQuestBook : GuiDialog
     void ComposeDetail(GuiComposer composer, QuestDef quest)
     {
         double x = RailWidth + Gap + CanvasWidth + Gap;
-        var textBounds = ElementBounds.Fixed(x + 3, ContentY + 3, DetailWidth - 30, ContentHeight - 46);
-        var clipBounds = textBounds.ForkBoundingParent();
-        var insetBounds = textBounds.FlatCopy().FixedGrow(6).WithFixedOffset(-3, -3);
-        var scrollbarBounds = clipBounds.CopyOffsetedSibling(textBounds.fixedWidth + 6, -3, 0, 6).WithFixedWidth(16);
+        AddTextPanel(composer, "detail", x, ContentY, DetailWidth, PanelHeight, DetailComponents(quest));
+        if (quest == null) return;
 
-        composer
-            .BeginClip(clipBounds)
-                .AddInset(insetBounds, 3)
-                .AddRichtext(DetailComponents(quest), textBounds, "detail")
-            .EndClip()
-            .AddVerticalScrollbar(OnDetailScroll, scrollbarBounds, "detailscroll");
-
-        if (quest != null && client.StateOf(quest.Id) == QuestState.Claimable)
+        var state = client.StateOf(quest.Id);
+        if (state != QuestState.Done)
         {
-            composer.AddSmallButton(Lang.Get("questline:claim"), OnClaim, ElementBounds.Fixed(x + DetailWidth - 110, ContentY + ContentHeight - 30, 110, 26), EnumButtonStyle.Normal, "claim");
+            bool pinned = client.IsPinned(quest.Id);
+            composer.AddSmallButton(Lang.Get(pinned ? "questline:unpin" : "questline:pin"), () =>
+            {
+                if (pinned) client.Unpin(quest.Id);
+                else if (!client.Pin(quest.Id)) capi.TriggerIngameError(this, "questline-pins", Lang.Get("questline:pins-full", ClientSettings.MaxPins));
+                return true;
+            }, ElementBounds.Fixed(x, ButtonY, 120, ButtonHeight), EnumButtonStyle.Small, "pin");
+        }
+        if (state == QuestState.Claimable)
+        {
+            composer.AddSmallButton(Lang.Get("questline:claim"), OnClaim, ElementBounds.Fixed(x + DetailWidth - 120, ButtonY, 120, ButtonHeight), EnumButtonStyle.Normal, "claim");
         }
     }
 
     RichTextComponentBase[] DetailComponents(QuestDef quest)
     {
-        var small = CairoFont.WhiteSmallText();
         if (quest == null)
         {
-            return [new RichTextComponent(capi, Lang.Get("questline:pick-a-quest"), small)];
+            return [new RichTextComponent(capi, Lang.Get("questline:pick-a-quest"), Body().WithColor(Muted))];
         }
 
         var state = client.StateOf(quest.Id);
         var tasks = client.TasksOf(quest);
         var comps = new List<RichTextComponentBase>
         {
-            new RichTextComponent(capi, text.Title(quest.Id) + "\n", CairoFont.WhiteMediumText()),
-            new RichTextComponent(capi, text.State(state) + "\n", CairoFont.WhiteDetailText().WithColor(StateColor(state))),
+            new RichTextComponent(capi, text.Title(quest.Id) + "\n", Title()),
+            new RichTextComponent(capi, text.State(state), Small().WithColor(StateColor(state)).WithWeight(Cairo.FontWeight.Bold)),
         };
-        if (state != QuestState.Done)
-        {
-            bool pinned = client.IsPinned(quest.Id);
-            comps.Add(new LinkTextComponent(capi, Lang.Get(pinned ? "questline:unpin" : "questline:pin") + "\n", CairoFont.WhiteDetailText(), _ =>
-            {
-                if (pinned) client.Unpin(quest.Id);
-                else if (!client.Pin(quest.Id)) capi.TriggerIngameError(this, "questline-pins", Lang.Get("questline:pins-full", ClientSettings.MaxPins));
-            }));
-        }
         if (quest.Mode != QuestMode.Individual)
         {
             string shared = quest.Mode == QuestMode.Server ? (quest.Claim == ClaimMode.First ? "questline:mode-server-first" : "questline:mode-server")
                 : client.InParty ? "questline:mode-party" : "questline:mode-party-alone";
-            comps.Add(new RichTextComponent(capi, Lang.Get(shared) + "\n", CairoFont.WhiteDetailText().WithSlant(Cairo.FontSlant.Italic)));
+            comps.Add(new RichTextComponent(capi, "   " + Lang.Get(shared), MutedSmall()));
         }
+        comps.Add(new RichTextComponent(capi, "\n", Small()));
         if (state == QuestState.Locked && quest.Requires != null)
         {
-            comps.Add(new RichTextComponent(capi, Lang.Get("questline:requires", text.Describe(quest.Requires)) + "\n", CairoFont.WhiteDetailText()));
+            comps.Add(new RichTextComponent(capi, Lang.Get("questline:requires", text.Describe(quest.Requires)) + "\n", MutedSmall()));
         }
-        comps.Add(new ClearFloatTextComponent(capi, 6));
+
+        var page = new List<RichTextComponentBase>();
         if (quest.Page.Count > 0)
         {
-            foreach (var block in quest.Page) AddPageBlock(comps, block, small);
+            foreach (var block in quest.Page) AddPageBlock(page, block, Body());
         }
         else if (text.Description(quest.Id) is { } desc)
         {
-            comps.AddRange(VtmlUtil.Richtextify(capi, desc + "\n", small, OnLinkClicked));
+            page.AddRange(VtmlUtil.Richtextify(capi, desc + "\n", Body(), OnLinkClicked));
+        }
+        if (page.Count > 0)
+        {
+            comps.Add(new RuleTextComponent(capi));
+            comps.AddRange(page);
         }
 
-        comps.Add(new ClearFloatTextComponent(capi, 8));
-        comps.Add(new RichTextComponent(capi, Lang.Get("questline:tasks") + "\n", small.Clone().WithWeight(Cairo.FontWeight.Bold)));
+        comps.Add(new RuleTextComponent(capi));
+        comps.Add(new RichTextComponent(capi, Lang.Get("questline:tasks").ToUpperInvariant() + "\n", Heading()));
         for (int i = 0; i < quest.Tasks.Count; i++)
         {
             var task = quest.Tasks[i];
-            if (task.Type is not ("checkbox" or "kill" or "custom") && text.StackFor(task.Target) is { } stack)
-            {
-                comps.Add(new ItemstackTextComponent(capi, stack, 30, 6, EnumFloat.Inline, OnStackClicked) { ShowStacksize = false, VerticalAlign = EnumVerticalAlign.Middle });
-            }
             bool done = tasks[i] >= task.Count;
-            string progress = task.Type == "checkbox" ? (done ? " ✓" : "") : $"  {tasks[i]}/{task.Count}";
-            comps.Add(new RichTextComponent(capi, text.TaskLine(task) + progress, done ? small.Clone().WithColor(StateColor(QuestState.Done)) : small) { VerticalAlign = EnumVerticalAlign.Middle });
+            AddIconRow(comps, task.Type is "checkbox" or "kill" or "custom" ? null : text.StackFor(task.Target));
+            comps.Add(new RichTextComponent(capi, text.TaskLine(task), done ? Body().WithColor(Good) : Body()) { VerticalAlign = EnumVerticalAlign.Middle });
 
-            int taskIndex = i;
-            if (task.Type == "checkbox" && !done && state is QuestState.Available or QuestState.InProgress)
+            if (task.Type == "checkbox")
             {
-                comps.Add(new LinkTextComponent(capi, " " + Lang.Get("questline:mark-done"), small, _ => client.Check(quest.Id, taskIndex)));
+                int taskIndex = i;
+                if (done) comps.Add(new RichTextComponent(capi, "  ✓", Body().WithColor(Good)) { VerticalAlign = EnumVerticalAlign.Middle });
+                else if (state is QuestState.Available or QuestState.InProgress)
+                {
+                    comps.Add(new LinkTextComponent(capi, "   " + Lang.Get("questline:mark-done"), Link(), _ => client.Check(quest.Id, taskIndex)) { VerticalAlign = EnumVerticalAlign.Middle });
+                }
             }
-            comps.Add(new ClearFloatTextComponent(capi, 2));
+            else
+            {
+                comps.Add(new RichTextComponent(capi, $"   {tasks[i]} / {task.Count}", done ? Small().WithColor(Good) : MutedSmall()) { VerticalAlign = EnumVerticalAlign.Middle });
+            }
+            comps.Add(new ClearFloatTextComponent(capi, 4));
         }
 
         if (quest.Rewards.Count > 0)
         {
-            comps.Add(new ClearFloatTextComponent(capi, 8));
-            comps.Add(new RichTextComponent(capi, Lang.Get("questline:rewards") + "\n", small.Clone().WithWeight(Cairo.FontWeight.Bold)));
+            comps.Add(new RuleTextComponent(capi));
+            comps.Add(new RichTextComponent(capi, Lang.Get("questline:rewards").ToUpperInvariant() + "\n", Heading()));
             int choiceIndex = 0;
             foreach (var reward in quest.Rewards)
             {
                 if (reward.Type == "choice") AddChoice(comps, quest, reward, choiceIndex++);
-                else AddReward(comps, reward, small);
+                else AddReward(comps, reward);
             }
         }
 
         return comps.ToArray();
+    }
+
+    const double IconRowSize = 26;
+
+    /// <summary>A row's leading icon, or the same space left blank, so every row's text lines up.</summary>
+    void AddIconRow(List<RichTextComponentBase> comps, ItemStack stack)
+    {
+        if (stack != null)
+        {
+            comps.Add(new ItemstackTextComponent(capi, stack, IconRowSize, 8, EnumFloat.Inline, OnStackClicked) { ShowStacksize = false, VerticalAlign = EnumVerticalAlign.Middle });
+        }
+        else
+        {
+            comps.Add(new RichTextComponent(capi, " ", Body()) { PaddingLeft = IconRowSize + 4, VerticalAlign = EnumVerticalAlign.Middle });
+        }
     }
 
     /// <summary>One block of a quest's page. A block the client can't show is skipped; the server log says why.</summary>
@@ -399,6 +424,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         {
             case "text" when block.Lang != null:
                 comps.AddRange(VtmlUtil.Richtextify(capi, text.Get(block.Lang) + "\n", font, OnLinkClicked));
+                comps.Add(new ClearFloatTextComponent(capi, 6));
                 break;
 
             case "image" when block.Src != null:
@@ -407,8 +433,9 @@ public partial class GuiDialogQuestBook : GuiDialog
                 comps.Add(image);
                 if (block.Caption != null)
                 {
-                    comps.Add(new RichTextComponent(capi, text.Get(block.Caption) + "\n", CairoFont.WhiteDetailText().WithSlant(Cairo.FontSlant.Italic)));
+                    comps.Add(new RichTextComponent(capi, text.Get(block.Caption) + "\n", MutedSmall().WithSlant(Cairo.FontSlant.Italic).WithOrientation(EnumTextOrientation.Center)));
                 }
+                comps.Add(new ClearFloatTextComponent(capi, 6));
                 break;
 
             case "items":
@@ -419,7 +446,7 @@ public partial class GuiDialogQuestBook : GuiDialog
                         comps.Add(new ItemstackTextComponent(capi, stack, 36, 4, EnumFloat.Inline, OnStackClicked));
                     }
                 }
-                comps.Add(new ClearFloatTextComponent(capi, 4));
+                comps.Add(new ClearFloatTextComponent(capi, 6));
                 break;
 
             case "recipe" when text.StackFor(block.Output) is { } output:
@@ -428,41 +455,34 @@ public partial class GuiDialogQuestBook : GuiDialog
                     .ToArray();
                 if (recipes.Length == 0) break;
                 comps.Add(new SlideshowGridRecipeTextComponent(capi, recipes, 40, EnumFloat.None, OnStackClicked, AllStacks));
-                comps.Add(new ClearFloatTextComponent(capi, 4));
+                comps.Add(new ClearFloatTextComponent(capi, 6));
                 break;
         }
     }
 
-    void AddReward(List<RichTextComponentBase> comps, RewardDef reward, CairoFont font)
+    void AddReward(List<RichTextComponentBase> comps, RewardDef reward)
     {
-        if (reward.Type == "item" && text.StackFor(reward.Item, reward.Count) is { } stack)
-        {
-            comps.Add(new ItemstackTextComponent(capi, stack, 30, 6, EnumFloat.Inline, OnStackClicked) { VerticalAlign = EnumVerticalAlign.Middle });
-        }
-        comps.Add(new RichTextComponent(capi, text.RewardLine(reward), font) { VerticalAlign = EnumVerticalAlign.Middle });
-        comps.Add(new ClearFloatTextComponent(capi, 2));
+        AddIconRow(comps, reward.Type == "item" ? text.StackFor(reward.Item, reward.Count) : null);
+        comps.Add(new RichTextComponent(capi, text.RewardLine(reward), Body()) { VerticalAlign = EnumVerticalAlign.Middle });
+        comps.Add(new ClearFloatTextComponent(capi, 4));
     }
 
     void AddChoice(List<RichTextComponentBase> comps, QuestDef quest, RewardDef choice, int choiceIndex)
     {
-        comps.Add(new RichTextComponent(capi, Lang.Get("questline:pick-one") + "\n", CairoFont.WhiteDetailText()));
+        comps.Add(new RichTextComponent(capi, Lang.Get("questline:pick-one") + "\n", MutedSmall()));
         int picked = Picks(quest)[choiceIndex];
         for (int j = 0; j < choice.Options.Count; j++)
         {
             var option = choice.Options[j];
             int optionIndex = j;
-            if (text.StackFor(option.Item, option.Count) is { } stack)
-            {
-                comps.Add(new ItemstackTextComponent(capi, stack, 30, 6, EnumFloat.Inline, OnStackClicked) { VerticalAlign = EnumVerticalAlign.Middle });
-            }
-            var font = CairoFont.WhiteSmallText();
-            if (picked == j) font = font.WithWeight(Cairo.FontWeight.Bold).WithColor(GuiStyle.ActiveButtonTextColor);
+            AddIconRow(comps, text.StackFor(option.Item, option.Count));
+            var font = picked == j ? Body().WithWeight(Cairo.FontWeight.Bold).WithColor(Accent) : Body();
             comps.Add(new LinkTextComponent(capi, (picked == j ? "● " : "○ ") + text.RewardLine(option), font, _ =>
             {
                 Picks(quest)[choiceIndex] = optionIndex;
                 Compose();
             }) { VerticalAlign = EnumVerticalAlign.Middle });
-            comps.Add(new ClearFloatTextComponent(capi, 2));
+            comps.Add(new ClearFloatTextComponent(capi, 4));
         }
     }
 
@@ -489,29 +509,6 @@ public partial class GuiDialogQuestBook : GuiDialog
         }
         client.Claim(quest.Id, p);
         return true;
-    }
-
-    static double[] StateColor(QuestState state) => state switch
-    {
-        QuestState.Done => [0.45, 0.85, 0.45, 1],
-        QuestState.Claimable => [1.0, 0.8, 0.25, 1],
-        QuestState.InProgress => [0.5, 0.7, 1.0, 1],
-        QuestState.Available => [0.9, 0.85, 0.7, 1],
-        _ => [0.6, 0.6, 0.6, 1],
-    };
-
-    void InitDetailScroll()
-    {
-        var detail = SingleComposer.GetRichtext("detail");
-        if (detail == null) return;
-        SingleComposer.GetScrollbar("detailscroll").SetHeights((float)(ContentHeight - 46), (float)detail.Bounds.fixedHeight);
-    }
-
-    void OnDetailScroll(float value)
-    {
-        var detail = SingleComposer.GetRichtext("detail");
-        detail.Bounds.fixedY = ContentY + 3 - value;
-        detail.Bounds.CalcWorldBounds();
     }
 
     #endregion

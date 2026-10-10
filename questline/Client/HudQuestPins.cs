@@ -9,7 +9,7 @@ namespace questline.Client;
 /// <summary>The HUD tracker: each pinned quest's title and task progress, below the minimap.</summary>
 public class HudQuestPins : HudElement
 {
-    const double Width = 230;
+    const double Width = 240;
 
     readonly QuestClient client;
     readonly QuestText text;
@@ -54,26 +54,30 @@ public class HudQuestPins : HudElement
 
     RichTextComponentBase[] Components()
     {
-        var title = CairoFont.WhiteSmallText().WithWeight(Cairo.FontWeight.Bold);
-        var line = CairoFont.WhiteDetailText();
         var comps = new List<RichTextComponentBase>();
-
-        foreach (var quest in Shown)
+        for (int q = 0; q < Shown.Count; q++)
         {
+            var quest = Shown[q];
+            if (q > 0) comps.Add(new ClearFloatTextComponent(capi, 8));
+
             var state = client.StateOf(quest.Id);
-            string mark = state == QuestState.Claimable ? "  " + Lang.Get("questline:state-claimable") : "";
-            comps.Add(new RichTextComponent(capi, text.Title(quest.Id) + mark + "\n", title));
+            comps.Add(new RichTextComponent(capi, text.Title(quest.Id), BookStyle.Body().WithWeight(Cairo.FontWeight.Bold)));
+            if (state == QuestState.Claimable)
+            {
+                comps.Add(new RichTextComponent(capi, "  " + Lang.Get("questline:state-claimable"), BookStyle.Small().WithColor(BookStyle.StateColor(state))));
+            }
+            comps.Add(new RichTextComponent(capi, "\n", BookStyle.Small()));
 
             var tasks = client.TasksOf(quest);
             for (int i = 0; i < quest.Tasks.Count; i++)
             {
                 var task = quest.Tasks[i];
                 bool done = tasks[i] >= task.Count;
-                string progress = task.Type == "checkbox" ? "" : $"  {tasks[i]}/{task.Count}";
-                var font = done ? line.Clone().WithColor([0.45, 0.85, 0.45, 1]) : line;
-                comps.Add(new RichTextComponent(capi, (done ? "✓ " : "• ") + text.TaskLine(task) + progress + "\n", font));
+                var font = done ? BookStyle.Small().WithColor(BookStyle.Good) : BookStyle.Small();
+                comps.Add(new RichTextComponent(capi, (done ? "✓ " : "• ") + text.TaskLine(task), font));
+                if (task.Type != "checkbox") comps.Add(new RichTextComponent(capi, $"  {tasks[i]}/{task.Count}", done ? font : BookStyle.MutedSmall()));
+                comps.Add(new RichTextComponent(capi, "\n", font));
             }
-            comps.Add(new ClearFloatTextComponent(capi, 4));
         }
         return comps.ToArray();
     }

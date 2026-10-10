@@ -99,6 +99,34 @@ namespace Questline.Tests
             Log(await Shot.Take("questline-book-page.png"));
         }
 
+        /// <summary>Photographs the book's screens in the states a layout has to cope with, for review.</summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task Screens()
+        {
+            await OnClient();
+            Book.SelectQuest("qltest:hunt");
+            await Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(20);
+            Log(await Shot.Take("questline-screen-locked.png"));
+
+            Book.SelectQuest("qltest:trade-sticks");
+            await Frames.Wait(20);
+            Log(await Shot.Take("questline-screen-choice.png"));
+
+            Book.SelectChapter("qltest:together");
+            await Frames.Wait(20);
+            Log(await Shot.Take("questline-screen-nothing-selected.png"));
+
+            Book.SelectTab(1);
+            await Frames.Wait(20);
+            Log(await Shot.Take("questline-screen-reference-empty.png"));
+
+            Book.SelectTab(2);
+            await Frames.Wait(20);
+            Log(await Shot.Take("questline-screen-no-party.png"));
+            Book.TryClose();
+        }
+
         [VsTest(TimeoutMs = 30000)]
         public async Task ChapterArtAndShapesDraw()
         {

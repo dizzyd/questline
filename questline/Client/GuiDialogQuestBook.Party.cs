@@ -1,33 +1,41 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Config;
+using static questline.Client.BookStyle;
 
 namespace questline.Client;
 
-/// <summary>The Party tab: make a party, invite players, answer invites, leave, kick.</summary>
+/// <summary>
+/// The Party tab: the party and its members on the left, invites on the right, each panel with
+/// its own buttons in the row beneath it.
+/// </summary>
 public partial class GuiDialogQuestBook
 {
+    string inviteUid;
+
+    double PartyLeftWidth => Math.Round((Width - Gap) * 0.55);
+    double PartyRightX => PartyLeftWidth + Gap;
+    double PartyRightWidth => Width - PartyRightX;
+
     void ComposeParty(GuiComposer composer)
     {
         var party = client.Party;
-        // The full width, so the book keeps its size from tab to tab; the text keeps to a readable column.
-        composer.AddInset(ElementBounds.Fixed(0, ContentY, Width, ContentHeight - 40), 3);
-        var textBounds = ElementBounds.Fixed(8, ContentY + 8, System.Math.Min(Width - 16, 560), ContentHeight - 56);
-        composer.AddRichtext(PartyComponents(), textBounds, "party");
+        AddTextPanel(composer, "party", 0, ContentY, PartyLeftWidth, PanelHeight, PartyComponents());
+        AddTextPanel(composer, "invites", PartyRightX, ContentY, PartyRightWidth, PanelHeight, InviteComponents());
 
         if (party is not { Enabled: true }) return;
 
-        double buttonY = ContentY + ContentHeight - 30;
         if (!client.InParty)
         {
             composer.AddSmallButton(Lang.Get("questline:party-create"), () => { client.PartyAction("create"); return true; },
-                ElementBounds.Fixed(0, buttonY, 160, 26), EnumButtonStyle.Normal, "party-create");
+                ElementBounds.Fixed(0, ButtonY, 160, ButtonHeight), EnumButtonStyle.Normal, "party-create");
             return;
         }
 
         composer.AddSmallButton(Lang.Get("questline:party-leave"), () => { client.PartyAction("leave"); return true; },
-            ElementBounds.Fixed(0, buttonY, 140, 26), EnumButtonStyle.Normal, "party-leave");
+            ElementBounds.Fixed(0, ButtonY, 140, ButtonHeight), EnumButtonStyle.Small, "party-leave");
 
         if (party.Owner != capi.World.Player.PlayerUID) return;
 
@@ -35,67 +43,86 @@ public partial class GuiDialogQuestBook
         var candidates = capi.World.AllOnlinePlayers.Where(p => !members.Contains(p.PlayerUID)).ToList();
         if (candidates.Count == 0) return;
 
-        inviteUid ??= candidates[0].PlayerUID;
-        int index = System.Math.Max(0, candidates.FindIndex(p => p.PlayerUID == inviteUid));
+        int index = Math.Max(0, candidates.FindIndex(p => p.PlayerUID == inviteUid));
         inviteUid = candidates[index].PlayerUID;
+        const double button = 100;
         composer
             .AddDropDown(candidates.Select(p => p.PlayerUID).ToArray(), candidates.Select(p => p.PlayerName).ToArray(), index,
-                (uid, _) => inviteUid = uid, ElementBounds.Fixed(160, buttonY, 180, 26), "party-invitee")
+                (uid, _) => inviteUid = uid, ElementBounds.Fixed(PartyRightX, ButtonY, PartyRightWidth - button - Gap / 2, ButtonHeight), "party-invitee")
             .AddSmallButton(Lang.Get("questline:party-invite"), () => { client.PartyAction("invite", inviteUid); return true; },
-                ElementBounds.Fixed(350, buttonY, 100, 26), EnumButtonStyle.Normal, "party-invite");
+                ElementBounds.Fixed(Width - button, ButtonY, button, ButtonHeight), EnumButtonStyle.Normal, "party-invite");
     }
-
-    string inviteUid;
 
     RichTextComponentBase[] PartyComponents()
     {
-        var small = CairoFont.WhiteSmallText();
-        var detail = CairoFont.WhiteDetailText();
         var party = client.Party;
-        var comps = new List<RichTextComponentBase>();
-
-        if (party == null) return [new RichTextComponent(capi, Lang.Get("questline:party-waiting"), small)];
-        if (!party.Enabled) return [new RichTextComponent(capi, Lang.Get("questline:party-off"), small)];
+        if (party == null) return [new RichTextComponent(capi, Lang.Get("questline:party-waiting"), Body().WithColor(Muted))];
+        if (!party.Enabled) return [new RichTextComponent(capi, Lang.Get("questline:party-off"), Body().WithColor(Muted))];
 
         if (!client.InParty)
         {
-            comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-none") + "\n\n", small));
-        }
-        else
-        {
-            comps.Add(new RichTextComponent(capi, party.Name + "\n", CairoFont.WhiteMediumText()));
-            comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-shares") + "\n\n", detail));
-            bool owner = party.Owner == capi.World.Player.PlayerUID;
-            foreach (var member in party.Members)
-            {
-                string line = member.Name + (member.Uid == party.Owner ? " " + Lang.Get("questline:party-owner") : "");
-                comps.Add(new RichTextComponent(capi, (member.Online ? "● " : "○ ") + line, small));
-                if (owner && member.Uid != party.Owner)
-                {
-                    string uid = member.Uid;
-                    comps.Add(new LinkTextComponent(capi, "  " + Lang.Get("questline:party-kick"), small, _ => client.PartyAction("kick", uid)));
-                }
-                comps.Add(new RichTextComponent(capi, "\n", small));
-            }
-            comps.Add(new RichTextComponent(capi, "\n", small));
+            return
+            [
+                new RichTextComponent(capi, Lang.Get("questline:party-none-title") + "\n", Title()),
+                new RichTextComponent(capi, Lang.Get("questline:party-none"), Body().WithColor(Muted)),
+            ];
         }
 
-        if (party.Invites.Count > 0)
+        bool owner = party.Owner == capi.World.Player.PlayerUID;
+        var comps = new List<RichTextComponentBase>
         {
-            comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-invites") + "\n", small.Clone().WithWeight(Cairo.FontWeight.Bold)));
-            foreach (var invite in party.Invites)
+            new RichTextComponent(capi, party.Name + "\n", Title()),
+            new RichTextComponent(capi, Lang.Get("questline:party-shares") + "\n", MutedSmall()),
+            new RuleTextComponent(capi),
+            new RichTextComponent(capi, Lang.Get("questline:party-members", party.Members.Count).ToUpperInvariant() + "\n", Heading()),
+        };
+        foreach (var member in party.Members)
+        {
+            comps.Add(new RichTextComponent(capi, "● ", Body().WithColor(member.Online ? Good : Muted)) { VerticalAlign = EnumVerticalAlign.Middle });
+            comps.Add(new RichTextComponent(capi, member.Name, Body()) { VerticalAlign = EnumVerticalAlign.Middle });
+            if (member.Uid == party.Owner)
             {
-                string id = invite.PartyId;
-                comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-invite-from", invite.PartyName, invite.OwnerName), small));
-                if (!client.InParty)
-                {
-                    comps.Add(new LinkTextComponent(capi, "  " + Lang.Get("questline:party-accept"), small, _ => client.PartyAction("accept", id)));
-                }
-                comps.Add(new LinkTextComponent(capi, "  " + Lang.Get("questline:party-decline"), small, _ => client.PartyAction("decline", id)));
-                comps.Add(new RichTextComponent(capi, "\n", small));
+                comps.Add(new RichTextComponent(capi, "   " + Lang.Get("questline:party-owner"), MutedSmall()) { VerticalAlign = EnumVerticalAlign.Middle });
             }
+            else if (owner)
+            {
+                string uid = member.Uid;
+                comps.Add(new LinkTextComponent(capi, "   " + Lang.Get("questline:party-kick"), Link(), _ => client.PartyAction("kick", uid)) { VerticalAlign = EnumVerticalAlign.Middle });
+            }
+            comps.Add(new ClearFloatTextComponent(capi, 6));
+        }
+        return comps.ToArray();
+    }
+
+    RichTextComponentBase[] InviteComponents()
+    {
+        var party = client.Party;
+        var comps = new List<RichTextComponentBase>
+        {
+            new RichTextComponent(capi, Lang.Get("questline:party-invites").ToUpperInvariant() + "\n", Heading()),
+        };
+        if (party is not { Enabled: true }) return comps.ToArray();
+
+        if (party.Invites.Count == 0)
+        {
+            comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-no-invites") + "\n", MutedSmall()));
+        }
+        foreach (var invite in party.Invites)
+        {
+            string id = invite.PartyId;
+            comps.Add(new RichTextComponent(capi, invite.PartyName + "\n", Body().WithWeight(Cairo.FontWeight.Bold)));
+            comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-invite-from", invite.OwnerName) + "\n", MutedSmall()));
+            if (!client.InParty) comps.Add(new LinkTextComponent(capi, Lang.Get("questline:party-accept") + "     ", Link(), _ => client.PartyAction("accept", id)));
+            comps.Add(new LinkTextComponent(capi, Lang.Get("questline:party-decline") + "\n", Link(), _ => client.PartyAction("decline", id)));
+            comps.Add(new ClearFloatTextComponent(capi, 10));
         }
 
+        if (client.InParty && party.Owner == capi.World.Player.PlayerUID)
+        {
+            comps.Add(new RuleTextComponent(capi));
+            comps.Add(new RichTextComponent(capi, Lang.Get("questline:party-invite-heading").ToUpperInvariant() + "\n", Heading()));
+            comps.Add(new RichTextComponent(capi, Lang.Get(capi.World.AllOnlinePlayers.Length > party.Members.Count ? "questline:party-invite-hint" : "questline:party-invite-nobody"), MutedSmall()));
+        }
         return comps.ToArray();
     }
 }

@@ -177,7 +177,8 @@ public partial class QuestEngine
 
     void SendParty(string playerUid)
     {
-        if (api.World.PlayerByUid(playerUid) is not IServerPlayer { ConnectionState: EnumClientState.Playing } player) return;
+        // Connected as well as playing: when PlayerNowPlaying fires the state hasn't changed yet.
+        if (api.World.PlayerByUid(playerUid) is not IServerPlayer { ConnectionState: EnumClientState.Playing or EnumClientState.Connected } player) return;
 
         var party = PartyOf(playerUid);
         var packet = new PartyPacket
