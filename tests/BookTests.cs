@@ -100,6 +100,31 @@ namespace Questline.Tests
         }
 
         [VsTest(TimeoutMs = 30000)]
+        public async Task ChapterArtAndShapesDraw()
+        {
+            await OnServer();
+            Assert.True(Engine.Problems.Any(p => p.StartsWith("qltest:gallery:") && p.Contains("nowhere.png")), "a missing art image is reported");
+
+            await OnClient();
+            Book.SelectChapter("qltest:gallery");
+            await Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(30);
+
+            var canvas = Book.Canvas;
+            Assert.True(canvas.HasBackground, "the chapter background loaded");
+            // An image, a label and two arrows; the image whose file is missing is skipped.
+            Assert.Equal(4, canvas.ArtReady);
+            Assert.Equal(NodeShape.Gear, canvas.Nodes.Single(n => n.Id == "qltest:shape-gear").Shape);
+
+            // A bigger node is a bigger target: just inside its edge still hits it.
+            int gear = canvas.Nodes.ToList().FindIndex(n => n.Id == "qltest:shape-gear");
+            var (gx, gy) = canvas.ScreenPosOf(gear);
+            float edge = GuiElementQuestCanvas.NodeSize * 1.6f / 2 * canvas.Zoom * Vintagestory.API.Config.RuntimeEnv.GUIScale;
+            Assert.Equal(gear, canvas.NodeAt(gx + edge - 2, gy));
+            Log(await Shot.Take("questline-gallery.png"));
+        }
+
+        [VsTest(TimeoutMs = 30000)]
         public async Task PinnedQuestsShowOnTheHudUntilClaimed()
         {
             await OnClient();

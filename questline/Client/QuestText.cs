@@ -10,12 +10,16 @@ namespace questline.Client;
 /// <summary>Player-facing words for quests: titles, task lines, reward names and requirements.</summary>
 public class QuestText(ICoreClientAPI capi, QuestClient client)
 {
-    public string Title(string questId) => Lang.Get(questId + "-title");
+    /// <summary>A lang entry. The editor's own text, sent with the definitions, comes first.</summary>
+    public string Get(string key) => client.Registry?.Text.TryGetValue(key, out var value) == true ? value : Lang.Get(key);
 
-    public string Description(string questId) =>
-        Lang.HasTranslation(questId + "-desc", true, false) ? Lang.Get(questId + "-desc") : null;
+    public bool Has(string key) => client.Registry?.Text.ContainsKey(key) == true || Lang.HasTranslation(key, true, false);
 
-    public string ChapterTitle(string chapterId) => Lang.Get(chapterId + "-title");
+    public string Title(string questId) => Get(questId + "-title");
+
+    public string Description(string questId) => Has(questId + "-desc") ? Get(questId + "-desc") : null;
+
+    public string ChapterTitle(string chapterId) => Get(chapterId + "-title");
 
     public string QuestlineTitle(string questlineId) => Lang.Get(questlineId + "-title");
 
@@ -32,7 +36,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
     }
 
     /// <summary>A stage or custom key's own lang entry (<c>&lt;name&gt;-title</c>) if it has one, or the name itself.</summary>
-    static string Named(string name) => Lang.HasTranslation(name + "-title", true, false) ? Lang.Get(name + "-title") : name;
+    string Named(string name) => Has(name + "-title") ? Get(name + "-title") : name;
 
     public string TaskLine(TaskDef task)
     {

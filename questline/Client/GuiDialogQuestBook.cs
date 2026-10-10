@@ -5,6 +5,7 @@ using questline.Model;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
+using Vintagestory.API.MathTools;
 
 namespace questline.Client;
 
@@ -29,6 +30,8 @@ public partial class GuiDialogQuestBook : GuiDialog
     List<QuestCanvasNode> spikeNodes;
     int tab;
     string questlineId, chapterId, questId;
+    // The chapter the canvas is showing, whose view is kept when the book recomposes.
+    string canvasChapter;
 
     public override string ToggleKeyCombinationCode => "questline";
 
@@ -66,7 +69,9 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void Compose()
     {
-        if (canvas != null && chapterId != null && spikeNodes == null) views[chapterId] = canvas.View;
+        // Saved under the chapter the canvas was showing, which may not be the one about to be shown.
+        if (canvas != null && canvasChapter != null) views[canvasChapter] = canvas.View;
+        canvasChapter = null;
         SingleComposer?.Dispose();
         canvas = null;
 
@@ -165,12 +170,14 @@ public partial class GuiDialogQuestBook : GuiDialog
         canvasQuests = chapter?.Quests.Where(client.IsVisible).ToList() ?? [];
         if (questId != null && canvasQuests.All(q => q.Id != questId)) questId = null;
 
-        canvas = new GuiElementQuestCanvas(capi, canvasBounds, BuildNodes(canvasQuests))
+        var background = chapter?.Background == null ? null : new AssetLocation(PageBlock.TexturePath(chapter.Background));
+        canvas = new GuiElementQuestCanvas(capi, canvasBounds, BuildNodes(canvasQuests), BuildArt(chapter), background)
         {
             SelectedIndex = canvasQuests.FindIndex(q => q.Id == questId),
             OnNodeClicked = i => SelectQuest(canvasQuests[i].Id),
         };
         if (chapterId != null && views.TryGetValue(chapterId, out var view)) canvas.View = view;
+        canvasChapter = chapterId;
         composer.AddInteractiveElement(canvas, "canvas");
 
         ComposeDetail(composer, client.Registry.Get(questId));
@@ -208,9 +215,58 @@ public partial class GuiDialogQuestBook : GuiDialog
             Y = q.Pos.Length > 1 ? q.Pos[1] : 0,
             Icon = text.StackFor(q.Icon ?? q.Tasks.FirstOrDefault()?.Target) is { } stack ? new DummySlot(stack) : null,
             State = client.StateOf(q.Id),
+            Shape = q.Shape,
+            Size = Math.Clamp(q.Size, 0.5f, 3f),
             // Only prerequisites drawn in this chapter get a line.
             Prereqs = q.Requires?.QuestIds().Where(index.ContainsKey).Select(id => index[id]).Distinct().ToArray() ?? [],
         }).ToList();
+    }
+
+    List<CanvasArt> BuildArt(ChapterDef chapter)
+    {
+        var list = new List<CanvasArt>();
+        foreach (var a in chapter?.Art ?? [])
+        {
+            int color = ArtColor(a.Color, a.Type == "arrow" ? ColorUtil.ColorFromRgba(200, 180, 140, 255) : ColorUtil.ColorFromRgba(235, 225, 200, 255));
+            var item = new CanvasArt
+            {
+                Type = a.Type,
+                X = a.Pos.ElementAtOrDefault(0),
+                Y = a.Pos.ElementAtOrDefault(1),
+                ToX = a.To?.ElementAtOrDefault(0) ?? 0,
+                ToY = a.To?.ElementAtOrDefault(1) ?? 0,
+                Width = a.Size.ElementAtOrDefault(0),
+                Height = a.Size.ElementAtOrDefault(1),
+                Src = a.Src == null ? null : new AssetLocation(PageBlock.TexturePath(a.Src)),
+                Text = a.Text == null ? null : text.Get(a.Text),
+                Scale = Math.Clamp(a.Scale, 0.5f, 4f),
+                Color = color,
+                TextColor = ArtRgba(a.Color, [0.92, 0.88, 0.78, 1]),
+                LineWidth = Math.Clamp(a.Width, 1, 20),
+            };
+            if (a.Type is "image" or "text" || a.To != null) list.Add(item);
+        }
+        return list;
+    }
+
+    /// <summary>#rrggbb or #rrggbbaa as the mesh colour the canvas wants, or <paramref name="fallback"/>.</summary>
+    static int ArtColor(string hex, int fallback) => ArtRgba(hex, null) is { } c
+        ? ColorUtil.ColorFromRgba((int)(c[0] * 255), (int)(c[1] * 255), (int)(c[2] * 255), (int)(c[3] * 255))
+        : fallback;
+
+    /// <summary>#rrggbb or #rrggbbaa as RGBA from 0 to 1, or <paramref name="fallback"/>.</summary>
+    static double[] ArtRgba(string hex, double[] fallback)
+    {
+        if (string.IsNullOrEmpty(hex) || hex[0] != '#' || hex.Length is not (7 or 9)) return fallback;
+        try
+        {
+            var c = ColorUtil.Hex2Doubles(hex);
+            return [c[0], c[1], c[2], c.Length > 3 ? c[3] : 1];
+        }
+        catch (Exception)
+        {
+            return fallback;
+        }
     }
 
     public void SelectChapter(string id)
@@ -342,7 +398,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         switch (block.Type)
         {
             case "text" when block.Lang != null:
-                comps.AddRange(VtmlUtil.Richtextify(capi, Lang.Get(block.Lang) + "\n", font, OnLinkClicked));
+                comps.AddRange(VtmlUtil.Richtextify(capi, text.Get(block.Lang) + "\n", font, OnLinkClicked));
                 break;
 
             case "image" when block.Src != null:
@@ -351,7 +407,7 @@ public partial class GuiDialogQuestBook : GuiDialog
                 comps.Add(image);
                 if (block.Caption != null)
                 {
-                    comps.Add(new RichTextComponent(capi, Lang.Get(block.Caption) + "\n", CairoFont.WhiteDetailText().WithSlant(Cairo.FontSlant.Italic)));
+                    comps.Add(new RichTextComponent(capi, text.Get(block.Caption) + "\n", CairoFont.WhiteDetailText().WithSlant(Cairo.FontSlant.Italic)));
                 }
                 break;
 

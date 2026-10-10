@@ -43,5 +43,11 @@
     "server-goal-title": "Server goal",
     "server-race-title": "First come",
     "teamwork-title": "Teamwork (reported by the tests)",
-    "townwork-title": "Town work (reported by the tests)"
+    "townwork-title": "Town work (reported by the tests)",
+    "gallery-title": "Gallery",
+    "gallery-label": "The road to the gear",
+    "shape-square-title": "A square",
+    "shape-circle-title": "A circle",
+    "shape-hexagon-title": "A hexagon",
+    "shape-gear-title": "A milestone with a long title"
 }

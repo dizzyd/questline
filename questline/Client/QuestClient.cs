@@ -104,7 +104,7 @@ public class QuestClient
             // A change, not the first full sync, finishing a quest gets a toast.
             if (Settings.Toasts && !packet.Full && entry.State >= QuestState.Claimable && StateOf(entry.QuestId) < QuestState.Claimable)
             {
-                capi.TriggerIngameDiscovery(this, "questline-complete", Lang.Get("questline:toast-complete", Lang.Get(entry.QuestId + "-title")));
+                capi.TriggerIngameDiscovery(this, "questline-complete", Lang.Get("questline:toast-complete", TextOf(entry.QuestId + "-title")));
             }
             states[entry.QuestId] = entry;
         }
@@ -125,6 +125,9 @@ public class QuestClient
         Party = packet;
         Changed?.Invoke();
     }
+
+    /// <summary>A lang entry, from the editor's text if the server sent it one.</summary>
+    public string TextOf(string key) => Registry?.Text.TryGetValue(key, out var value) == true ? value : Lang.Get(key);
 
     public QuestState StateOf(string questId) => states.TryGetValue(questId, out var e) ? e.State : QuestState.Locked;
 

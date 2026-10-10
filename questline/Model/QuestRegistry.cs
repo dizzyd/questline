@@ -14,6 +14,11 @@ public class QuestRegistry
 
     public List<QuestlineDef> Questlines = [];
     public List<ChapterDef> Chapters = [];
+    /// <summary>
+    /// Lang entries written in the editor, in the server's language, for clients to use before
+    /// the installed lang files. Empty unless someone has edited quests on this server.
+    /// </summary>
+    public Dictionary<string, string> Text = [];
 
     [JsonIgnore] public Dictionary<string, QuestDef> Quests { get; private set; } = [];
     [JsonIgnore] public Dictionary<string, ChapterDef> ChaptersById { get; private set; } = [];

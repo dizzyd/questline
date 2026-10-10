@@ -36,6 +36,17 @@ public enum QuestMode
     Server
 }
 
+/// <summary>The outline of a quest's frame on the canvas.</summary>
+[JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
+public enum NodeShape
+{
+    Square,
+    Circle,
+    Hexagon,
+    /// <summary>For milestones.</summary>
+    Gear
+}
+
 /// <summary>Who may claim a server quest.</summary>
 [JsonConverter(typeof(StringEnumConverter), typeof(CamelCaseNamingStrategy))]
 public enum ClaimMode
@@ -71,6 +82,10 @@ public class ChapterDef
     public int Order;
     public string[] RequiresMod = [];
     public ChapterVisibility Visibility = ChapterVisibility.Always;
+    /// <summary>A texture under assets/&lt;domain&gt;/textures/, drawn behind the whole canvas, e.g. mypack:questline/parchment.png.</summary>
+    public string Background;
+    /// <summary>Images, labels and arrows placed on the chapter's grid, behind the quests.</summary>
+    public List<ArtDef> Art = [];
     public List<QuestDef> Quests = [];
     /// <summary>Old quest id to new, so a rename in a pack update keeps players' progress.</summary>
     public Dictionary<string, string> Aliases = [];
@@ -81,6 +96,9 @@ public class QuestDef
     public string Id;
     public float[] Pos = [0, 0];
     public string Icon;
+    public NodeShape Shape = NodeShape.Square;
+    /// <summary>The frame's size, 1 being normal. Milestones might be 1.5.</summary>
+    public float Size = 1;
     public Requirement Requires;
     public QuestVisibility Visibility = QuestVisibility.Always;
     public QuestMode Mode = QuestMode.Individual;
@@ -152,4 +170,27 @@ public class RewardDef
     public string Stage;
     /// <summary>choice only: the player picks one of these.</summary>
     public List<RewardDef> Options = [];
+}
+
+/// <summary>A picture, a label or an arrow on a chapter's canvas. Positions are grid cells, as for quests.</summary>
+public class ArtDef
+{
+    /// <summary>image, text or arrow.</summary>
+    public string Type;
+    /// <summary>The centre of an image or a label; where an arrow starts.</summary>
+    public float[] Pos = [0, 0];
+    /// <summary>arrow: where it points.</summary>
+    public float[] To;
+    /// <summary>image: width and height in grid cells.</summary>
+    public float[] Size = [1, 1];
+    /// <summary>image: a texture under assets/&lt;domain&gt;/textures/.</summary>
+    public string Src;
+    /// <summary>text: the lang key of the label.</summary>
+    public string Text;
+    /// <summary>text: font size relative to quest labels.</summary>
+    public float Scale = 1;
+    /// <summary>text and arrow: a colour as #rrggbb or #rrggbbaa.</summary>
+    public string Color;
+    /// <summary>arrow: line width in canvas units at zoom 1.</summary>
+    public float Width = 3;
 }

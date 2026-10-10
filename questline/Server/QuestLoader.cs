@@ -141,10 +141,16 @@ public class QuestLoader(ICoreServerAPI api)
             foreach (var e in errors) Problem($"{quest.Id}: {e}; quest disabled");
             if (errors.Count > 0) broken.Add(quest.Id);
 
+            if (quest.Size is < 0.5f or > 3f) Problem($"{quest.Id}: size {quest.Size} is outside 0.5 to 3; drawn clamped");
             if (quest.Claim == ClaimMode.First && quest.Mode != QuestMode.Server) Problem($"{quest.Id}: claim 'first' only applies to server quests; each player claims their own");
             if (quest.Icon != null && !CollectibleExists(quest.Icon)) Problem($"{quest.Id}: icon {quest.Icon} is not an item or block");
             foreach (var warning in PageWarnings(quest)) Problem($"{quest.Id}: {warning}");
             if (!Lang.HasTranslation(quest.Id + "-title", true, false)) Problem($"{quest.Id}: no lang entry {quest.Id}-title");
+        }
+
+        foreach (var chapter in registry.Chapters)
+        {
+            foreach (var warning in ArtWarnings(chapter)) Problem($"{chapter.Id}: {warning}");
         }
 
         foreach (var id in FindCycles(registry))
@@ -227,12 +233,7 @@ public class QuestLoader(ICoreServerAPI api)
                         yield return "page image has no src";
                         break;
                     }
-                    var asset = api.Assets.TryGet(new AssetLocation(PageBlock.TexturePath(block.Src)));
-                    if (asset == null) yield return $"page image {block.Src} not found (looked for {PageBlock.TexturePath(block.Src)})";
-                    else if (PngSize(asset.Data) is var (w, h) && (w > MaxImageSize || h > MaxImageSize))
-                    {
-                        yield return $"page image {block.Src} is {w}×{h}; over {MaxImageSize} px it costs GPU memory on every client";
-                    }
+                    foreach (var w in TextureWarnings("page image", block.Src)) yield return w;
                     break;
                 case "items":
                     foreach (var code in block.Items.Where(c => !CollectibleExists(c))) yield return $"page item {code} is not an item or block";
@@ -244,6 +245,41 @@ public class QuestLoader(ICoreServerAPI api)
                     yield return $"unknown page block type '{block.Type}'";
                     break;
             }
+        }
+    }
+
+    /// <summary>Art problems are warnings too: the canvas skips what it can't draw.</summary>
+    IEnumerable<string> ArtWarnings(ChapterDef chapter)
+    {
+        if (chapter.Background != null) foreach (var w in TextureWarnings("background", chapter.Background)) yield return w;
+        foreach (var a in chapter.Art)
+        {
+            switch (a.Type)
+            {
+                case "image":
+                    if (a.Src == null) yield return "art image has no src";
+                    else foreach (var w in TextureWarnings("art image", a.Src)) yield return w;
+                    break;
+                case "text":
+                    if (a.Text == null || !Lang.HasTranslation(a.Text, true, false)) yield return $"art text {a.Text} has no lang entry";
+                    break;
+                case "arrow":
+                    if (a.To is not { Length: 2 }) yield return "art arrow has no 'to'";
+                    break;
+                default:
+                    yield return $"unknown art type '{a.Type}'";
+                    break;
+            }
+        }
+    }
+
+    IEnumerable<string> TextureWarnings(string what, string src)
+    {
+        var asset = api.Assets.TryGet(new AssetLocation(PageBlock.TexturePath(src)));
+        if (asset == null) yield return $"{what} {src} not found (looked for {PageBlock.TexturePath(src)})";
+        else if (PngSize(asset.Data) is var (w, h) && (w > MaxImageSize || h > MaxImageSize))
+        {
+            yield return $"{what} {src} is {w}×{h}; over {MaxImageSize} px it costs GPU memory on every client";
         }
     }
 

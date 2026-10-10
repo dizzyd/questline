@@ -1,0 +1,19 @@
+{
+    "id": "gallery",
+    "order": 60,
+    "icon": "game:gear-rusty",
+    "background": "qltest:questline/map-background.png",
+    "art": [
+        { "type": "image", "src": "qltest:questline/test-image.png", "pos": [5.5, 0.5], "size": [2.5, 1.5] },
+        { "type": "text", "text": "qltest:gallery-label", "pos": [2, -1.2], "scale": 1.6, "color": "#e8c870" },
+        { "type": "arrow", "pos": [0.5, 2.2], "to": [3.4, 2.2], "color": "#c09050", "width": 4 },
+        { "type": "arrow", "pos": [5.5, 1.7], "to": [5.5, 2.8] },
+        { "type": "image", "src": "qltest:questline/nowhere.png", "pos": [9, 9] }
+    ],
+    "quests": [
+        { "id": "shape-square", "pos": [0, 0], "icon": "game:flint", "tasks": [{ "type": "checkbox" }] },
+        { "id": "shape-circle", "pos": [2, 0], "icon": "game:stick", "shape": "circle", "requires": "shape-square", "tasks": [{ "type": "checkbox" }] },
+        { "id": "shape-hexagon", "pos": [4, 0], "icon": "game:clay-blue", "shape": "hexagon", "requires": "shape-circle", "tasks": [{ "type": "checkbox" }] },
+        { "id": "shape-gear", "pos": [4, 3], "icon": "game:gear-rusty", "shape": "gear", "size": 1.6, "requires": "shape-hexagon", "tasks": [{ "type": "checkbox" }] }
+    ]
+}
