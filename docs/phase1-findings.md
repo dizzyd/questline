@@ -65,3 +65,18 @@ So the doc's "one patch per station" holds for anvil, molds, heat stations and b
 three events cover the rest except for the gaps above, which need a patch each as well.
 `CollectibleObject.OnCreatedByCrafting` and `MatchesGridRecipe` fire on preview, not on take, and
 can't credit anyone.
+
+## Phase 2: what the station patches found
+
+Every station is now patched (`questline/Server/StationPatches.cs`), and the event-bus
+listeners are gone: the grid patch counts every shift-click batch, and the knapping and
+clay-forming patches cover the cases their events skip.
+
+The game's internals differ between 1.22 point releases: `InventoryCraftingGrid.ConsumeIngredients`
+returns the recipe it consumed in 1.22.7 and `void` in 1.22.6. A postfix reading `__result`
+failed to attach on 1.22.6 and, under `PatchAll`, took the whole mod down. Patches now attach
+one by one, and the grid patch reads the public `MatchingRecipe` field in a prefix instead.
+
+Gate result, two processes on vsclient.home (game 1.22.6): the dedicated server holds all
+8 patched methods, the client process none, and a smithing finish on the server reaches the
+client's book as progress.

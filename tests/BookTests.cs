@@ -16,7 +16,7 @@ namespace Questline.Tests
     /// The quest book against the qltest fixture: the chapter rail, the tree, picking a quest by
     /// clicking it, and claiming through the button. Run with --mods tests/fixtures/Mods.
     /// </summary>
-    [RequiresClient]
+    [RequiresClient, SingleplayerOnly]
     public class BookTests
     {
         const string GatherFlint = "qltest:gather-flint";

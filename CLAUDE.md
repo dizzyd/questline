@@ -30,7 +30,10 @@ ssh dizzyd@vsclient.home 'cd vstestkit-questline && bash scripts/run.sh mods/que
   --mods "$HOME/vstestkit-questline/mods/questline/tests/fixtures/Mods" --client'
 ```
 
-Without the fixture the engine and book tests skip, saying so. Screenshots land in the
+Without the fixture the engine and book tests skip, saying so. Swap `--client` for
+`--multiplayer` to run `MultiplayerTests` (dedicated server plus client, the phase 2 gate);
+every other suite is `[SingleplayerOnly]`, because it reaches the server with `OnServer()`,
+which only works when both sides share a process. Screenshots land in the
 game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 
 ## Traps
@@ -46,5 +49,13 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 - **`Input.Click` doesn't reach dialog elements**; it goes in through the world's mouse
   state. Hand the press to the dialog, as `BookTests.ClickAt` does (configkit does the same).
 - **The book reopens on the tab it was left on.** Tests start from a known chapter.
+- **Station patches attach one at a time** (`StationPatches.Apply`). The game's API moves
+  even between 1.22 point releases — `InventoryCraftingGrid.ConsumeIngredients` returns its
+  recipe in 1.22.7 and nothing in 1.22.6 — and one failed patch used to stop the whole mod.
+  CI builds against 1.22.7; the test box runs 1.22.6.
+- **Tests can't name HarmonyLib on a dedicated server**: the in-game compiler there doesn't
+  see 0Harmony. Use plain reflection, and `StationPatches.Attached()` for patch counts.
+- In multiplayer, a test reaches the server only through `Remote.Eval` snippets; the
+  default usings include `Vintagestory.GameContent`.
 - The test window is 960×600, so the book sizes itself to the screen. Check new layout in a
   screenshot there, not just at a desktop size.

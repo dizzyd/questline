@@ -43,6 +43,14 @@ public static class StationPatches
         return harmony;
     }
 
+    /// <summary>Every method carrying one of these patches, with how many of each kind are ours.</summary>
+    public static List<(string Method, int Prefixes, int Postfixes)> Attached() => Harmony.GetAllPatchedMethods()
+        .Select(m => (Method: m, Info: Harmony.GetPatchInfo(m)))
+        .Select(p => ($"{p.Method.DeclaringType?.Name}.{p.Method.Name}",
+            p.Info.Prefixes.Count(x => x.owner == HarmonyId), p.Info.Postfixes.Count(x => x.owner == HarmonyId)))
+        .Where(p => p.Item2 + p.Item3 > 0)
+        .ToList();
+
     static void Credit(IPlayer player, string type, ItemStack made, int? count = null)
     {
         if (player is not IServerPlayer serverPlayer || made?.Collectible == null) return;

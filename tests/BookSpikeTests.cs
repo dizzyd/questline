@@ -14,7 +14,7 @@ namespace Questline.Tests
     /// The phase 1 rendering spike's two gates: a 500-node tree pans and zooms smoothly, and a
     /// vanilla handbook page renders inside the book without patches.
     /// </summary>
-    [RequiresClient]
+    [RequiresClient, SingleplayerOnly]
     public class BookSpikeTests
     {
         static GuiDialogQuestBook Book => Capi.ModLoader.GetModSystem<QuestlineModSystem>().Book;

@@ -19,7 +19,7 @@ namespace Questline.Tests
     /// type through the real game events, claiming, and the client's copy of the state.
     /// Run with --mods tests/fixtures/Mods.
     /// </summary>
-    [RequiresClient]
+    [RequiresClient, SingleplayerOnly]
     public class EngineTests
     {
         const string GatherFlint = "qltest:gather-flint";

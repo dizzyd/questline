@@ -15,7 +15,7 @@ namespace Questline.Tests
     /// Stages and the API other mods use: a stage reward unlocking a gated quest, and custom-task
     /// progress reported both through QuestlineApi and over the event bus.
     /// </summary>
-    [RequiresClient]
+    [RequiresClient, SingleplayerOnly]
     public class ApiTests
     {
         const string ForgeAhead = "qltest:forge-ahead";
