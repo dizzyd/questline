@@ -1,13 +1,12 @@
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
-using Vintagestory.API.Datastructures;
 using Vintagestory.API.Server;
 
 namespace questline.Server;
 
 /// <summary>
-/// Turns game events into task reports. Inventory (obtain) and checkbox tasks are the engine's
-/// own; everything here hangs off an existing server event, with no Harmony.
+/// Turns game events into task reports: kill, place and break. Obtain and checkbox tasks are
+/// the engine's own, and crafting is <see cref="StationPatches"/>.
 /// </summary>
 public class Trackers(ICoreServerAPI api, QuestEngine engine)
 {
@@ -17,12 +16,7 @@ public class Trackers(ICoreServerAPI api, QuestEngine engine)
         api.Event.DidPlaceBlock += OnDidPlaceBlock;
         api.Event.DidBreakBlock += OnDidBreakBlock;
 
-        // The engine posts these when a grid craft is taken, a knapping or a clay form finishes.
-        // Known gaps: shift-click crafting reports only its last batch; knapping into a placed
-        // block and clay forming into ground-storable pottery post nothing (docs/phase1-findings.md).
-        api.Event.RegisterEventBusListener((string _, ref EnumHandling _, IAttribute data) => OnCrafted("craft", data), 0.5, "onitemcrafted");
-        api.Event.RegisterEventBusListener((string _, ref EnumHandling _, IAttribute data) => OnCrafted("knap", data), 0.5, "onitemknapped");
-        api.Event.RegisterEventBusListener((string _, ref EnumHandling _, IAttribute data) => OnCrafted("clayform", data), 0.5, "onitemclayformed");
+        // Crafting at the grid and at stations is credited by StationPatches.
     }
 
     void OnEntityDeath(Entity entity, DamageSource damage)
@@ -39,15 +33,5 @@ public class Trackers(ICoreServerAPI api, QuestEngine engine)
     void OnDidBreakBlock(IServerPlayer player, int oldBlockId, BlockSelection blockSel)
     {
         engine.Report(player, "break", api.World.GetBlock(oldBlockId)?.Code, 1);
-    }
-
-    void OnCrafted(string type, IAttribute data)
-    {
-        if (data is not ITreeAttribute tree) return;
-        var stack = (tree["itemstack"] as ItemstackAttribute)?.value;
-        if (api.World.GetEntityById(tree.GetLong("byentityid")) is not EntityPlayer { Player: IServerPlayer player }) return;
-        if (stack?.Collectible == null) return;
-
-        engine.Report(player, type, stack.Collectible.Code, stack.StackSize);
     }
 }

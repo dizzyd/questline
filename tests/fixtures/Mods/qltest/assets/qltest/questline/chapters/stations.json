@@ -1,0 +1,90 @@
+{
+    "id": "stations",
+    "order": 30,
+    "quests": [
+        {
+            "id": "station-craft",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:*",
+                    "count": 100000
+                }
+            ]
+        },
+        {
+            "id": "station-smith",
+            "pos": [
+                2,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*",
+                    "count": 100000
+                }
+            ]
+        },
+        {
+            "id": "station-knap",
+            "pos": [
+                4,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:*",
+                    "count": 100000
+                }
+            ]
+        },
+        {
+            "id": "station-clayform",
+            "pos": [
+                6,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:*",
+                    "count": 100000
+                }
+            ]
+        },
+        {
+            "id": "station-cook",
+            "pos": [
+                8,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "game:*",
+                    "count": 100000
+                }
+            ]
+        },
+        {
+            "id": "station-smelt",
+            "pos": [
+                10,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:*",
+                    "count": 100000
+                }
+            ]
+        }
+    ]
+}

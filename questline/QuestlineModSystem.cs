@@ -10,6 +10,7 @@ public class QuestlineModSystem : ModSystem
 {
     ICoreClientAPI capi;
     GuiDialogQuestBook book;
+    HarmonyLib.Harmony harmony;
 
     /// <summary>The server's quest engine. Server side only.</summary>
     public QuestEngine Engine { get; private set; }
@@ -36,6 +37,9 @@ public class QuestlineModSystem : ModSystem
         Engine.Start();
         Engine.Reload();
         new Trackers(api, Engine).Start();
+        // Server side only: in singleplayer both sides share this assembly, and patching from
+        // Start() would register every patch twice.
+        harmony = StationPatches.Apply(Engine, api.Logger);
         RegisterCommands(api);
     }
 
@@ -96,6 +100,7 @@ public class QuestlineModSystem : ModSystem
     public override void Dispose()
     {
         book?.Dispose();
+        harmony?.UnpatchAll(StationPatches.HarmonyId);
         base.Dispose();
     }
 }

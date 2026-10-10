@@ -21,5 +21,12 @@
     "secret-title": "A secret",
     "secret-desc": "You found it.",
     "fine-title": "Still fine",
-    "fine-desc": "The broken quests around this one don't stop it loading."
+    "fine-desc": "The broken quests around this one don't stop it loading.",
+    "stations-title": "Stations",
+    "station-craft-title": "Any craft",
+    "station-smith-title": "Any smith",
+    "station-knap-title": "Any knap",
+    "station-clayform-title": "Any clayform",
+    "station-cook-title": "Any cook",
+    "station-smelt-title": "Any smelt"
 }

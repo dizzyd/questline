@@ -30,6 +30,9 @@
     "task-craft": "Craft {0}",
     "task-knap": "Knap {0}",
     "task-clayform": "Form {0} from clay",
+    "task-smith": "Smith {0}",
+    "task-cook": "Cook {0}",
+    "task-smelt": "Cast or smelt {0}",
     "task-checkbox": "Read this and tick it off",
     "any-of": "any {0}",
 

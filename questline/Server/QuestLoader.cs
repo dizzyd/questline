@@ -16,7 +16,7 @@ namespace questline.Server;
 /// </summary>
 public class QuestLoader(ICoreServerAPI api)
 {
-    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "checkbox"];
+    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "checkbox"];
     static readonly HashSet<string> BlockTasks = ["place", "break"];
     static readonly HashSet<string> RewardTypes = ["item", "choice"];
 
