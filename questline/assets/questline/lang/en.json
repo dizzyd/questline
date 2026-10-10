@@ -1,2 +1,42 @@
 {
+    "default-title": "Survival",
+
+    "book-title": "Quest book",
+    "tab-quests": "Quests",
+    "tab-reference": "Reference",
+    "no-quests": "No quests are loaded. Quest packs add chapters under assets/<domain>/questline/chapters/.",
+    "pick-a-quest": "Click a quest to see its tasks and rewards.",
+    "tasks": "Tasks",
+    "rewards": "Rewards",
+    "pick-one": "Pick one:",
+    "requires": "Needs {0}",
+    "claim": "Claim",
+    "pick-first": "Pick a reward first.",
+    "mark-done": "[Mark done]",
+    "back": "Back",
+    "handbook-loading": "The handbook hasn't finished loading.",
+    "toast-complete": "Quest complete: {0}",
+
+    "state-locked": "Locked",
+    "state-available": "Available",
+    "state-inprogress": "In progress",
+    "state-claimable": "Ready to claim",
+    "state-done": "Done",
+
+    "task-obtain": "Have {0}",
+    "task-kill": "Kill {0}",
+    "task-place": "Place {0}",
+    "task-break": "Break {0}",
+    "task-craft": "Craft {0}",
+    "task-knap": "Knap {0}",
+    "task-clayform": "Form {0} from clay",
+    "task-checkbox": "Read this and tick it off",
+    "any-of": "any {0}",
+
+    "req-and": " and ",
+    "req-or": " or ",
+    "req-atleast": "{0} of: {1}",
+    "req-mod": "the mod {0}",
+    "req-stage": "the stage {0}",
+    "req-chapter": "every quest in {0}"
 }

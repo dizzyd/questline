@@ -5,6 +5,7 @@ using questline.Model;
 using questline.Network;
 using questline.Server;
 using Vintagestory.API.Client;
+using Vintagestory.API.Config;
 
 namespace questline.Client;
 
@@ -14,6 +15,7 @@ namespace questline.Client;
 /// </summary>
 public class QuestClient
 {
+    readonly ICoreClientAPI capi;
     readonly IClientNetworkChannel channel;
     readonly Dictionary<string, QuestStateEntry> states = [];
 
@@ -25,6 +27,7 @@ public class QuestClient
 
     public QuestClient(ICoreClientAPI capi)
     {
+        this.capi = capi;
         channel = capi.Network.RegisterChannel(QuestEngine.ChannelName)
             .RegisterMessageType<DefinitionsPacket>()
             .RegisterMessageType<StatePacket>()
@@ -44,7 +47,15 @@ public class QuestClient
     void OnState(StatePacket packet)
     {
         if (packet.Full) states.Clear();
-        foreach (var entry in packet.Entries) states[entry.QuestId] = entry;
+        foreach (var entry in packet.Entries)
+        {
+            // A change, not the first full sync, finishing a quest gets a toast.
+            if (!packet.Full && entry.State >= QuestState.Claimable && StateOf(entry.QuestId) < QuestState.Claimable)
+            {
+                capi.TriggerIngameDiscovery(this, "questline-complete", Lang.Get("questline:toast-complete", Lang.Get(entry.QuestId + "-title")));
+            }
+            states[entry.QuestId] = entry;
+        }
         Changed?.Invoke();
     }
 

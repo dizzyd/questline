@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Cairo;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -52,17 +53,18 @@ public class GuiElementQuestCanvas : GuiElement
     readonly Matrixf mvMat = new();
     readonly Dictionary<int, LoadedTexture> labels = new();
     readonly CairoFont labelFont = CairoFont.WhiteDetailText();
-    readonly float contentWidth, contentHeight;
+    readonly float minX, minY, maxX, maxY;
 
     MeshRef edgeMesh, frameMesh;
-    LoadedTexture frameAtlas;
+    LoadedTexture frameAtlas, ring;
     bool meshesDirty = true;
+    CanvasView? initialView;
 
     // Canvas units at the top left corner of the element.
     float panX, panY;
     float zoom = 1;
     bool dragging;
-    int prevMouseX, prevMouseY;
+    int prevMouseX, prevMouseY, downX, downY;
 
     float tourSeconds, tourElapsed;
     Action<CanvasFrameStats> onTourDone;
@@ -72,16 +74,28 @@ public class GuiElementQuestCanvas : GuiElement
     public int VisibleNodes { get; private set; }
     public bool Touring => onTourDone != null;
 
+    /// <summary>The node drawn with a selection ring, or -1.</summary>
+    public int SelectedIndex = -1;
+    /// <summary>Called with a node's index when it is clicked rather than dragged.</summary>
+    public Action<int> OnNodeClicked;
+
+    /// <summary>Where the view is. Set before composing to restore one; otherwise the tree is fitted to the canvas.</summary>
+    public CanvasView View
+    {
+        get => new(panX, panY, zoom);
+        set => initialView = value;
+    }
+
     float ViewScale => zoom * RuntimeEnv.GUIScale;
 
     public GuiElementQuestCanvas(ICoreClientAPI capi, ElementBounds bounds, List<QuestCanvasNode> nodes) : base(capi, bounds)
     {
         this.nodes = nodes;
-        foreach (var n in nodes)
-        {
-            contentWidth = Math.Max(contentWidth, n.X * CellSize);
-            contentHeight = Math.Max(contentHeight, n.Y * CellSize);
-        }
+        if (nodes.Count == 0) return;
+        minX = nodes.Min(n => n.X) * CellSize;
+        minY = nodes.Min(n => n.Y) * CellSize;
+        maxX = nodes.Max(n => n.X) * CellSize;
+        maxY = nodes.Max(n => n.Y) * CellSize;
     }
 
     public override void ComposeElements(Context ctxStatic, ImageSurface surface)
@@ -93,8 +107,26 @@ public class GuiElementQuestCanvas : GuiElement
         ctxStatic.Fill();
 
         ComposeFrameAtlas();
-        panX = -NodeSize;
-        panY = -NodeSize;
+
+        if (initialView is { } view)
+        {
+            (panX, panY, zoom) = (view.PanX, view.PanY, view.Zoom);
+        }
+        else
+        {
+            FitView();
+        }
+    }
+
+    /// <summary>Centres the tree, zoomed out just enough to show all of it, but never past half size or above full size.</summary>
+    void FitView()
+    {
+        float width = maxX - minX + CellSize * 2, height = maxY - minY + CellSize * 2;
+        float gs = RuntimeEnv.GUIScale;
+        zoom = GameMath.Clamp(Math.Min((float)Bounds.InnerWidth / (width * gs), (float)Bounds.InnerHeight / (height * gs)), 0.5f, 1f);
+        float s = ViewScale;
+        panX = (minX + maxX) / 2 - (float)Bounds.InnerWidth / s / 2;
+        panY = (minY + maxY) / 2 - (float)Bounds.InnerHeight / s / 2;
     }
 
     void ComposeFrameAtlas()
@@ -116,6 +148,15 @@ public class GuiElementQuestCanvas : GuiElement
 
         frameAtlas ??= new LoadedTexture(api);
         api.Gui.LoadOrUpdateCairoTexture(atlas, true, ref frameAtlas);
+
+        using var ringSurface = new ImageSurface(Format.Argb32, AtlasCell, AtlasCell);
+        using var ringCtx = new Context(ringSurface);
+        RoundRectangle(ringCtx, 3, 3, AtlasCell - 6, AtlasCell - 6, 10);
+        ringCtx.SetSourceRGBA(1, 1, 1, 0.9);
+        ringCtx.LineWidth = 3;
+        ringCtx.Stroke();
+        ring ??= new LoadedTexture(api);
+        api.Gui.LoadOrUpdateCairoTexture(ringSurface, true, ref ring);
     }
 
     /// <summary>Call after any node's state or position changes.</summary>
@@ -132,7 +173,7 @@ public class GuiElementQuestCanvas : GuiElement
             foreach (int p in n.Prereqs)
             {
                 var from = nodes[p];
-                int color = from.State == QuestState.Done ? LitEdge : DimEdge;
+                int color = from.State >= QuestState.Claimable ? LitEdge : DimEdge;
                 AddSegment(edges, from.X * CellSize, from.Y * CellSize, n.X * CellSize, n.Y * CellSize, color);
             }
         }
@@ -235,6 +276,11 @@ public class GuiElementQuestCanvas : GuiElement
             visible++;
 
             double sx = ox + cx * s, sy = oy + cy * s;
+            if (i == SelectedIndex)
+            {
+                float size = NodeSize * 1.3f * s;
+                api.Render.Render2DTexturePremultipliedAlpha(ring.TextureId, (float)(sx - size / 2), (float)(sy - size / 2), size, size, 150);
+            }
             if (n.Icon?.Itemstack != null)
             {
                 api.Render.RenderItemstackToGui(n.Icon, sx, sy, 200, iconSize, ColorUtil.WhiteArgb, true, false, false);
@@ -267,15 +313,40 @@ public class GuiElementQuestCanvas : GuiElement
         if (args.Button != EnumMouseButton.Left) return;
 
         dragging = true;
-        prevMouseX = args.X;
-        prevMouseY = args.Y;
+        prevMouseX = downX = args.X;
+        prevMouseY = downY = args.Y;
         args.Handled = true;
     }
 
     public override void OnMouseUp(ICoreClientAPI api, MouseEvent args)
     {
         base.OnMouseUp(api, args);
+        if (!dragging) return;
         dragging = false;
+
+        // A press that barely moved is a click, not a drag.
+        if (Math.Abs(args.X - downX) + Math.Abs(args.Y - downY) > 4) return;
+        int hit = NodeAt(args.X, args.Y);
+        if (hit >= 0) OnNodeClicked?.Invoke(hit);
+    }
+
+    /// <summary>Where a node's centre is on screen, for tests that click it.</summary>
+    public (int X, int Y) ScreenPosOf(int index)
+    {
+        float s = ViewScale;
+        return ((int)(Bounds.absX + (nodes[index].X * CellSize - panX) * s), (int)(Bounds.absY + (nodes[index].Y * CellSize - panY) * s));
+    }
+
+    /// <summary>The node under a screen position, or -1.</summary>
+    public int NodeAt(double screenX, double screenY)
+    {
+        float s = ViewScale;
+        float cx = panX + (float)(screenX - Bounds.absX) / s, cy = panY + (float)(screenY - Bounds.absY) / s;
+        for (int i = 0; i < nodes.Count; i++)
+        {
+            if (Math.Abs(nodes[i].X * CellSize - cx) <= NodeSize / 2 && Math.Abs(nodes[i].Y * CellSize - cy) <= NodeSize / 2) return i;
+        }
+        return -1;
     }
 
     public override void OnMouseMove(ICoreClientAPI api, MouseEvent args)
@@ -340,8 +411,8 @@ public class GuiElementQuestCanvas : GuiElement
         float viewW = (float)Bounds.InnerWidth / s, viewH = (float)Bounds.InnerHeight / s;
         float fx = 0.5f - 0.5f * MathF.Cos(t * MathF.PI * 4);
         float fy = 0.5f - 0.5f * MathF.Cos(t * MathF.PI * 2.5f);
-        panX = fx * contentWidth - viewW / 2;
-        panY = fy * contentHeight - viewH / 2;
+        panX = minX + fx * (maxX - minX) - viewW / 2;
+        panY = minY + fy * (maxY - minY) - viewH / 2;
     }
 
     void DeleteMeshes()
@@ -356,7 +427,10 @@ public class GuiElementQuestCanvas : GuiElement
         base.Dispose();
         DeleteMeshes();
         frameAtlas?.Dispose();
+        ring?.Dispose();
         foreach (var tex in labels.Values) tex.Dispose();
         labels.Clear();
     }
 }
+
+public record struct CanvasView(float PanX, float PanY, float Zoom);
