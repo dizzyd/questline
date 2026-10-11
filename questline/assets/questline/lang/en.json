@@ -309,5 +309,6 @@
     "plan-kind-drop": "breaking",
     "plan-kind-entity-drop": "hunting",
     "plan-kind-butcher": "butchering",
-    "plan-kind-trade": "buying from a trader"
+    "plan-kind-trade": "buying from a trader",
+    "edit-suggested": "Perhaps after:"
 }

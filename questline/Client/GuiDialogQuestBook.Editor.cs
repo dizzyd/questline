@@ -323,6 +323,17 @@ public partial class GuiDialogQuestBook
         {
             notes.Add(new RichTextComponent(capi, problem[(quest.Id.Length + 2)..] + "\n", Small().WithColor(BookStyle.Problem)));
         }
+        var suggested = SuggestedPrerequisites(quest);
+        if (suggested.Count > 0)
+        {
+            notes.Add(new RichTextComponent(capi, Lang.Get("questline:edit-suggested") + "  ", MutedSmall()));
+            for (int i = 0; i < suggested.Count; i++)
+            {
+                var pre = suggested[i];
+                notes.Add(new LinkTextComponent(capi, NonEmpty(EditText(pre.Id + "-title"), pre.Id), Link(), _ => ToggleLink(pre, quest)));
+                notes.Add(new RichTextComponent(capi, i < suggested.Count - 1 ? ", " : "\n", Small()));
+            }
+        }
         composer.AddRichtext(notes.ToArray(), ElementBounds.Fixed(FormX, y, FormWidth, ContentY + PanelHeight - y - Pad), "edit-notes");
     }
 
@@ -516,6 +527,51 @@ public partial class GuiDialogQuestBook
         }
         SaveDraft();
         Compose();
+    }
+
+    /// <summary>
+    /// Quests worth requiring before this one, from the recipe graph: those that ask for something
+    /// a way of making this quest's items takes, one step back. Quests already required (directly
+    /// or further back) and quests that come after this one are left out.
+    /// </summary>
+    public List<QuestDef> SuggestedPrerequisites(QuestDef quest)
+    {
+        var all = client.Editor.Chapters.Values.SelectMany(c => c.Quests).GroupBy(q => q.Id).ToDictionary(g => g.Key, g => g.First());
+        if (draft != null) foreach (var q in draft.Quests) all[q.Id] = q;
+
+        var inputs = new HashSet<string>();
+        foreach (var task in quest.Tasks.Where(t => t.Target != null && t.Type is not ("kill" or "custom" or "checkbox")))
+        {
+            foreach (var code in Candidates(task.Target))
+            {
+                foreach (var edge in client.Graph.MadeBy(code).Where(e => !Planner.FoundKinds.Contains(e.Kind)))
+                {
+                    foreach (var input in edge.Inputs) inputs.UnionWith(input.Codes.Where(c => !c.Contains('*')));
+                }
+            }
+        }
+        if (inputs.Count == 0) return [];
+
+        return all.Values
+            .Where(q => q.Id != quest.Id && !DependsOn(quest, q.Id) && !DependsOn(q, quest.Id))
+            .Where(q => q.Tasks.Any(t => t.Target != null && t.Type is not ("kill" or "custom" or "checkbox") && Candidates(t.Target).Any(inputs.Contains)))
+            .OrderBy(q => q.Id)
+            .Take(6)
+            .ToList();
+    }
+
+    readonly Dictionary<string, string[]> candidates = [];
+
+    /// <summary>The item codes a task target names: itself, or every code its wildcard matches.</summary>
+    string[] Candidates(string target)
+    {
+        if (!target.Contains('*')) return [target.Contains(':') ? target : "game:" + target];
+        if (!candidates.TryGetValue(target, out var codes))
+        {
+            var loc = new AssetLocation(target);
+            candidates[target] = codes = capi.World.Collectibles.Where(c => c?.Code != null && Vintagestory.API.Util.WildcardUtil.Match(loc, c.Code)).Select(c => c.Code.ToString()).ToArray();
+        }
+        return codes;
     }
 
     /// <summary>Whether <paramref name="quest"/> needs <paramref name="id"/>, directly or further back.</summary>

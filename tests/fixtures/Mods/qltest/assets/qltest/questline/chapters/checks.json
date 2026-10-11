@@ -70,6 +70,32 @@
                     "item": "game:jonasparts-*"
                 }
             ]
+        },
+        {
+            "id": "check-part-first",
+            "pos": [
+                0,
+                6
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "qltest:gizmo-part"
+                }
+            ]
+        },
+        {
+            "id": "check-gizmo-after",
+            "pos": [
+                2,
+                6
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "qltest:gizmo-whole"
+                }
+            ]
         }
     ]
 }

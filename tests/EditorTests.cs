@@ -232,6 +232,26 @@ namespace Questline.Tests
             Log($"exported {chapters} chapters to {folder}");
         }
 
+        [VsTest(TimeoutMs = 30000)]
+        public async Task SuggestsPrerequisitesFromTheRecipeGraph()
+        {
+            await OnClient();
+            Book.ShowInEditor("qltest:checks", "qltest:check-gizmo-after");
+            await Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+
+            var quest = Book.Draft.Quests.Single(q => q.Id == "qltest:check-gizmo-after");
+            var suggested = Book.SuggestedPrerequisites(quest).Select(q => q.Id).ToList();
+            Log("suggested: " + string.Join(", ", suggested));
+            Assert.True(suggested.Contains("qltest:check-part-first"), "the quest that makes the part a gizmo is made from");
+
+            // One already required isn't suggested again; nor is one that comes after.
+            var made = Book.Draft.Quests.Single(q => q.Id == "qltest:check-early-gizmo");
+            Assert.False(Book.SuggestedPrerequisites(made).Any(q => q.Id == "qltest:check-late-part"), "not a quest that comes after");
+            Log(await Shot.Take("questline-editor-suggested.png"));
+            Book.SetEditing(false);
+        }
+
         static int Index(string questId) => Book.Canvas.Nodes.ToList().FindIndex(n => n.Id == questId);
 
         static async Task Click(int x, int y, EnumMouseButton button)

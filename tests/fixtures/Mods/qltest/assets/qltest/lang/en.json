@@ -57,5 +57,7 @@
     "check-early-gizmo-title": "Have a gizmo",
     "check-late-part-title": "Make a gizmo part",
     "item-gizmo-whole": "Gizmo",
-    "item-gizmo-part": "Gizmo part"
+    "item-gizmo-part": "Gizmo part",
+    "check-part-first-title": "Make a part first",
+    "check-gizmo-after-title": "Then a gizmo"
 }
