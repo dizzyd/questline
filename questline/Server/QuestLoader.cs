@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 using questline.Model;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -14,7 +16,7 @@ namespace questline.Server;
 /// questlines, merges their chapters and disables quests that can't work. Each problem is
 /// logged and kept in <see cref="Problems"/>; a broken quest never stops its chapter loading.
 /// </summary>
-public class QuestLoader(ICoreServerAPI api)
+public class QuestLoader(ICoreServerAPI api, string workingDir = null)
 {
     public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom", "checkbox"];
     static readonly HashSet<string> BlockTasks = ["place", "break"];
@@ -22,11 +24,21 @@ public class QuestLoader(ICoreServerAPI api)
 
     public List<string> Problems { get; } = [];
 
+    /// <summary>Every chapter as loaded, ids qualified, before validation disabled anything: what the editor edits.</summary>
+    public Dictionary<string, string> RawChapters { get; } = [];
+
+    /// <summary>Lang entries written by the editor, keyed with their domain, e.g. mypack:first-quest-title.</summary>
+    public Dictionary<string, string> Text { get; } = [];
+
+    /// <summary>The ids of chapters that have a working copy from the editor.</summary>
+    public HashSet<string> Edited { get; } = [];
+
     public QuestRegistry Load()
     {
         var registry = new QuestRegistry { Questlines = SelectActive(LoadQuestlines()) };
         var active = registry.Questlines.Select(q => q.Id).ToHashSet();
 
+        var chapters = new List<ChapterDef>();
         foreach (var asset in api.Assets.GetMany("questline/chapters/"))
         {
             if (!asset.Name.EndsWith(".json")) continue;
@@ -42,15 +54,28 @@ public class QuestLoader(ICoreServerAPI api)
                 continue;
             }
 
-            if (!Qualify(chapter, asset)) continue;
-            if (!chapter.RequiresMod.All(api.ModLoader.IsModEnabled)) continue;
-            if (!active.Contains(chapter.Questline)) continue;
-            if (registry.Chapters.Any(c => c.Id == chapter.Id))
+            Qualify(chapter, asset.Location.Domain, asset.Location.GetName().RemoveFileEnding());
+            if (chapters.Any(c => c.Id == chapter.Id))
             {
                 Problem($"{asset.Location}: chapter {chapter.Id} is already defined; this copy is ignored");
                 continue;
             }
+            chapters.Add(chapter);
+        }
 
+        // The editor's working copies replace the installed chapter of the same id, or add a new one.
+        foreach (var chapter in LoadWorking())
+        {
+            chapters.RemoveAll(c => c.Id == chapter.Id);
+            chapters.Add(chapter);
+            Edited.Add(chapter.Id);
+        }
+
+        foreach (var chapter in chapters)
+        {
+            if (!chapter.RequiresMod.All(api.ModLoader.IsModEnabled)) continue;
+            if (!active.Contains(chapter.Questline)) continue;
+            RawChapters[chapter.Id] = JsonConvert.SerializeObject(chapter);
             registry.Chapters.Add(chapter);
         }
 
@@ -65,6 +90,7 @@ public class QuestLoader(ICoreServerAPI api)
             });
         }
 
+        registry.Text = Text;
         registry.Index();
         Validate(registry);
         registry.Index();
@@ -109,10 +135,9 @@ public class QuestLoader(ICoreServerAPI api)
         return active;
     }
 
-    bool Qualify(ChapterDef chapter, IAsset asset)
+    void Qualify(ChapterDef chapter, string domain, string fileName)
     {
-        string domain = asset.Location.Domain;
-        chapter.Id = Requirement.QualifyId(chapter.Id ?? asset.Location.GetName().RemoveFileEnding(), domain);
+        chapter.Id = Requirement.QualifyId(chapter.Id ?? fileName, domain);
         chapter.Questline = chapter.Questline == null ? QuestRegistry.DefaultQuestline : Requirement.QualifyId(chapter.Questline, domain);
         chapter.Aliases = chapter.Aliases.ToDictionary(a => Requirement.QualifyId(a.Key, domain), a => Requirement.QualifyId(a.Value, domain));
 
@@ -128,8 +153,56 @@ public class QuestLoader(ICoreServerAPI api)
             quest.Requires?.Qualify(domain);
             foreach (var reward in quest.Rewards.Where(r => r.Stage != null)) reward.Stage = Requirement.QualifyId(reward.Stage, domain);
         }
-        return true;
     }
+
+    /// <summary>
+    /// The editor's working chapters: &lt;working&gt;/&lt;domain&gt;/chapters/*.json, with the lang
+    /// entries beside them in &lt;domain&gt;/lang/en.json going into <see cref="Text"/>.
+    /// </summary>
+    List<ChapterDef> LoadWorking()
+    {
+        var list = new List<ChapterDef>();
+        if (workingDir == null || !Directory.Exists(workingDir)) return list;
+
+        foreach (var domainDir in Directory.GetDirectories(workingDir))
+        {
+            string domain = Path.GetFileName(domainDir);
+            string langFile = Path.Combine(domainDir, "lang", "en.json");
+            if (File.Exists(langFile))
+            {
+                try
+                {
+                    foreach (var (key, value) in JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(langFile)) ?? [])
+                    {
+                        Text[Requirement.QualifyId(key, domain)] = value;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Problem($"{langFile}: can't read the editor's text: {e.Message}");
+                }
+            }
+
+            string chaptersDir = Path.Combine(domainDir, "chapters");
+            if (!Directory.Exists(chaptersDir)) continue;
+            foreach (var file in Directory.GetFiles(chaptersDir, "*.json").OrderBy(f => f))
+            {
+                try
+                {
+                    var chapter = JsonConvert.DeserializeObject<ChapterDef>(File.ReadAllText(file));
+                    Qualify(chapter, domain, Path.GetFileNameWithoutExtension(file));
+                    list.Add(chapter);
+                }
+                catch (Exception e)
+                {
+                    Problem($"{file}: can't read working chapter: {e.Message}");
+                }
+            }
+        }
+        return list;
+    }
+
+    bool HasText(string key) => key != null && (Text.ContainsKey(key) || Lang.HasTranslation(key, true, false));
 
     void Validate(QuestRegistry registry)
     {
@@ -145,7 +218,7 @@ public class QuestLoader(ICoreServerAPI api)
             if (quest.Claim == ClaimMode.First && quest.Mode != QuestMode.Server) Problem($"{quest.Id}: claim 'first' only applies to server quests; each player claims their own");
             if (quest.Icon != null && !CollectibleExists(quest.Icon)) Problem($"{quest.Id}: icon {quest.Icon} is not an item or block");
             foreach (var warning in PageWarnings(quest)) Problem($"{quest.Id}: {warning}");
-            if (!Lang.HasTranslation(quest.Id + "-title", true, false)) Problem($"{quest.Id}: no lang entry {quest.Id}-title");
+            if (!HasText(quest.Id + "-title")) Problem($"{quest.Id}: no lang entry {quest.Id}-title");
         }
 
         foreach (var chapter in registry.Chapters)
@@ -225,7 +298,7 @@ public class QuestLoader(ICoreServerAPI api)
             switch (block.Type)
             {
                 case "text":
-                    if (block.Lang == null || !Lang.HasTranslation(block.Lang, true, false)) yield return $"page text {block.Lang} has no lang entry";
+                    if (!HasText(block.Lang)) yield return $"page text {block.Lang} has no lang entry";
                     break;
                 case "image":
                     if (block.Src == null)
@@ -261,7 +334,7 @@ public class QuestLoader(ICoreServerAPI api)
                     else foreach (var w in TextureWarnings("art image", a.Src)) yield return w;
                     break;
                 case "text":
-                    if (a.Text == null || !Lang.HasTranslation(a.Text, true, false)) yield return $"art text {a.Text} has no lang entry";
+                    if (!HasText(a.Text)) yield return $"art text {a.Text} has no lang entry";
                     break;
                 case "arrow":
                     if (a.To is not { Length: 2 }) yield return "art arrow has no 'to'";

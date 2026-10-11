@@ -18,7 +18,13 @@ public class GuiElementChapterRail : GuiElement
     public const double RowHeight = 34;
     const double IconSize = 22;
 
-    public record Row(string Id, string Title, ItemSlot Icon, int Done, int Total);
+    public record Row(string Id, string Title, ItemSlot Icon, int Done, int Total)
+    {
+        /// <summary>Shown instead of done/total, e.g. a quest count in the editor.</summary>
+        public string Note { get; init; }
+        /// <summary>Draws the note in the problem colour.</summary>
+        public bool Warn { get; init; }
+    }
 
     readonly List<Row> rows;
     readonly string selected;
@@ -91,8 +97,8 @@ public class GuiElementChapterRail : GuiElement
             ctx.Fill();
         }
 
-        var countFont = BookStyle.Small().WithColor(row.Total > 0 && row.Done == row.Total ? BookStyle.Good : BookStyle.Muted);
-        string count = $"{row.Done}/{row.Total}";
+        var countFont = BookStyle.Small().WithColor(row.Warn ? BookStyle.Problem : row.Note == null && row.Total > 0 && row.Done == row.Total ? BookStyle.Good : BookStyle.Muted);
+        string count = row.Note ?? $"{row.Done}/{row.Total}";
         countFont.SetupContext(ctx);
         double countWidth = countFont.GetTextExtents(count).Width;
         new TextDrawUtil().DrawTextLine(ctx, countFont, count, width - pad - countWidth, y + (h - countFont.GetFontExtents().Height) / 2);

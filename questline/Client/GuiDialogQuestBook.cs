@@ -23,7 +23,7 @@ namespace questline.Client;
 public partial class GuiDialogQuestBook : GuiDialog
 {
     const double TabsY = 30, TabsHeight = 26, ContentY = TabsY + TabsHeight + 10;
-    const int QuestsTab = 0, ReferenceTab = 1, PartyTab = 2;
+    const int QuestsTab = 0, ReferenceTab = 1, PartyTab = 2, ProblemsTab = 3;
 
     readonly QuestClient client;
     readonly QuestText text;
@@ -44,8 +44,9 @@ public partial class GuiDialogQuestBook : GuiDialog
     /// <summary>The book's size and columns for the current window; see <see cref="BookLayout"/>.</summary>
     public BookLayout Layout => BookLayout.For(capi.Render.FrameWidth, capi.Render.FrameHeight, RuntimeEnv.GUIScale, ContentY);
     double RailWidth => Layout.RailWidth;
-    double DetailWidth => Layout.DetailWidth;
-    double CanvasWidth => Layout.CanvasWidth;
+    // The editor's form needs more room than the quest panel; it takes it from the canvas.
+    double DetailWidth => editing ? Math.Max(Layout.DetailWidth, Math.Min(380, Layout.Width * 0.36)) : Layout.DetailWidth;
+    double CanvasWidth => Width - RailWidth - DetailWidth - 2 * Gap;
     double Width => Layout.Width;
     double ContentHeight => Layout.ContentHeight;
     /// <summary>The height of a panel with a row of buttons under it.</summary>
@@ -62,6 +63,14 @@ public partial class GuiDialogQuestBook : GuiDialog
         this.client = client;
         text = new QuestText(capi, client);
         client.Changed += OnClientChanged;
+        client.EditorChanged += OnEditorChanged;
+    }
+
+    // A save's reply replaces a draft with nothing unsaved in it. Only the editor's own packet
+    // does: the definitions arrive first, with the editor's chapters still the old ones.
+    void OnEditorChanged()
+    {
+        if (editing && !dirty) draft = null;
     }
 
     public override void OnGuiOpened()
@@ -72,7 +81,9 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void OnClientChanged()
     {
-        if (IsOpened()) Compose();
+        if (!IsOpened()) return;
+        if (editing && InputFocused()) pendingCompose = true;
+        else Compose();
     }
 
     void Compose()
@@ -85,6 +96,9 @@ public partial class GuiDialogQuestBook : GuiDialog
         canvas = null;
         rail = null;
         panels.Clear();
+        afterCompose.Clear();
+        inputKeys.Clear();
+        if (tab == ProblemsTab && !client.CanEdit) tab = QuestsTab;
 
         var bg = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
         bg.BothSizing = ElementSizing.FitToChildren;
@@ -96,6 +110,7 @@ public partial class GuiDialogQuestBook : GuiDialog
             new() { Name = Lang.Get("questline:tab-reference"), DataInt = ReferenceTab },
             new() { Name = Lang.Get("questline:tab-party"), DataInt = PartyTab },
         ];
+        if (client.CanEdit) tabs = [.. tabs, new() { Name = Lang.Get("questline:tab-problems", client.Editor.Problems.Count), DataInt = ProblemsTab }];
 
         var composer = capi.Gui.CreateCompo("questline-book", dialogBounds)
             .AddShadedDialogBG(bg)
@@ -111,10 +126,20 @@ public partial class GuiDialogQuestBook : GuiDialog
 
         if (tab == QuestsTab) ComposeQuests(composer);
         else if (tab == PartyTab) ComposeParty(composer);
+        else if (tab == ProblemsTab) ComposeProblems(composer);
         else ComposeReference(composer);
 
         SingleComposer = composer.EndChildElements().Compose();
         SingleComposer.GetHorizontalTabs("tabs").SetValue(tab, false);
+        loadingForm = true;
+        try
+        {
+            foreach (var setup in afterCompose) setup();
+        }
+        finally
+        {
+            loadingForm = false;
+        }
         InitPanels();
         if (detailScroll > 0) RestorePanelScroll("detail", detailScroll);
     }
@@ -141,7 +166,18 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void ComposeQuests(GuiComposer composer)
     {
-        var canvasBounds = ElementBounds.Fixed(RailWidth + Gap, ContentY, CanvasWidth, ContentHeight);
+        if (editing && spikeNodes == null && client.Ready)
+        {
+            ComposeEditing(composer);
+            return;
+        }
+
+        // Editors get a row of buttons under the canvas, starting with Edit.
+        var canvasBounds = ElementBounds.Fixed(RailWidth + Gap, ContentY, CanvasWidth, client.CanEdit ? PanelHeight : ContentHeight);
+        if (client.CanEdit && spikeNodes == null)
+        {
+            AddRowButton(composer, Lang.Get("questline:edit-start"), RailWidth + Gap, false, () => { SetEditing(true); return true; }, "edit-start");
+        }
 
         if (spikeNodes != null)
         {
@@ -209,13 +245,14 @@ public partial class GuiDialogQuestBook : GuiDialog
         return new(chapter.Id, text.ChapterTitle(chapter.Id), icon == null ? null : new DummySlot(icon), done, quests.Count);
     }
 
-    List<QuestCanvasNode> BuildNodes(List<QuestDef> quests)
+    List<QuestCanvasNode> BuildNodes(List<QuestDef> quests, System.Func<string, string> title = null)
     {
+        title ??= text.Title;
         var index = quests.Select((q, i) => (q.Id, i)).ToDictionary(p => p.Id, p => p.i);
         return quests.Select(q => new QuestCanvasNode
         {
             Id = q.Id,
-            Title = text.Title(q.Id),
+            Title = title(q.Id),
             X = q.Pos.Length > 0 ? q.Pos[0] : 0,
             Y = q.Pos.Length > 1 ? q.Pos[1] : 0,
             Icon = text.StackFor(q.Icon ?? q.Tasks.FirstOrDefault()?.Target) is { } stack ? new DummySlot(stack) : null,
@@ -313,16 +350,16 @@ public partial class GuiDialogQuestBook : GuiDialog
         if (state != QuestState.Done)
         {
             bool pinned = client.IsPinned(quest.Id);
-            composer.AddSmallButton(Lang.Get(pinned ? "questline:unpin" : "questline:pin"), () =>
+            AddRowButton(composer, Lang.Get(pinned ? "questline:unpin" : "questline:pin"), x, false, () =>
             {
                 if (pinned) client.Unpin(quest.Id);
                 else if (!client.Pin(quest.Id)) capi.TriggerIngameError(this, "questline-pins", Lang.Get("questline:pins-full", ClientSettings.MaxPins));
                 return true;
-            }, ElementBounds.Fixed(x, ButtonY, 120, ButtonHeight), EnumButtonStyle.Small, "pin");
+            }, "pin");
         }
         if (state == QuestState.Claimable)
         {
-            composer.AddSmallButton(Lang.Get("questline:claim"), OnClaim, ElementBounds.Fixed(x + DetailWidth - 120, ButtonY, 120, ButtonHeight), EnumButtonStyle.Normal, "claim");
+            AddRowButton(composer, Lang.Get("questline:claim"), x + DetailWidth, true, OnClaim, "claim", primary: true);
         }
     }
 
@@ -550,6 +587,7 @@ public partial class GuiDialogQuestBook : GuiDialog
     public override void Dispose()
     {
         client.Changed -= OnClientChanged;
+        client.EditorChanged -= OnEditorChanged;
         base.Dispose();
     }
 }

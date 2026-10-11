@@ -114,6 +114,9 @@ public class GuiElementQuestCanvas : GuiElement
         set => initialView = value;
     }
 
+    /// <summary>Moves the view now, where <see cref="View"/> waits for the next compose.</summary>
+    public void SetView(CanvasView view) => (panX, panY, zoom) = (view.PanX, view.PanY, GameMath.Clamp(view.Zoom, MinZoom, MaxZoom));
+
     float ViewScale => zoom * RuntimeEnv.GUIScale;
 
     public GuiElementQuestCanvas(ICoreClientAPI capi, ElementBounds bounds, List<QuestCanvasNode> nodes, List<CanvasArt> art = null, AssetLocation background = null)
@@ -520,7 +523,8 @@ public class GuiElementQuestCanvas : GuiElement
         int max = (int)(CellSize * 1.8f * RuntimeEnv.GUIScale);
         int width = (int)Math.Ceiling(Math.Min(max, labelFont.GetTextExtents(title).Width)) + 4;
         double height = new TextDrawUtil().GetMultilineTextHeight(labelFont, title, width);
-        tex = api.Gui.TextTexture.GenTextTexture(title, labelFont, width, (int)height + 2, null, EnumTextOrientation.Center);
+        var font = nodes[index].Problem ? labelFont.Clone().WithColor(BookStyle.Problem) : labelFont;
+        tex = api.Gui.TextTexture.GenTextTexture(title, font, width, (int)height + 2, null, EnumTextOrientation.Center);
         labels[index] = tex;
         return tex;
     }

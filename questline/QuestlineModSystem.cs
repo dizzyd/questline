@@ -134,6 +134,14 @@ public class QuestlineModSystem : ModSystem
                     return TextCommandResult.Success(id == null ? $"Reset every quest for {name}" : $"Reset {id} for {name}");
                 })
             .EndSubCommand()
+            .BeginSubCommand("export")
+                .WithDescription("Write the editor's chapters out as content-mod assets")
+                .HandleWith(_ =>
+                {
+                    var (folder, count) = Engine.Editor.Export();
+                    return TextCommandResult.Success($"Exported {count} chapters to {folder}");
+                })
+            .EndSubCommand()
             .BeginSubCommand("resetserver")
                 .WithDescription("Forget the progress and stages of every server quest")
                 .HandleWith(_ =>

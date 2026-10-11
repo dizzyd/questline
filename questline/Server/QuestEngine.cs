@@ -46,6 +46,11 @@ public partial class QuestEngine
     static readonly HashSet<string> HistoryTypes = ["kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom"];
     public List<string> Problems { get; private set; } = [];
 
+    /// <summary>The in-game editor's server half: working copies and export.</summary>
+    public QuestEditor Editor { get; private set; }
+    Dictionary<string, string> rawChapters = [];
+    HashSet<string> edited = [];
+
     /// <summary>Fires after a quest's tasks are all done, once for each online player it was done for.</summary>
     public event Action<IServerPlayer, string> QuestCompleted;
 
@@ -79,9 +84,17 @@ public partial class QuestEngine
             .RegisterMessageType<CheckboxRequest>()
             .RegisterMessageType<PartyPacket>()
             .RegisterMessageType<PartyRequest>()
+            .RegisterMessageType<EditorPacket>()
+            .RegisterMessageType<SaveChapterRequest>()
+            .RegisterMessageType<ExportRequest>()
+            .SetMessageHandler<SaveChapterRequest>(OnSaveChapter)
+            .SetMessageHandler<ExportRequest>(OnExport)
             .SetMessageHandler<ClaimRequest>((player, req) => Claim(player, req.QuestId, req.Choices))
             .SetMessageHandler<CheckboxRequest>((player, req) => Check(player, req.QuestId, req.TaskIndex))
             .SetMessageHandler<PartyRequest>(OnPartyRequest);
+
+        Editor = new QuestEditor(api, this);
+        api.Permissions.RegisterPrivilege(QuestEditor.Privilege, "Edit quests in the quest book");
 
         api.Event.SaveGameLoaded += LoadProgress;
         api.Event.GameWorldSave += SaveProgress;
@@ -102,9 +115,11 @@ public partial class QuestEngine
     /// <summary>Re-reads every chapter and resends definitions and state to everyone online.</summary>
     public void Reload()
     {
-        var loader = new QuestLoader(api);
+        var loader = new QuestLoader(api, Editor?.WorkingDir);
         Registry = loader.Load();
         Problems = loader.Problems;
+        rawChapters = loader.RawChapters;
+        edited = loader.Edited;
 
         tasksByType = [];
         foreach (var quest in Registry.Quests.Values)
@@ -653,6 +668,33 @@ public partial class QuestEngine
         channel.SendPacket(new DefinitionsPacket { RegistryJson = Registry.ToJson() }, player);
         sent.Remove(player.PlayerUID);
         Sync(player);
+        if (QuestEditor.CanEdit(player))
+        {
+            channel.SendPacket(new EditorPacket
+            {
+                Domain = Config.EditorDomain,
+                Chapters = rawChapters,
+                Problems = Problems,
+                Edited = edited.ToList(),
+            }, player);
+        }
+    }
+
+    void OnSaveChapter(IServerPlayer player, SaveChapterRequest req)
+    {
+        string error = req.Revert ? Editor.Revert(player, req.ChapterId) : Editor.Save(player, req.ChapterJson, req.TextJson);
+        if (error != null) player.SendIngameError("questline-edit", error);
+    }
+
+    void OnExport(IServerPlayer player, ExportRequest req)
+    {
+        if (!QuestEditor.CanEdit(player))
+        {
+            player.SendIngameError("questline-edit", $"You need the {QuestEditor.Privilege} privilege to export quests.");
+            return;
+        }
+        var (folder, count) = Editor.Export();
+        player.SendMessage(Vintagestory.API.Config.GlobalConstants.GeneralChatGroup, $"Exported {count} chapters to {folder}", EnumChatType.Notification);
     }
 
     /// <summary>Syncs every online player whose quest states may have changed.</summary>

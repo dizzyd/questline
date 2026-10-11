@@ -19,6 +19,8 @@ public static class BookStyle
     public static readonly double[] Muted = ColorUtil.Hex2Doubles("#b4a690");
     public static readonly double[] Accent = GuiStyle.ActiveButtonTextColor;
     public static readonly double[] Good = [0.50, 0.82, 0.48, 1];
+    /// <summary>Something an author needs to fix.</summary>
+    public static readonly double[] Problem = [0.95, 0.45, 0.38, 1];
 
     /// <summary>A quest's name at the top of the detail panel.</summary>
     public static CairoFont Title() => CairoFont.WhiteSmallishText().WithWeight(Cairo.FontWeight.Bold);

@@ -13,4 +13,7 @@ public class QuestlineConfig
 
     /// <summary>Players can form parties that share progress on party quests. Off, every party quest counts per player.</summary>
     public bool Parties = true;
+
+    /// <summary>The asset domain chapters made in the editor belong to, and are exported under.</summary>
+    public string EditorDomain = "questpack";
 }

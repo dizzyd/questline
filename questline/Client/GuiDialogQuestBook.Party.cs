@@ -29,13 +29,11 @@ public partial class GuiDialogQuestBook
 
         if (!client.InParty)
         {
-            composer.AddSmallButton(Lang.Get("questline:party-create"), () => { client.PartyAction("create"); return true; },
-                ElementBounds.Fixed(0, ButtonY, 160, ButtonHeight), EnumButtonStyle.Normal, "party-create");
+            AddRowButton(composer, Lang.Get("questline:party-create"), 0, false, () => { client.PartyAction("create"); return true; }, "party-create", primary: true);
             return;
         }
 
-        composer.AddSmallButton(Lang.Get("questline:party-leave"), () => { client.PartyAction("leave"); return true; },
-            ElementBounds.Fixed(0, ButtonY, 140, ButtonHeight), EnumButtonStyle.Small, "party-leave");
+        AddRowButton(composer, Lang.Get("questline:party-leave"), 0, false, () => { client.PartyAction("leave"); return true; }, "party-leave");
 
         if (party.Owner != capi.World.Player.PlayerUID) return;
 
@@ -45,12 +43,9 @@ public partial class GuiDialogQuestBook
 
         int index = Math.Max(0, candidates.FindIndex(p => p.PlayerUID == inviteUid));
         inviteUid = candidates[index].PlayerUID;
-        const double button = 100;
-        composer
-            .AddDropDown(candidates.Select(p => p.PlayerUID).ToArray(), candidates.Select(p => p.PlayerName).ToArray(), index,
-                (uid, _) => inviteUid = uid, ElementBounds.Fixed(PartyRightX, ButtonY, PartyRightWidth - button - Gap / 2, ButtonHeight), "party-invitee")
-            .AddSmallButton(Lang.Get("questline:party-invite"), () => { client.PartyAction("invite", inviteUid); return true; },
-                ElementBounds.Fixed(Width - button, ButtonY, button, ButtonHeight), EnumButtonStyle.Normal, "party-invite");
+        double button = AddRowButton(composer, Lang.Get("questline:party-invite"), Width, true, () => { client.PartyAction("invite", inviteUid); return true; }, "party-invite", primary: true);
+        composer.AddDropDown(candidates.Select(p => p.PlayerUID).ToArray(), candidates.Select(p => p.PlayerName).ToArray(), index,
+            (uid, _) => inviteUid = uid, ElementBounds.Fixed(PartyRightX, ButtonY, PartyRightWidth - button - Gap / 2, ButtonHeight), "party-invitee");
     }
 
     RichTextComponentBase[] PartyComponents()

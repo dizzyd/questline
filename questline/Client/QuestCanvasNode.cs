@@ -19,6 +19,8 @@ public class QuestCanvasNode
     /// <summary>The frame's size, 1 being normal.</summary>
     public float Size = 1;
     public int[] Prereqs = [];
+    /// <summary>The editor found something wrong with it; its label is drawn in the problem colour.</summary>
+    public bool Problem;
 }
 
 /// <summary>One piece of chapter art, resolved for drawing. Positions are grid cells.</summary>

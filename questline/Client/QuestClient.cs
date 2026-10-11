@@ -27,10 +27,18 @@ public class QuestClient
     public bool InParty => Party?.Id != null;
 
     public ClientSettings Settings { get; private set; } = new();
+
+    /// <summary>The editor's view of every chapter, broken quests included. Null unless this player may edit.</summary>
+    public EditorState Editor { get; private set; }
+
+    public bool CanEdit => Editor != null;
     public bool Ready => Registry != null;
 
     /// <summary>Fires after definitions or states arrive.</summary>
     public event Action Changed;
+
+    /// <summary>Fires when the editor's chapters arrive, just before <see cref="Changed"/>. They follow the definitions after every reload.</summary>
+    public event Action EditorChanged;
 
     public QuestClient(ICoreClientAPI capi)
     {
@@ -42,6 +50,10 @@ public class QuestClient
             .RegisterMessageType<CheckboxRequest>()
             .RegisterMessageType<PartyPacket>()
             .RegisterMessageType<PartyRequest>()
+            .RegisterMessageType<EditorPacket>()
+            .RegisterMessageType<SaveChapterRequest>()
+            .RegisterMessageType<ExportRequest>()
+            .SetMessageHandler<EditorPacket>(OnEditor)
             .SetMessageHandler<DefinitionsPacket>(OnDefinitions)
             .SetMessageHandler<StatePacket>(OnState)
             .SetMessageHandler<PartyPacket>(OnParty);
@@ -117,6 +129,30 @@ public class QuestClient
         Changed?.Invoke();
     }
 
+    void OnEditor(EditorPacket packet)
+    {
+        var chapters = new Dictionary<string, ChapterDef>();
+        foreach (var (id, json) in packet.Chapters ?? [])
+        {
+            chapters[id] = Newtonsoft.Json.JsonConvert.DeserializeObject<ChapterDef>(json);
+        }
+        Editor = new EditorState(packet.Domain, chapters, packet.Problems ?? [], (packet.Edited ?? []).ToHashSet());
+        EditorChanged?.Invoke();
+        Changed?.Invoke();
+    }
+
+    /// <summary>Sends an edited chapter, and the text it uses, to be saved and reloaded.</summary>
+    public void SaveChapter(ChapterDef chapter, Dictionary<string, string> text) => channel.SendPacket(new SaveChapterRequest
+    {
+        ChapterJson = Newtonsoft.Json.JsonConvert.SerializeObject(chapter),
+        TextJson = Newtonsoft.Json.JsonConvert.SerializeObject(text),
+    });
+
+    /// <summary>Drops a chapter's working copy on the server.</summary>
+    public void RevertChapter(string chapterId) => channel.SendPacket(new SaveChapterRequest { Revert = true, ChapterId = chapterId });
+
+    public void Export() => channel.SendPacket(new ExportRequest());
+
     void OnParty(PartyPacket packet)
     {
         // protobuf sends an empty list as null.
@@ -161,4 +197,11 @@ public class QuestClient
 
     /// <summary>Asks the server to create, invite, accept, decline, leave or kick. See <see cref="PartyRequest"/>.</summary>
     public void PartyAction(string action, string arg = null) => channel.SendPacket(new PartyRequest { Action = action, Arg = arg });
+}
+
+/// <summary>What the editor works from: the chapters as written and the last load's problems.</summary>
+public record EditorState(string Domain, Dictionary<string, ChapterDef> Chapters, List<string> Problems, HashSet<string> Edited)
+{
+    /// <summary>The problems that name a quest or chapter, by its id.</summary>
+    public IEnumerable<string> ProblemsOf(string id) => Problems.Where(p => p.StartsWith(id + ":"));
 }

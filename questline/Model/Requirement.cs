@@ -36,7 +36,12 @@ public abstract class Requirement
     /// <summary>Qualifies unqualified quest and chapter ids with <paramref name="domain"/>.</summary>
     public virtual void Qualify(string domain) { }
 
+    /// <summary>Drops <paramref name="domain"/> from qualified quest, chapter and stage ids, as a pack's own files write them.</summary>
+    public virtual void Unqualify(string domain) { }
+
     internal static string QualifyId(string id, string domain) => id.Contains(':') ? id : domain + ":" + id;
+
+    public static string UnqualifyId(string id, string domain) => id != null && id.StartsWith(domain + ":") ? id[(domain.Length + 1)..] : id;
 }
 
 public class QuestRequirement(string questId) : Requirement
@@ -44,6 +49,7 @@ public class QuestRequirement(string questId) : Requirement
     public string QuestId { get; private set; } = questId;
     public override bool Evaluate(IRequirementContext ctx) => ctx.IsQuestComplete(QuestId);
     public override void Qualify(string domain) => QuestId = QualifyId(QuestId, domain);
+    public override void Unqualify(string domain) => QuestId = UnqualifyId(QuestId, domain);
 }
 
 public class ModRequirement(string modId) : Requirement
@@ -57,6 +63,7 @@ public class StageRequirement(string stage) : Requirement
     public string Stage { get; private set; } = stage;
     public override bool Evaluate(IRequirementContext ctx) => ctx.HasStage(Stage);
     public override void Qualify(string domain) => Stage = QualifyId(Stage, domain);
+    public override void Unqualify(string domain) => Stage = UnqualifyId(Stage, domain);
 }
 
 public class ChapterCompleteRequirement(string chapterId) : Requirement
@@ -64,6 +71,7 @@ public class ChapterCompleteRequirement(string chapterId) : Requirement
     public string ChapterId { get; private set; } = chapterId;
     public override bool Evaluate(IRequirementContext ctx) => ctx.IsChapterComplete(ChapterId);
     public override void Qualify(string domain) => ChapterId = QualifyId(ChapterId, domain);
+    public override void Unqualify(string domain) => ChapterId = UnqualifyId(ChapterId, domain);
 }
 
 public abstract class CompositeRequirement(List<Requirement> of) : Requirement
@@ -75,6 +83,11 @@ public abstract class CompositeRequirement(List<Requirement> of) : Requirement
     public override void Qualify(string domain)
     {
         foreach (var r in Of) r.Qualify(domain);
+    }
+
+    public override void Unqualify(string domain)
+    {
+        foreach (var r in Of) r.Unqualify(domain);
     }
 }
 

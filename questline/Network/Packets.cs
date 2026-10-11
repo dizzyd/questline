@@ -80,3 +80,38 @@ public class PartyRequest
     /// <summary>create: the name; invite and kick: the player's uid; accept and decline: the party id.</summary>
     [ProtoMember(2)] public string Arg;
 }
+
+/// <summary>
+/// What the editor needs, sent only to players who may edit: every chapter as written, broken
+/// quests included, and the problems the last load found.
+/// </summary>
+[ProtoContract]
+public class EditorPacket
+{
+    /// <summary>The domain new chapters are made in.</summary>
+    [ProtoMember(1)] public string Domain;
+    /// <summary>Chapter id to the chapter's JSON, ids qualified.</summary>
+    [ProtoMember(2)] public Dictionary<string, string> Chapters = [];
+    [ProtoMember(3)] public List<string> Problems = [];
+    /// <summary>Chapters with a working copy from the editor.</summary>
+    [ProtoMember(4)] public List<string> Edited = [];
+}
+
+/// <summary>An editor's change to one chapter: the whole chapter, and the text it uses.</summary>
+[ProtoContract]
+public class SaveChapterRequest
+{
+    [ProtoMember(1)] public string ChapterJson;
+    /// <summary>Lang key (qualified) to text, as JSON. Only the chapter's domain is kept.</summary>
+    [ProtoMember(2)] public string TextJson;
+    /// <summary>Drop the working copy instead, going back to the installed chapter if there is one.</summary>
+    [ProtoMember(3)] public bool Revert;
+    /// <summary>The chapter to revert, when <see cref="Revert"/> is set.</summary>
+    [ProtoMember(4)] public string ChapterId;
+}
+
+/// <summary>Package every working copy as content-mod assets.</summary>
+[ProtoContract]
+public class ExportRequest
+{
+}

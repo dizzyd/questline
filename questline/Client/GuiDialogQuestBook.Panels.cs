@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using Vintagestory.API.Client;
+using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using static questline.Client.BookStyle;
 
 namespace questline.Client;
@@ -50,6 +53,21 @@ public partial class GuiDialogQuestBook
         text.Bounds.fixedY = -value;
         text.Bounds.CalcWorldBounds();
     }
+
+    /// <summary>
+    /// A button in the row under the panels, as wide as its label needs: its left edge at
+    /// <paramref name="x"/>, or its right edge there when <paramref name="right"/>. Returns its width.
+    /// </summary>
+    double AddRowButton(GuiComposer composer, string label, double x, bool right, ActionConsumable onClick, string key, bool primary = false)
+    {
+        var style = primary ? EnumButtonStyle.Normal : EnumButtonStyle.Small;
+        double width = ButtonWidth(label, style);
+        composer.AddSmallButton(label, onClick, ElementBounds.Fixed(right ? x - width : x, ButtonY, width, ButtonHeight), style, key);
+        return width;
+    }
+
+    static double ButtonWidth(string label, EnumButtonStyle style = EnumButtonStyle.Small) =>
+        Math.Max(ButtonHeight, Math.Ceiling(CairoFont.SmallButtonText(style).GetTextExtents(label).Width / RuntimeEnv.GUIScale) + 28);
 
     float PanelScroll(string key) => SingleComposer?.GetScrollbar(key + "-scroll")?.CurrentYPosition ?? 0;
 

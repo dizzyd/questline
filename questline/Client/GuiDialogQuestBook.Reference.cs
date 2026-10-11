@@ -60,7 +60,7 @@ public partial class GuiDialogQuestBook
 
         if (history.Count > 0)
         {
-            composer.AddSmallButton(Lang.Get("questline:back"), GoBack, ElementBounds.Fixed(0, ButtonY, 120, BookStyle.ButtonHeight), EnumButtonStyle.Small, "back");
+            AddRowButton(composer, Lang.Get("questline:back"), 0, false, GoBack, "back");
         }
     }
 
