@@ -63,6 +63,7 @@ public class GuiElementQuestCanvas : GuiElement
     readonly AssetLocation background;
     readonly Matrixf mvMat = new();
     readonly Dictionary<int, LoadedTexture> labels = new();
+    readonly ElementBounds iconCell;
     readonly CairoFont labelFont = CairoFont.WhiteDetailText();
 
     MeshRef edgeMesh, frameMesh, linkMesh;
@@ -125,6 +126,7 @@ public class GuiElementQuestCanvas : GuiElement
         this.nodes = nodes;
         this.art = art ?? [];
         this.background = background;
+        iconCell = ElementBounds.Fixed(0, 0, 1, 1).WithParent(bounds);
     }
 
     public override void ComposeElements(Context ctxStatic, ImageSurface surface)
@@ -517,7 +519,16 @@ public class GuiElementQuestCanvas : GuiElement
             }
             if (n.Icon?.Itemstack != null)
             {
+                // Clipped to the frame: long models such as spears and beams would cross into the
+                // next quest. The cell is in unscaled units, as every ElementBounds is.
+                double half = size * 0.5f * s;
+                iconCell.fixedX = (sx - half - Bounds.renderX) / RuntimeEnv.GUIScale;
+                iconCell.fixedY = (sy - half - Bounds.renderY) / RuntimeEnv.GUIScale;
+                iconCell.fixedWidth = iconCell.fixedHeight = 2 * half / RuntimeEnv.GUIScale;
+                iconCell.CalcWorldBounds();
+                api.Render.PushScissor(iconCell, true);
                 api.Render.RenderItemstackToGui(n.Icon, sx, sy, 200, size * 0.55f * s, ColorUtil.WhiteArgb, true, false, false);
+                api.Render.PopScissor();
             }
 
             // Below where the selection ring reaches, so selecting a quest never hides its name.
@@ -545,7 +556,16 @@ public class GuiElementQuestCanvas : GuiElement
         string title = nodes[index].Title;
         int max = (int)(CellSize * 1.8f * RuntimeEnv.GUIScale);
         int width = (int)Math.Ceiling(Math.Min(max, labelFont.GetTextExtents(title).Width)) + 4;
-        double height = new TextDrawUtil().GetMultilineTextHeight(labelFont, title, width);
+        var draw = new TextDrawUtil();
+        double height = draw.GetMultilineTextHeight(labelFont, title, width);
+        // Two lines at most: a third runs into the label of the quest below. The book's page has the whole title.
+        double twoLines = draw.GetMultilineTextHeight(labelFont, "A\nA", width);
+        for (var words = title.Split(' ').ToList(); height > twoLines + 1 && words.Count > 1; )
+        {
+            words.RemoveAt(words.Count - 1);
+            title = string.Join(" ", words).TrimEnd(',', ':') + "…";
+            height = draw.GetMultilineTextHeight(labelFont, title, width);
+        }
         var font = nodes[index].Problem ? labelFont.Clone().WithColor(BookStyle.Problem) : labelFont;
         tex = api.Gui.TextTexture.GenTextTexture(title, font, width, (int)height + 2, null, EnumTextOrientation.Center);
         labels[index] = tex;
