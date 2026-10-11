@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      The quest pack checker: Questline's own loader and checks, run outside the game against a
+      snapshot taken in it (/questline snapshot). The source is shared with the mod, not copied.
+    -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <DefineConstants>$(DefineConstants);PACKCHECK</DefineConstants>
+        <AssemblyName>questline-packcheck</AssemblyName>
+        <RootNamespace>questline.PackCheck</RootNamespace>
+        <!-- Builds export VINTAGE_STORY; this is only for editors and language servers that don't. -->
+        <VINTAGE_STORY Condition="'$(VINTAGE_STORY)' == ''">$(HOME)/.cairn/games/1.22.7</VINTAGE_STORY>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="../../questline/Model/*.cs" Link="Shared/Model/%(Filename).cs" />
+        <Compile Include="../../questline/Graph/RecipeGraph.cs" Link="Shared/Graph/RecipeGraph.cs" />
+        <Compile Include="../../questline/Server/QuestLoader.cs" Link="Shared/Server/QuestLoader.cs" />
+        <Compile Include="../../questline/Server/GraphChecks.cs" Link="Shared/Server/GraphChecks.cs" />
+        <Compile Include="../../questline/Server/PackFacts.cs" Link="Shared/Server/PackFacts.cs" />
+        <Compile Include="../../questline/Server/GameFacts.cs" Link="Shared/Server/GameFacts.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- Only the API and its JSON library: no game, no window. -->
+        <Reference Include="VintagestoryAPI">
+            <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll</HintPath>
+        </Reference>
+        <Reference Include="protobuf-net">
+            <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+</Project>

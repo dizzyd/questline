@@ -256,20 +256,19 @@ public class GraphChecks
             .Where(c => c != null).Distinct();
         foreach (string code in named)
         {
-            string spoiler = Spoilers.FirstOrDefault(s => Overlaps(s, code));
+            string spoiler = Spoilers.FirstOrDefault(s => Covers(s, code));
             if (spoiler == null) continue;
-            if (gated.Any(g => Overlaps(g, code))) continue;
+            if (gated.Any(g => Covers(g, code))) continue;
             yield return $"names {code}, a story item ({spoiler}), without a \"discovered\" gate on it";
         }
     }
 
-    /// <summary>Whether two patterns could match the same code: either matches the other as written.</summary>
-    static bool Overlaps(string a, string b)
-    {
-        var la = new AssetLocation(a);
-        var lb = new AssetLocation(b);
-        return WildcardUtil.Match(la, lb) || WildcardUtil.Match(lb, la) || a == b;
-    }
+    /// <summary>
+    /// Whether everything <paramref name="code"/> names falls under <paramref name="pattern"/>: the
+    /// pattern matches the code as written. "game:jonas*" covers "game:jonasparts-*"; it doesn't
+    /// cover "game:*", which asks for anything at all rather than naming a story item.
+    /// </summary>
+    static bool Covers(string pattern, string code) => pattern == code || WildcardUtil.Match(new AssetLocation(pattern), new AssetLocation(code));
 
     #endregion
 }

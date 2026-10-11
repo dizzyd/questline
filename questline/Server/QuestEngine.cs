@@ -154,6 +154,19 @@ public partial class QuestEngine
 
     bool recipesReady;
 
+    /// <summary>What the pack checker needs from this game, for <c>/questline snapshot</c>.</summary>
+    public GameSnapshot Snapshot() => new()
+    {
+        // A const, so read from the running game's assembly; written plainly it's the version this mod compiled against.
+        GameVersion = (string)typeof(Vintagestory.API.Config.GameVersion).GetField(nameof(Vintagestory.API.Config.GameVersion.ShortGameVersion))!.GetValue(null),
+        Mods = api.ModLoader.Mods.Select(m => m.Info.ModID).ToList(),
+        Items = api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()).ToList(),
+        Blocks = api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()).ToList(),
+        Entities = api.World.EntityTypes.Select(e => e.Code.ToString()).ToList(),
+        Lang = Vintagestory.API.Config.Lang.GetAllEntries().ToDictionary(e => e.Key, e => e.Value),
+        Graph = Graph,
+    };
+
     /// <summary>Adds what the recipe graph says about the quests to <see cref="Problems"/>, and tells editors.</summary>
     public void RunGraphChecks(bool resend = true)
     {

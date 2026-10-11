@@ -119,8 +119,10 @@ public class RecipeGraph
     public static IEnumerable<T> Countable<T>(IEnumerable<T> recipes) where T : RecipeBase =>
         recipes.Where(r => r.Enabled && r.RecipeOutput?.ResolvedItemStack != null);
 
+#if !PACKCHECK
     /// <summary>Scans the running game; see <see cref="RecipeGraphBuilder"/>.</summary>
     public static RecipeGraph Build(ICoreAPI api) => new RecipeGraphBuilder(api).Build();
+#endif
 
     public string ToJson() => JsonConvert.SerializeObject(this, Formatting.Indented);
 }

@@ -40,6 +40,25 @@ Phases 1 to 4 of the roadmap, minus the VS Quest importer:
 - `/questline reload | complete <quest> [player] | unlock <quest> [player] |
   reset [quest] [player] | resetserver | export | graph <item>|export`
 
+## Checking a quest pack
+
+`tools/packcheck` runs every check the server runs (missing items and text, broken requirements,
+cycles, the recipe graph's checks, spoilers) on a quest pack outside the game, like a test suite
+before a release.
+
+1. In a game with the pack's dependencies installed, run `/questline snapshot`. It writes
+   `ModConfig/questline/questline-snapshot.json`: the game's items, text and recipe graph.
+2. Run the checker on the pack's folder or zip:
+
+```bash
+dotnet build tools/packcheck -c Release
+dotnet tools/packcheck/bin/Release/net10.0/questline-packcheck.dll \
+  --snapshot questline-snapshot.json --game "$VINTAGE_STORY" mypack/
+```
+
+It prints each problem and exits 1 if any quest would be disabled (`--strict`: any problem at
+all). `--game` lets it find textures a pack borrows from the game.
+
 ## Building
 
 ```bash
