@@ -34,6 +34,21 @@ namespace Questline.Tests
             Assert.Equal(0, StationPatches.Attached().Count, "the client process patches nothing");
         }
 
+        /// <summary>The client builds the recipe graph from the recipes the server sent it; it should be the server's graph.</summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task TheClientsRecipeGraphMatchesTheServers()
+        {
+            string server = await Remote.Eval(@"
+                var g = sapi.ModLoader.GetModSystem<questline.QuestlineModSystem>().Engine.Graph;
+                return string.Join("","", g.CountByKind().Where(k => !k.Key.StartsWith(""drop"") && k.Key != ""entity-drop"" && k.Key != ""butcher"").Select(k => k.Key + ""="" + k.Value));");
+            await OnClient();
+            var graph = Client.Graph;
+            string client = string.Join(",", graph.CountByKind().Where(k => !k.Key.StartsWith("drop") && k.Key != "entity-drop" && k.Key != "butcher").Select(k => k.Key + "=" + k.Value));
+            Log($"server: {server.Trim()}");
+            Log($"client: {client}");
+            Assert.Equal(server.Trim(), client, "the same recipes on both sides");
+        }
+
         [VsTest(TimeoutMs = 60000)]
         public async Task SmithingOnTheServerReachesTheClient()
         {

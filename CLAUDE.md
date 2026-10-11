@@ -11,6 +11,7 @@ and the rendering spike settled.
 |---|---|
 | `questline/Model/` | Definitions (chapters, quests, tasks, rewards, page blocks), the `requires` tree and its JSON converter, progress and quest states. Shared by both sides |
 | `questline/Server/` | `QuestLoader` (assets and the editor's working copies → registry, validation), `QuestEngine` (progress, parties, claims, sync, save game), `QuestEditor` (working copies, export), `Trackers` and `StationPatches` (game events → task reports) |
+| `questline/Graph/` | `RecipeGraph`: every recipe and item property as edges between item codes, built on first use on either side |
 | `questline/Network/` | The packets. Channel `questline`; message types must be registered in the same order on both sides |
 | `questline/Client/` | `QuestClient` (the client's copy), the book dialog (Quests, Reference, Party and, for editors, Problems tabs; edit mode in `GuiDialogQuestBook.Editor.cs`), the canvas, the chapter rail, the HUD pins. `BookStyle` and `BookLayout` hold the type scale, colours and sizing every panel uses |
 | `tests/` | vstestkit suites; `tests/fixtures/Mods/qltest` is a content mod of test chapters, committed (it's ours, not downloaded) |
@@ -72,3 +73,7 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   before each test, so a failed run doesn't leave edits loaded into the next.
 - **Text rendered at a z below 50 is hidden** behind the dialog's own texture, which draws at
   50. The canvas draws its art just above that.
+- **The graph and Reference tests reach the server directly**, so they're `[SingleplayerOnly]`;
+  `MultiplayerTests` checks the client builds the same graph as a dedicated server.
+- **A LinkTextComponent made without the client API can't handle its link.** To follow one in a
+  test, call `Capi.LinkProtocols["handbook"](link)` as a click does.

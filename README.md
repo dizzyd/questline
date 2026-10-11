@@ -6,7 +6,7 @@ claimed in the book. The design lives in the Questline design doc.
 
 ## Status
 
-Phases 1 to 3 of the roadmap, minus the VS Quest importer:
+Phases 1 to 4 of the roadmap, minus the VS Quest importer:
 
 - Chapters from any mod's `assets/<domain>/questline/chapters/`, merged and checked at load;
   a broken quest is disabled and reported, never its chapter
@@ -30,10 +30,15 @@ Phases 1 to 3 of the roadmap, minus the VS Quest importer:
   quests on the canvas, edit them in a form, and export the result as content-mod assets.
   Working copies live in `ModConfig/questline/working/`, never in installed mods. A Problems
   tab lists what the last load found
+- The Reference tab replaces the handbook (H, and handbook links): one search across quests,
+  guides and items; the game's own item and guide pages, with each item page listing the
+  quests that need it or give it. `.questline handbook off` gives H back to the handbook
+- A recipe graph of every recipe and item property the handbook knows (about 20,600 edges for
+  vanilla, built in under 400 ms): `/questline graph <item>` and `/questline graph export`
 - The book takes 80% of the screen, and opens each chapter on all of it or on twenty quests
   around the player
 - `/questline reload | complete <quest> [player] | unlock <quest> [player] |
-  reset [quest] [player] | resetserver | export`
+  reset [quest] [player] | resetserver | export | graph <item>|export`
 
 ## Building
 

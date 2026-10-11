@@ -80,3 +80,30 @@ one by one, and the grid patch reads the public `MatchingRecipe` field in a pref
 Gate result, two processes on vsclient.home (game 1.22.6): the dedicated server holds all
 8 patched methods, the client process none, and a smithing finish on the server reaches the
 client's book as progress.
+
+## Phase 4: the recipe graph and the handbook
+
+**The graph is built, not read.** 1.22 gives every recipe registry a common shape
+(`RecipeBase.RecipeIngredients` and `RecipeOutput`, with `IRecipeIngredientBase.SatisfiesAsIngredient`
+for wildcards and tags), which covers grid, smithing, knapping, clay forming and barrel recipes.
+Cooking pot recipes and alloys are their own classes. Everything else the handbook shows under
+"Created by" is an item property, found by walking every collectible the way
+`CollectibleBehaviorHandbookTextAndExtraInfo.addCreatedByInfo` does: combustible (smelt, cook,
+bake, fire), grinding, crushing, ore → nugget, transitions, juiceable, squeezable, distillation,
+carburizing, beehive kiln, ground-stored processing, block drops, creature drops and the
+harvestable behaviour's butchering drops. Vanilla 1.22.6: 20,622 edges in 366 ms.
+
+Not yet in it: panning, charcoal pits, bloomery blooms (the graph has ore → ingot by heat, not
+ore → bloom → ingot), quern and pulveriser chains beyond the item properties, trader stock, and
+anything found only by world generation. The client's graph matches the server's for every
+recipe kind; drops weren't compared.
+
+**Hosting the handbook, for real.** Guide pages come from `config/handbook` assets plus the list
+`ModSystemSurvivalHandbook.OnInitCustomPages` hands over. A plain `GuiHandbookTextPage` is
+re-read from its `Text`; its subclasses (tutorial pages, meal recipe pages, mods') compose
+themselves under the key "richtext" exactly as item pages do, so they're hosted the same way and
+anything to go on top is prepended to that rich text's components before composing.
+
+The H keys (`handbook`, `selectionhandbook`) and the `handbook`/`handbooksearch` link protocols
+are replaced at `LevelFinalize`, after the handbook set them; `HotKey.Handler` and
+`capi.LinkProtocols` hand back the originals, so the takeover turns off without a restart.

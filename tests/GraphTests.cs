@@ -15,6 +15,7 @@ namespace Questline.Tests
     /// (smelting, grinding, crushing, transitions) is checked against an edge from that item.
     /// Runs headless too: the server has every recipe.
     /// </summary>
+    [SingleplayerOnly]
     public class GraphTests
     {
         static RecipeGraph Graph => Sapi.ModLoader.GetModSystem<QuestlineModSystem>().Engine.Graph;
