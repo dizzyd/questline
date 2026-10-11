@@ -45,7 +45,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Assert.True(await Input.Hotkey("questline"), "hotkey not handled");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
 
             Assert.Equal("qltest:basics", Book.SelectedChapter);
@@ -60,7 +60,7 @@ namespace Questline.Tests
             // The book composes textures, so it is only ever touched from the client thread.
             await OnClient();
             Book.TryOpen();
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(10);
 
             var (x, y) = Book.Canvas.ScreenPosOf(0);
@@ -87,7 +87,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.SelectQuest("qltest:read-the-book");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
 
             var comps = Book.SingleComposer.GetRichtext("detail").Components;
@@ -137,7 +137,7 @@ namespace Questline.Tests
             await OnClient();
             Book.ForgetViews();
             Book.SelectChapter("qltest:basics");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(10);
             Log($"basics: {Book.Canvas.VisibleNodes} of {Book.Canvas.Nodes.Count} in view at zoom {Book.Canvas.Zoom:0.00}");
             Assert.Equal(Book.Canvas.Nodes.Count, Book.Canvas.VisibleNodes, "the whole small chapter");
@@ -158,7 +158,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.SelectQuest("qltest:hunt");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
             Log(await Shot.Take("questline-screen-locked.png"));
 
@@ -196,7 +196,7 @@ namespace Questline.Tests
 
             await OnClient();
             Book.SelectChapter("qltest:gallery");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(30);
 
             var canvas = Book.Canvas;

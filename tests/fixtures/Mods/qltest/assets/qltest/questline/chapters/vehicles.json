@@ -39,7 +39,7 @@
             "tasks": [
                 {
                     "type": "trade",
-                    "item": "game:*"
+                    "item": "*:*"
                 }
             ]
         }

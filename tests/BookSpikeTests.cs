@@ -24,7 +24,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Assert.True(await Input.Hotkey("questline"), "hotkey not handled");
-            var book = await Gui.WaitFor<GuiDialogQuestBook>();
+            var book = await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
 
             await Frames.Wait(10);
             Log($"chapter {book.SelectedChapter}, {book.Canvas?.VisibleNodes ?? 0} nodes in view");
@@ -35,7 +35,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.ShowBenchmarkTree();
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(60);
             Log(await Shot.Take("questline-canvas-default.png"));
             Book.Canvas.ZoomAt(0, 0, 0.01f);   // clamps to fully zoomed out
@@ -66,7 +66,7 @@ namespace Questline.Tests
             var ingot = new ItemStack(Capi.World.GetItem(new AssetLocation("ingot-copper")));
 
             Assert.True(Book.ShowReference(anvil));
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(30);
 
             var text = Book.SingleComposer.GetRichtext("richtext");

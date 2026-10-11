@@ -169,17 +169,27 @@ public partial class QuestEngine
     };
 
     /// <summary>Adds what the recipe graph says about the quests to <see cref="Problems"/>, and tells editors.</summary>
+    // What the checks know of the game, kept across reloads: only the quests change.
+    GraphIndex graphIndex;
+
     public void RunGraphChecks(bool resend = true)
     {
-        var checks = new GraphChecks(Registry, Graph,
-            api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()),
-            api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()),
-            api.World.EntityTypes.Select(e => e.Code.ToString()));
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        if (graphIndex?.Graph != Graph)
+        {
+            graphIndex = new GraphIndex(Graph,
+                api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()),
+                api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()),
+                api.World.EntityTypes.Select(e => e.Code.ToString()));
+            api.Logger.Notification("[questline] graph index: {0} codes can be had, built in {1:0} ms", graphIndex.Obtainable.Count, watch.Elapsed.TotalMilliseconds);
+        }
+        var checks = new GraphChecks(Registry, graphIndex);
         foreach (var problem in checks.Run())
         {
             Problems.Add(problem);
             api.Logger.Warning("[questline] " + problem);
         }
+        api.Logger.Notification("[questline] graph checks in {0:0} ms", watch.Elapsed.TotalMilliseconds);
         if (!resend) return;
         foreach (IServerPlayer player in api.World.AllOnlinePlayers)
         {

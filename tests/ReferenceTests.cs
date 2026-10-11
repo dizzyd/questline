@@ -38,7 +38,7 @@ namespace Questline.Tests
             Assert.True(ClientSystem.Takeover.Active, "the takeover is on by default");
 
             Assert.True(await Input.Hotkey("handbook"), "H handled");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             Assert.True(Book.OnReferenceTab, "on the Reference tab");
             Assert.False(Capi.Gui.OpenedGuis.OfType<GuiDialogSurvivalHandbook>().Any(), "the vanilla handbook stays shut");
 
@@ -61,7 +61,7 @@ namespace Questline.Tests
             try
             {
                 Assert.True(await Input.Hotkey("handbook"), "H handled");
-                await Gui.WaitFor<GuiDialogSurvivalHandbook>();
+                await VsTestkit.Testing.Gui.WaitFor<GuiDialogSurvivalHandbook>();
                 Assert.False(Book.IsOpened(), "the book stays shut");
                 foreach (var d in Capi.Gui.OpenedGuis.OfType<GuiDialogSurvivalHandbook>().ToList()) d.TryClose();
             }
@@ -76,7 +76,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.SearchReference("");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(10);
             Assert.True(Book.Results.Rows.Count > 0 && Book.Results.Rows.Where(r => !r.Heading).All(r => r.Id.StartsWith("guide:")), "with no search, the guides");
             Assert.True(Book.Results.Rows.Any(r => r.Heading), "grouped under headings");
@@ -100,7 +100,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Assert.True(Book.ShowReference(new ItemStack(Capi.World.GetItem(new AssetLocation("game:flint")))));
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
 
             var page = Book.SingleComposer.GetRichtext("richtext");
@@ -119,7 +119,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.SearchReference("");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(5);
             var guides = Book.Results.Rows.Select((r, i) => (r, i)).Where(p => !p.r.Heading).Take(2).ToList();
             string first = guides[0].r.Id, second = guides[1].r.Id;

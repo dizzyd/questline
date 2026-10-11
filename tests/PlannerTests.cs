@@ -86,7 +86,7 @@ namespace Questline.Tests
             Assert.Equal(RevealLevel.Hints, Client.Reveal, "the server's hints cap the player's guide");
             Assert.True(Book.CanPlan(Axe));
             Book.ShowPlan(Axe);
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
 
             var nodes = Book.Canvas.Nodes;

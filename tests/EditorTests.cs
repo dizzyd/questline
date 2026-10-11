@@ -88,7 +88,7 @@ namespace Questline.Tests
             Assert.True(Client.Editor.ProblemsOf("qleditor:bad").Any(), "its problem reaches the editor");
 
             Book.ShowInEditor("qleditor:fixme", "qleditor:bad");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
             Assert.True(Book.Canvas.Nodes.Single().Problem, "drawn as a problem");
             Log(await Shot.Take("questline-editor-problem.png"));
@@ -103,7 +103,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.ShowInEditor("qltest:basics", null);
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(20);
 
             int flint = Book.Canvas.Nodes.ToList().FindIndex(n => n.Id == "qltest:gather-flint");
@@ -134,7 +134,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.SelectChapter("qltest:basics");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(10);
             await ClickButton("edit-start");
             await Until(() => Book.Editing, 60, "edit mode");
@@ -237,7 +237,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Book.ShowInEditor("qltest:checks", "qltest:check-gizmo-after");
-            await Gui.WaitFor<GuiDialogQuestBook>();
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(10);
 
             var quest = Book.Draft.Quests.Single(q => q.Id == "qltest:check-gizmo-after");

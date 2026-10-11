@@ -132,7 +132,7 @@ namespace Questline.Tests
             {
                 book.ForgetViews();
                 book.SelectChapter(id);
-                await Gui.WaitFor<questline.Client.GuiDialogQuestBook>();
+                await VsTestkit.Testing.Gui.WaitFor<questline.Client.GuiDialogQuestBook>();
                 await Frames.Wait(20);
                 Log(await Shot.Take($"questline-chapter-{id[10..]}.png"));
             }

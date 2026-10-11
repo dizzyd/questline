@@ -45,8 +45,9 @@ public class GraphChecks
 
     readonly QuestRegistry registry;
     readonly RecipeGraph graph;
-    readonly string[] allCodes;   // sorted, for prefix search
-    readonly HashSet<string> obtainable;
+    readonly GraphIndex index;
+    HashSet<string> obtainable => index.Obtainable;
+    string[] Candidates(string pattern) => index.Candidates(pattern);
 
     public List<string> Problems { get; } = [];
 
@@ -54,13 +55,14 @@ public class GraphChecks
     /// <param name="items">Every item code.</param>
     /// <param name="entities">Every creature code: their drops can be had.</param>
     public GraphChecks(QuestRegistry registry, RecipeGraph graph, IEnumerable<string> blocks, IEnumerable<string> items, IEnumerable<string> entities)
+        : this(registry, new GraphIndex(graph, blocks, items, entities)) { }
+
+    /// <summary>With an index already built: it depends only on the game, so a reload reuses it.</summary>
+    public GraphChecks(QuestRegistry registry, GraphIndex index)
     {
         this.registry = registry;
-        this.graph = graph;
-        var blockList = blocks.ToList();
-        var entityList = entities.ToList();
-        allCodes = blockList.Concat(items).Concat(entityList).Distinct().OrderBy(c => c, StringComparer.Ordinal).ToArray();
-        obtainable = Obtainable(blockList.Concat(entityList));
+        this.index = index;
+        graph = index.Graph;
     }
 
     public List<string> Run()
@@ -93,107 +95,6 @@ public class GraphChecks
         return Problems;
     }
 
-    #region Obtainable
-
-    readonly Dictionary<string, string[]> matchCache = [];
-
-    /// <summary>
-    /// Everything that can be had: the seeds, then whatever an edge makes once all its inputs can
-    /// be had. A worklist: each code, once had, wakes only the edges waiting on it, and each
-    /// wildcard is matched against the known codes once.
-    /// </summary>
-    HashSet<string> Obtainable(IEnumerable<string> seeds)
-    {
-        var have = new HashSet<string>();
-        var queue = new Queue<string>();
-        var waiting = new Dictionary<string, List<(int Edge, int Input)>>();
-        var unmet = new int[graph.Edges.Count];
-        var inputMet = new List<bool[]>(graph.Edges.Count);
-
-        void Gain(string code)
-        {
-            if (have.Add(code)) queue.Enqueue(code);
-        }
-
-        for (int e = 0; e < graph.Edges.Count; e++)
-        {
-            var edge = graph.Edges[e];
-            var met = new bool[edge.Inputs.Count];
-            inputMet.Add(met);
-            for (int i = 0; i < edge.Inputs.Count; i++)
-            {
-                var candidates = edge.Inputs[i].Codes.SelectMany(Candidates).ToList();
-                if (edge.Inputs[i].Codes.Contains("*:*") || candidates.Count == 0 && edge.Inputs[i].Codes.Any(c => c.Contains('*') && !c.Contains(':')))
-                {
-                    met[i] = true;
-                    continue;
-                }
-                unmet[e]++;
-                foreach (string code in candidates)
-                {
-                    if (!waiting.TryGetValue(code, out var list)) waiting[code] = list = [];
-                    list.Add((e, i));
-                }
-            }
-            if (unmet[e] == 0) foreach (var output in edge.Outputs) Gain(output.Code);
-        }
-
-        foreach (string seed in seeds) Gain(seed);
-        while (queue.Count > 0)
-        {
-            if (!waiting.TryGetValue(queue.Dequeue(), out var list)) continue;
-            foreach (var (e, i) in list)
-            {
-                if (inputMet[e][i]) continue;
-                inputMet[e][i] = true;
-                if (--unmet[e] == 0) foreach (var output in graph.Edges[e].Outputs) Gain(output.Code);
-            }
-        }
-        return have;
-    }
-
-    string[] Candidates(string pattern)
-    {
-        if (!matchCache.TryGetValue(pattern, out var codes)) matchCache[pattern] = codes = TaskDef.IsPattern(pattern) ? Matching(pattern).ToArray() : [pattern.Contains(':') ? pattern : "game:" + pattern];
-        return codes;
-    }
-
-    /// <summary>Whether anything matching this code can be had.</summary>
-    public bool IsObtainable(string pattern) => Candidates(pattern).Any(obtainable.Contains);
-
-    /// <summary>The known codes a pattern matches, found by the part before its first wildcard.</summary>
-    IEnumerable<string> Matching(string pattern)
-    {
-        if (!pattern.Contains(':')) pattern = "game:" + pattern;
-        // A regular expression has no prefix to search by: try every code.
-        if (pattern.Contains(":@"))
-        {
-            var regex = new AssetLocation(pattern);
-            foreach (string code in allCodes.Where(c => WildcardUtil.Match(regex, new AssetLocation(c)))) yield return code;
-            yield break;
-        }
-        int star = pattern.IndexOf('*');
-        if (star < 0)
-        {
-            if (Array.BinarySearch(allCodes, pattern, StringComparer.Ordinal) >= 0) yield return pattern;
-            yield break;
-        }
-
-        string prefix = pattern[..star];
-        var loc = new AssetLocation(pattern);
-        int i = Array.BinarySearch(allCodes, prefix, StringComparer.Ordinal);
-        if (i < 0) i = ~i;
-        // A star in the domain matches everywhere; otherwise only codes starting with the prefix can.
-        int start = prefix.Contains(':') ? i : 0;
-        for (int j = start; j < allCodes.Length; j++)
-        {
-            string code = allCodes[j];
-            if (prefix.Contains(':') && !code.StartsWith(prefix, StringComparison.Ordinal)) break;
-            if (WildcardUtil.Match(loc, new AssetLocation(code))) yield return code;
-        }
-    }
-
-    #endregion
 
     #region Order
 
@@ -279,4 +180,126 @@ public class GraphChecks
     static bool Covers(string pattern, string code) => pattern == code || WildcardUtil.Match(new AssetLocation(pattern), new AssetLocation(code));
 
     #endregion
+}
+
+/// <summary>
+/// What the checks need from the game alone, built once per recipe graph: every code, sorted for
+/// prefix search, and what can be had. A reload changes the quests, never this, so the server
+/// keeps it; on a large pack building it takes seconds.
+/// </summary>
+public class GraphIndex
+{
+
+    readonly Dictionary<string, string[]> matchCache = [];
+    readonly string[] allCodes;   // sorted, for prefix search
+
+    public RecipeGraph Graph { get; }
+    /// <summary>Every code that can be had in the game.</summary>
+    public HashSet<string> Obtainable { get; }
+
+    public GraphIndex(RecipeGraph graph, IEnumerable<string> blocks, IEnumerable<string> items, IEnumerable<string> entities)
+    {
+        Graph = graph;
+        var blockList = blocks.ToList();
+        var entityList = entities.ToList();
+        allCodes = blockList.Concat(items).Concat(entityList).Distinct().OrderBy(c => c, StringComparer.Ordinal).ToArray();
+        Obtainable = FindObtainable(blockList.Concat(entityList));
+    }
+
+    /// <summary>
+    /// Everything that can be had: the seeds, then whatever an edge makes once all its inputs can
+    /// be had. A worklist: each code, once had, wakes only the edges waiting on it, and each
+    /// wildcard is matched against the known codes once.
+    /// </summary>
+    HashSet<string> FindObtainable(IEnumerable<string> seeds)
+    {
+        var have = new HashSet<string>();
+        var queue = new Queue<string>();
+        var waiting = new Dictionary<string, List<(int Edge, int Input)>>();
+        var unmet = new int[Graph.Edges.Count];
+        var inputMet = new List<bool[]>(Graph.Edges.Count);
+
+        void Gain(string code)
+        {
+            if (have.Add(code)) queue.Enqueue(code);
+        }
+
+        for (int e = 0; e < Graph.Edges.Count; e++)
+        {
+            var edge = Graph.Edges[e];
+            var met = new bool[edge.Inputs.Count];
+            inputMet.Add(met);
+            for (int i = 0; i < edge.Inputs.Count; i++)
+            {
+                var candidates = edge.Inputs[i].Codes.SelectMany(Candidates).ToList();
+                if (edge.Inputs[i].Codes.Contains("*:*") || candidates.Count == 0 && edge.Inputs[i].Codes.Any(c => c.Contains('*') && !c.Contains(':')))
+                {
+                    met[i] = true;
+                    continue;
+                }
+                unmet[e]++;
+                foreach (string code in candidates)
+                {
+                    if (!waiting.TryGetValue(code, out var list)) waiting[code] = list = [];
+                    list.Add((e, i));
+                }
+            }
+            if (unmet[e] == 0) foreach (var output in edge.Outputs) Gain(output.Code);
+        }
+
+        foreach (string seed in seeds) Gain(seed);
+        while (queue.Count > 0)
+        {
+            if (!waiting.TryGetValue(queue.Dequeue(), out var list)) continue;
+            foreach (var (e, i) in list)
+            {
+                if (inputMet[e][i]) continue;
+                inputMet[e][i] = true;
+                if (--unmet[e] == 0) foreach (var output in Graph.Edges[e].Outputs) Gain(output.Code);
+            }
+        }
+        return have;
+    }
+
+    public string[] Candidates(string pattern)
+    {
+        if (!matchCache.TryGetValue(pattern, out var codes)) matchCache[pattern] = codes = TaskDef.IsPattern(pattern) ? Matching(pattern).ToArray() : [pattern.Contains(':') ? pattern : "game:" + pattern];
+        return codes;
+    }
+
+    /// <summary>Whether anything matching this code can be had.</summary>
+    public bool IsObtainable(string pattern) => Candidates(pattern).Any(Obtainable.Contains);
+
+    /// <summary>The known codes a pattern matches, found by the part before its first wildcard.</summary>
+    IEnumerable<string> Matching(string pattern)
+    {
+        if (!pattern.Contains(':')) pattern = "game:" + pattern;
+        // A regular expression has no prefix to search by: try every code.
+        if (pattern.Contains(":@"))
+        {
+            var regex = new AssetLocation(pattern);
+            foreach (string code in allCodes.Where(c => WildcardUtil.Match(regex, new AssetLocation(c)))) yield return code;
+            yield break;
+        }
+        int star = pattern.IndexOf('*');
+        if (star < 0)
+        {
+            if (Array.BinarySearch(allCodes, pattern, StringComparer.Ordinal) >= 0) yield return pattern;
+            yield break;
+        }
+
+        string prefix = pattern[..star];
+        var loc = new AssetLocation(pattern);
+        int i = Array.BinarySearch(allCodes, prefix, StringComparer.Ordinal);
+        if (i < 0) i = ~i;
+        // A star in the domain matches everywhere; otherwise only codes starting with the prefix can.
+        int start = prefix.Contains(':') ? i : 0;
+        for (int j = start; j < allCodes.Length; j++)
+        {
+            string code = allCodes[j];
+            if (prefix.Contains(':') && !code.StartsWith(prefix, StringComparison.Ordinal)) break;
+            if (WildcardUtil.Match(loc, new AssetLocation(code))) yield return code;
+        }
+    }
+
 }

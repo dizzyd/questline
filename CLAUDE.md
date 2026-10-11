@@ -108,3 +108,18 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   the "how is it made" checks; the code must still exist. Use it only for that.
 - **A target can be a regular expression,** as the game's matcher allows: `game:@(redmeat|poultry)-cooked`.
   Use it where a wildcard would take in things the quest doesn't mean.
+- **The whole of Dizzy's Best Pack runs on the box** for a release check. The pack targets 1.22.7,
+  which lives at `~/vs-installs/1.22.7` there, outside Cairn's games folder so other slots keep
+  defaulting to 1.22.6. Its zips are in `~/questline-pack-mods`. Point the run at both, give the
+  boot time for a big pack's worldgen, and keep the fixtures:
+  ```bash
+  env VINTAGE_STORY=$HOME/vs-installs/1.22.7 DOTNET_ROOT=$HOME/.cairn/runtimes/10.0.11-linux-x64 \
+      PATH=$HOME/.cairn/runtimes/10.0.11-linux-x64:$PATH VSTK_BOOT_TIMEOUT=900 \
+    bash scripts/run.sh mods/questline/tests --mod mods/questline/questline \
+      --mods "$HOME/questline-pack-mods" --mods "$HOME/vstestkit-questline/mods/questline/tests/fixtures/Mods" --client
+  ```
+  On 1.22.6 two of its mods refuse to load and the client gives up before the world opens.
+- **Tests write `VsTestkit.Testing.Gui` in full.** A pack mod (`gui`) has a top-level `Gui`
+  namespace, which hides the testkit's class, and an alias can't share its name.
+- **The graph index is built once per recipe graph** (`GraphIndex`, about 5 s on the whole pack)
+  and reused by every reload, which then takes milliseconds. Don't rebuild it per reload.
