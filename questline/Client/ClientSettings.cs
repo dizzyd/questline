@@ -14,6 +14,12 @@ public class ClientSettings
     /// <summary>H opens the book's Reference tab instead of the vanilla handbook, and handbook links open there too.</summary>
     public bool TakeOverHandbook = true;
 
+    /// <summary>How much the goal planner shows, up to what the server allows: guide, hints or discovery.</summary>
+    public string PlannerLevel = "guide";
+
+    /// <summary>Each world's goal plans: the item codes the player is working towards.</summary>
+    public Dictionary<string, List<string>> Plans = [];
+
     /// <summary>Pinned quest ids, per world (by savegame identifier), shown in the HUD tracker.</summary>
     public Dictionary<string, List<string>> Pins = [];
 }

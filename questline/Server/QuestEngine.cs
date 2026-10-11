@@ -741,7 +741,7 @@ public partial class QuestEngine
 
     void SendDefinitions(IServerPlayer player)
     {
-        channel.SendPacket(new DefinitionsPacket { RegistryJson = Registry.ToJson() }, player);
+        channel.SendPacket(new DefinitionsPacket { RegistryJson = Registry.ToJson(), RevealLevel = Config.RevealLevel }, player);
         sent.Remove(player.PlayerUID);
         Sync(player);
         if (QuestEditor.CanEdit(player)) SendEditor(player);

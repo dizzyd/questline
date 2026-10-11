@@ -107,6 +107,7 @@ public class QuestClient
 
     void OnDefinitions(DefinitionsPacket packet)
     {
+        ServerReveal = ParseLevel(packet.RevealLevel, RevealLevel.Hints);
         Registry = QuestRegistry.FromJson(packet.RegistryJson);
         states.Clear();
         Changed?.Invoke();
@@ -198,6 +199,75 @@ public class QuestClient
     public void Claim(string questId, int[] choices) => channel.SendPacket(new ClaimRequest { QuestId = questId, Choices = choices });
 
     public void Check(string questId, int taskIndex) => channel.SendPacket(new CheckboxRequest { QuestId = questId, TaskIndex = taskIndex });
+
+    #region Planner
+
+    /// <summary>The most the server lets the planner show.</summary>
+    public RevealLevel ServerReveal { get; private set; } = RevealLevel.Hints;
+
+    /// <summary>What the planner shows this player: their own choice, up to the server's limit.</summary>
+    public RevealLevel Reveal => (RevealLevel)Math.Min((int)ServerReveal, (int)ParseLevel(Settings.PlannerLevel, RevealLevel.Guide));
+
+    public static RevealLevel ParseLevel(string value, RevealLevel fallback) => Enum.TryParse<RevealLevel>(value, true, out var level) ? level : fallback;
+
+    public void SetPlannerLevel(RevealLevel level)
+    {
+        Settings.PlannerLevel = level.ToString().ToLowerInvariant();
+        SaveSettings();
+        Changed?.Invoke();
+    }
+
+    /// <summary>This world's goal plans, by target item code.</summary>
+    public IReadOnlyList<string> Plans => Settings.Plans.TryGetValue(capi.World.SavegameIdentifier, out var plans) ? plans : [];
+
+    public void AddPlan(string code)
+    {
+        string world = capi.World.SavegameIdentifier;
+        if (!Settings.Plans.TryGetValue(world, out var plans)) Settings.Plans[world] = plans = [];
+        if (!plans.Contains(code)) plans.Add(code);
+        SaveSettings();
+        Changed?.Invoke();
+    }
+
+    public void RemovePlan(string code)
+    {
+        if (!Settings.Plans.TryGetValue(capi.World.SavegameIdentifier, out var plans) || !plans.Remove(code)) return;
+        SaveSettings();
+        Changed?.Invoke();
+    }
+
+    readonly Dictionary<string, string[]> matchCache = [];
+
+    /// <summary>A planner over this player's inventory as it is now.</summary>
+    public Planner MakePlanner()
+    {
+        var counts = new Dictionary<string, int>();
+        foreach (string name in new[] { GlobalConstants.hotBarInvClassName, GlobalConstants.backpackInvClassName })
+        {
+            if (capi.World.Player.InventoryManager.GetOwnInventory(name) is not { } inv) continue;
+            foreach (var slot in inv)
+            {
+                if (slot.Itemstack?.Collectible?.Code is not { } code) continue;
+                string key = code.ToString();
+                counts[key] = counts.GetValueOrDefault(key) + slot.StackSize;
+            }
+        }
+        return new Planner(Graph, code => counts.GetValueOrDefault(code), CodesMatching, IsSpoiler);
+    }
+
+    IEnumerable<string> CodesMatching(string pattern)
+    {
+        if (!matchCache.TryGetValue(pattern, out var codes))
+        {
+            var loc = new Vintagestory.API.Common.AssetLocation(pattern);
+            matchCache[pattern] = codes = capi.World.Collectibles.Where(c => c?.Code != null && Vintagestory.API.Util.WildcardUtil.Match(loc, c.Code)).Select(c => c.Code.ToString()).ToArray();
+        }
+        return codes;
+    }
+
+    public static bool IsSpoiler(string code) => GraphChecks.Spoilers.Any(s => Vintagestory.API.Util.WildcardUtil.Match(new Vintagestory.API.Common.AssetLocation(s), new Vintagestory.API.Common.AssetLocation(code)));
+
+    #endregion
 
     /// <summary>Asks the server to create, invite, accept, decline, leave or kick. See <see cref="PartyRequest"/>.</summary>
     public void PartyAction(string action, string arg = null) => channel.SendPacket(new PartyRequest { Action = action, Arg = arg });

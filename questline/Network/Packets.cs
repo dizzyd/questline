@@ -9,6 +9,8 @@ namespace questline.Network;
 public class DefinitionsPacket
 {
     [ProtoMember(1)] public string RegistryJson;
+    /// <summary>The server's limit on the goal planner: guide, hints or discovery.</summary>
+    [ProtoMember(2)] public string RevealLevel;
 }
 
 /// <summary>Quest states for one player. The first after definitions is <see cref="Full"/>; later ones carry only changes.</summary>

@@ -16,4 +16,10 @@ public class QuestlineConfig
 
     /// <summary>The asset domain chapters made in the editor belong to, and are exported under.</summary>
     public string EditorDomain = "questpack";
+
+    /// <summary>
+    /// The most the goal planner may show players: "guide" (every step and recipe), "hints" (the
+    /// next things to get, not how) or "discovery" (no planner). Each player can choose less.
+    /// </summary>
+    public string RevealLevel = "hints";
 }

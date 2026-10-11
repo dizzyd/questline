@@ -102,6 +102,11 @@ public partial class GuiDialogQuestBook
         double left = x;
         if (back.Count > 0) left += AddRowButton(composer, Lang.Get("questline:back"), left, false, GoBack, "back") + Gap / 2;
         if (forward.Count > 0) AddRowButton(composer, Lang.Get("questline:forward"), left, false, GoForward, "forward");
+        if (refPage?.StartsWith("item:") == true && stackByPageCode?.TryGetValue(refPage[5..], out var shown) == true
+            && shown.Collectible.Code.ToString() is var code && CanPlan(code))
+        {
+            AddRowButton(composer, Lang.Get(client.Plans.Contains(code) ? "questline:plan-open" : "questline:plan-start"), Width, true, () => { ShowPlan(code); return true; }, "plan-start", primary: true);
+        }
         if (refPage?.StartsWith("quest:") == true)
         {
             string id = refPage["quest:".Length..];

@@ -174,10 +174,6 @@ public partial class GuiDialogQuestBook : GuiDialog
 
         // Editors get a row of buttons under the canvas, starting with Edit.
         var canvasBounds = ElementBounds.Fixed(RailWidth + Gap, ContentY, CanvasWidth, client.CanEdit ? PanelHeight : ContentHeight);
-        if (client.CanEdit && spikeNodes == null)
-        {
-            AddRowButton(composer, Lang.Get("questline:edit-start"), RailWidth + Gap, false, () => { SetEditing(true); return true; }, "edit-start");
-        }
 
         if (spikeNodes != null)
         {
@@ -197,19 +193,32 @@ public partial class GuiDialogQuestBook : GuiDialog
             return;
         }
 
-        var questlines = client.Registry.Questlines.Where(ql => client.Registry.Chapters.Any(c => c.Questline == ql.Id)).ToList();
-        if (questlineId == null || questlines.All(ql => ql.Id != questlineId)) questlineId = questlines.FirstOrDefault()?.Id;
+        // The questlines with chapters, and the player's own plans as one more when there are any.
+        var questlines = client.Registry.Questlines.Where(ql => client.Registry.Chapters.Any(c => c.Questline == ql.Id)).Select(ql => ql.Id).ToList();
+        if (PlansAvailable) questlines.Add(PlansQuestline);
+        if (questlineId == null || !questlines.Contains(questlineId)) questlineId = questlines.FirstOrDefault();
 
         double railTop = ContentY;
         if (questlines.Count > 1)
         {
             composer.AddDropDown(
-                questlines.Select(ql => ql.Id).ToArray(),
-                questlines.Select(ql => text.QuestlineTitle(ql.Id)).ToArray(),
-                questlines.FindIndex(ql => ql.Id == questlineId),
+                questlines.ToArray(),
+                questlines.Select(id => id == PlansQuestline ? Lang.Get("questline:plans-title") : text.QuestlineTitle(id)).ToArray(),
+                questlines.IndexOf(questlineId),
                 (code, _) => { questlineId = code; chapterId = questId = null; Compose(); },
                 ElementBounds.Fixed(0, ContentY, RailWidth, ButtonHeight), "questlines");
             railTop += ButtonHeight + Gap / 2;
+        }
+
+        if (questlineId == PlansQuestline)
+        {
+            ComposePlans(composer, railTop);
+            return;
+        }
+
+        if (client.CanEdit)
+        {
+            AddRowButton(composer, Lang.Get("questline:edit-start"), RailWidth + Gap, false, () => { SetEditing(true); return true; }, "edit-start");
         }
 
         var chapters = VisibleChapters();
