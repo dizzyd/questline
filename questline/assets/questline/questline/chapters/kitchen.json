@@ -22,6 +22,13 @@
                     "type": "cook",
                     "item": "game:poultry-cooked"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 4
+                }
             ]
         },
         {
@@ -35,6 +42,13 @@
                 {
                     "type": "obtain",
                     "item": "game:bowl-*-meal"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:redmeat-raw",
+                    "count": 2
                 }
             ]
         },
@@ -54,6 +68,13 @@
                     "item": "game:dough-*",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
             ]
         },
         {
@@ -67,6 +88,13 @@
                 {
                     "type": "craft",
                     "item": "game:table-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -90,6 +118,13 @@
                     "type": "cook",
                     "item": "game:claypot-*-cooked"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-onion",
+                    "count": 3
+                }
             ]
         },
         {
@@ -108,6 +143,13 @@
                 {
                     "type": "cook",
                     "item": "game:claypot-*-cooked"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-parsnip",
+                    "count": 3
                 }
             ]
         },
@@ -128,6 +170,13 @@
                     "type": "cook",
                     "item": "game:claypot-*-cooked"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:redmeat-raw",
+                    "count": 2
+                }
             ]
         },
         {
@@ -145,6 +194,13 @@
                     "type": "obtain",
                     "item": "game:bread-*-perfect"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
+                }
             ]
         },
         {
@@ -161,6 +217,13 @@
                 {
                     "type": "obtain",
                     "item": "game:pie-perfect"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -193,6 +256,28 @@
                     "type": "obtain",
                     "item": "game:bread-*-perfect",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:seeds-pumpkin",
+                            "count": 4
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:seeds-carrot",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 5
+                        }
+                    ]
                 }
             ]
         }

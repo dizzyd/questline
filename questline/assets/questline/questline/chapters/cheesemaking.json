@@ -16,6 +16,13 @@
                     "item": "game:milkportion",
                     "count": 10
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -34,6 +41,13 @@
                     "type": "obtain",
                     "item": "game:curdledmilkportion"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:salt",
+                    "count": 3
+                }
             ]
         },
         {
@@ -50,6 +64,13 @@
                 {
                     "type": "obtain",
                     "item": "game:cottagecheeseportion"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:salt",
+                    "count": 5
                 }
             ]
         },
@@ -85,6 +106,13 @@
                     "type": "obtain",
                     "item": "game:cheese-waxedcheddar-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -104,7 +132,29 @@
                 }
             ],
             "shape": "gear",
-            "size": 1.25
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:salt",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 8
+                        }
+                    ]
+                }
+            ]
         },
         {
             "id": "age-blue-cheese",
@@ -117,6 +167,13 @@
                 {
                     "type": "obtain",
                     "item": "game:cheese-blue-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
                 }
             ]
         }

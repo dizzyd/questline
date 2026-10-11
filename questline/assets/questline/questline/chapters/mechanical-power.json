@@ -16,6 +16,13 @@
                     "item": "game:resin",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -33,6 +40,13 @@
                     "type": "craft",
                     "item": "game:sail",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -53,6 +67,13 @@
                     "type": "smith",
                     "item": "game:metalplate-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -69,6 +90,13 @@
                 {
                     "type": "clayform",
                     "item": "game:toolmold-*-raw-helvehammer"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
                 }
             ]
         },
@@ -87,6 +115,13 @@
                     "type": "craft",
                     "item": "game:windmillrotor-wood-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -101,6 +136,13 @@
                     "type": "craft",
                     "item": "game:woodenaxle-*",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -121,7 +163,14 @@
                     "count": 2
                 }
             ],
-            "icon": "game:angledgears-s"
+            "icon": "game:angledgears-s",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
         },
         {
             "id": "cast-helve-head",
@@ -134,6 +183,13 @@
                 {
                     "type": "smelt",
                     "item": "game:helvehammerhead-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -148,6 +204,13 @@
                 {
                     "type": "place",
                     "block": "game:windmillrotor-wood-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -172,6 +235,13 @@
                     "type": "place",
                     "block": "game:angledgears-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -194,6 +264,13 @@
                     "type": "craft",
                     "item": "game:pulverizertoggle-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -208,6 +285,13 @@
                     "type": "craft",
                     "item": "game:helvehammer-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -221,6 +305,13 @@
                 {
                     "type": "place",
                     "block": "game:grindingwheel-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -239,6 +330,13 @@
                     "type": "place",
                     "block": "game:quern-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -254,7 +352,14 @@
                     "block": "game:largegear3"
                 }
             ],
-            "icon": "game:largegearsection-wood"
+            "icon": "game:largegearsection-wood",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
         },
         {
             "id": "make-pulverizer",
@@ -270,6 +375,13 @@
                 {
                     "type": "place",
                     "block": "game:pulverizerframe-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
                 }
             ]
         },
@@ -297,9 +409,24 @@
             "size": 1.25,
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:fat-rendered",
-                    "count": 4
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:fat-rendered",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 8
+                        }
+                    ]
                 }
             ]
         },
@@ -315,6 +442,13 @@
                     "type": "obtain",
                     "item": "game:crushed-quartz",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         }

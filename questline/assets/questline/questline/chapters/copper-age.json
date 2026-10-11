@@ -15,6 +15,13 @@
                     "type": "craft",
                     "item": "game:pan-wooden"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 4
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                     "type": "obtain",
                     "item": "game:charcoal",
                     "count": 16
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
                 }
             ]
         },
@@ -45,6 +59,13 @@
                     "item": "game:nugget-nativecopper",
                     "count": 20
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 4
+                }
             ]
         },
         {
@@ -58,6 +79,13 @@
                 {
                     "type": "clayform",
                     "item": "game:crucible-*-raw"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
                 }
             ]
         },
@@ -73,6 +101,13 @@
                     "type": "clayform",
                     "item": "game:toolmold-*-raw-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
             ]
         },
         {
@@ -86,6 +121,13 @@
                 {
                     "type": "craft",
                     "item": "game:tongs"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 4
                 }
             ]
         },
@@ -103,6 +145,13 @@
                 {
                     "type": "obtain",
                     "item": "game:crucible-*-fired"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 4
                 }
             ]
         },
@@ -123,6 +172,13 @@
                     "type": "smelt",
                     "item": "game:*head-copper"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:nugget-nativecopper",
+                    "count": 5
+                }
             ]
         },
         {
@@ -136,6 +192,13 @@
                 {
                     "type": "clayform",
                     "item": "game:ingotmold-*-raw"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 4
                 }
             ]
         },
@@ -151,6 +214,13 @@
                     "type": "craft",
                     "item": "game:pickaxe-copper"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 6
+                }
             ]
         },
         {
@@ -165,6 +235,13 @@
                     "type": "craft",
                     "item": "game:axe-felling-copper"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -178,6 +255,13 @@
                 {
                     "type": "craft",
                     "item": "game:hammer-copper"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:nugget-nativecopper",
+                    "count": 5
                 }
             ]
         },
@@ -196,6 +280,13 @@
                     "type": "smelt",
                     "item": "game:ingot-copper"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 6
+                }
             ]
         },
         {
@@ -210,6 +301,13 @@
                     "type": "craft",
                     "item": "game:forge"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
+                }
             ]
         },
         {
@@ -223,6 +321,13 @@
                 {
                     "type": "smelt",
                     "item": "game:anvil-copper"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -247,9 +352,24 @@
             ],
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:charcoal",
-                    "count": 16
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 24
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-copper",
+                            "count": 2
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
                 }
             ]
         },
@@ -265,6 +385,13 @@
                     "type": "craft",
                     "item": "game:saw-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -278,6 +405,13 @@
                 {
                     "type": "craft",
                     "item": "game:knife-generic-copper"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -293,6 +427,13 @@
                     "type": "craft",
                     "item": "game:scythe-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-spelt",
+                    "count": 6
+                }
             ]
         },
         {
@@ -306,6 +447,13 @@
                 {
                     "type": "craft",
                     "item": "game:shovel-copper"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         }

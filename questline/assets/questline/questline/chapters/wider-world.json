@@ -16,6 +16,13 @@
                     "item": "game:gear-rusty",
                     "count": 5
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                 {
                     "type": "trade",
                     "item": "game:*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -45,6 +59,13 @@
                     "block": "game:rock-*",
                     "count": 32
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -59,6 +80,13 @@
                     "type": "obtain",
                     "item": "game:stone-limestone",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -75,7 +103,14 @@
                     "entity": "game:drifter-*"
                 }
             ],
-            "icon": "game:creature-drifter-normal"
+            "icon": "game:creature-drifter-normal",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
         },
         {
             "id": "find-temporal-gear",
@@ -90,6 +125,28 @@
                 {
                     "type": "obtain",
                     "item": "game:gear-temporal"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 24
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:rope",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 10
+                        }
+                    ]
                 }
             ]
         },
@@ -133,6 +190,13 @@
                     "type": "craft",
                     "item": "game:poultice-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -148,6 +212,13 @@
                     "item": "game:bandage-clean",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -161,6 +232,13 @@
                 {
                     "type": "craft",
                     "item": "game:bandage-alcoholed"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         }

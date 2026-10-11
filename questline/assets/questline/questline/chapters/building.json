@@ -16,6 +16,13 @@
                     "item": "game:plank-*",
                     "count": 16
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -30,6 +37,13 @@
                     "type": "craft",
                     "item": "game:door-solid-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -43,6 +57,13 @@
                 {
                     "type": "craft",
                     "item": "game:ladder-wood-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -63,6 +84,13 @@
                     "type": "craft",
                     "item": "game:woodenfencegate-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -78,6 +106,13 @@
                     "item": "game:slantedroofing-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -91,6 +126,13 @@
                 {
                     "type": "smith",
                     "item": "game:metalnailsandstrips-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -109,6 +151,13 @@
                     "type": "craft",
                     "item": "game:chest-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -123,6 +172,13 @@
                     "type": "craft",
                     "item": "game:oillamp-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fat",
+                    "count": 2
+                }
             ]
         },
         {
@@ -136,6 +192,13 @@
                 {
                     "type": "smith",
                     "item": "game:chisel-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -152,6 +215,13 @@
                     "item": "game:stonebrick-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -167,6 +237,13 @@
                     "item": "game:lime",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -180,6 +257,13 @@
                 {
                     "type": "cook",
                     "item": "game:quicklime",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
                     "count": 8
                 }
             ]
@@ -200,6 +284,13 @@
                     "item": "game:slakedlimeportion",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -215,6 +306,13 @@
                     "item": "game:plaster-*",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -229,6 +327,13 @@
                     "type": "obtain",
                     "item": "game:mortar",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -249,6 +354,28 @@
                     "type": "craft",
                     "item": "game:stonebricks-*",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:plank-oak",
+                            "count": 24
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:lime",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
                 }
             ]
         }

@@ -15,6 +15,13 @@
                     "item": "game:flint",
                     "count": 3
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -28,6 +35,13 @@
                     "type": "obtain",
                     "item": "game:stick",
                     "count": 6
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -43,6 +57,13 @@
                     "item": "game:fruit-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -56,6 +77,13 @@
                 {
                     "type": "knap",
                     "item": "game:axehead-flint"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 2
                 }
             ]
         },
@@ -71,6 +99,13 @@
                     "type": "knap",
                     "item": "game:knifeblade-flint"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 2
+                }
             ]
         },
         {
@@ -85,6 +120,13 @@
                     "type": "knap",
                     "item": "game:spearhead-flint"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 2
+                }
             ]
         },
         {
@@ -98,6 +140,13 @@
                 {
                     "type": "craft",
                     "item": "game:firestarter"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:drygrass",
+                    "count": 4
                 }
             ]
         },
@@ -116,6 +165,13 @@
                     "type": "craft",
                     "item": "game:axe-flint"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 4
+                }
             ]
         },
         {
@@ -133,6 +189,13 @@
                     "type": "craft",
                     "item": "game:knife-generic-flint"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -149,6 +212,13 @@
                 {
                     "type": "craft",
                     "item": "game:spear-generic-flint"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flint",
+                    "count": 2
                 }
             ]
         },
@@ -171,6 +241,13 @@
                     "type": "craft",
                     "item": "game:shovel-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:cattailtops",
+                    "count": 4
+                }
             ]
         },
         {
@@ -185,6 +262,13 @@
                     "type": "obtain",
                     "item": "game:firewood",
                     "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flint",
+                    "count": 2
                 }
             ]
         },
@@ -203,6 +287,13 @@
                     "type": "craft",
                     "item": "game:club-generic-wood"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -217,6 +308,13 @@
                     "type": "obtain",
                     "item": "game:drygrass",
                     "count": 10
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 4
                 }
             ]
         },
@@ -233,6 +331,13 @@
                     "item": "game:cattailtops",
                     "count": 10
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:drygrass",
+                    "count": 4
+                }
             ]
         },
         {
@@ -248,7 +353,19 @@
                     "entity": "game:chicken-*"
                 }
             ],
-            "icon": "game:spear-generic-flint"
+            "icon": "game:spear-generic-flint",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:drygrass",
+                    "count": 4
+                },
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
         },
         {
             "id": "ground-storage",
@@ -279,14 +396,14 @@
                     "type": "checkbox"
                 }
             ],
+            "icon": "game:firepit-lit",
             "rewards": [
                 {
                     "type": "item",
                     "item": "game:firewood",
                     "count": 4
                 }
-            ],
-            "icon": "game:firepit-lit"
+            ]
         },
         {
             "id": "make-basket",
@@ -299,6 +416,13 @@
                 {
                     "type": "craft",
                     "item": "game:basket-normal-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -314,6 +438,13 @@
                     "type": "craft",
                     "item": "game:bed-hay-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 4
+                }
             ]
         },
         {
@@ -328,6 +459,13 @@
                     "type": "craft",
                     "item": "game:torch-basic-*",
                     "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 4
                 }
             ]
         },
@@ -345,6 +483,13 @@
                 {
                     "type": "cook",
                     "item": "game:vegetable-cookedcattailroot"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -369,9 +514,24 @@
             ],
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:firewood",
-                    "count": 8
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 16
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:redmeat-raw",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 3
+                        }
+                    ]
                 }
             ]
         }

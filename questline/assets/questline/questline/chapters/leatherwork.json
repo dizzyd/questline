@@ -16,6 +16,13 @@
                     "item": "game:hide-raw-*",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -34,6 +41,13 @@
                     "item": "game:limewaterportion",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -48,6 +62,13 @@
                     "type": "obtain",
                     "item": "game:weaktanninportion",
                     "count": 10
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -66,6 +87,13 @@
                     "type": "craft",
                     "item": "game:hide-salted-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:hide-raw-small",
+                    "count": 1
+                }
             ]
         },
         {
@@ -83,6 +111,13 @@
                     "type": "obtain",
                     "item": "game:hide-soaked-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -98,6 +133,13 @@
                     "item": "game:strongtanninportion",
                     "count": 10
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -111,6 +153,13 @@
                 {
                     "type": "craft",
                     "item": "game:hide-scraped-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -128,6 +177,13 @@
                 {
                     "type": "obtain",
                     "item": "game:hide-prepared-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -149,6 +205,28 @@
                     "item": "game:leather-normal-plain",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:hide-raw-medium",
+                            "count": 2
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:fat",
+                            "count": 4
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
+                }
             ]
         },
         {
@@ -162,6 +240,13 @@
                 {
                     "type": "craft",
                     "item": "game:backpack-normal"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -177,6 +262,13 @@
                     "type": "craft",
                     "item": "game:clothes-foot-*leather-boots"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -190,6 +282,13 @@
                 {
                     "type": "craft",
                     "item": "game:hide-oiled-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fat",
+                    "count": 2
                 }
             ]
         },
@@ -205,6 +304,13 @@
                     "type": "obtain",
                     "item": "game:hide-pelt-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -218,6 +324,13 @@
                 {
                     "type": "craft",
                     "item": "game:clothes-head-furhat*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         }

@@ -16,6 +16,13 @@
                     "item": "game:metalnailsandstrips-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -47,6 +54,13 @@
                     "type": "craft",
                     "item": "game:hoovedwearables-middleback-saddle1"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -60,6 +74,13 @@
                 {
                     "type": "craft",
                     "item": "game:hoovedwearables-head-bridle*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -79,7 +100,14 @@
                     "entity": "game:semitameddeer-*"
                 }
             ],
-            "icon": "game:hoovedwearables-middleback-saddle1"
+            "icon": "game:hoovedwearables-middleback-saddle1",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
         },
         {
             "id": "ride-elk",
@@ -99,7 +127,29 @@
                     "entity": "game:tameddeer-*"
                 }
             ],
-            "icon": "game:hoovedwearables-middleback-saddle1"
+            "icon": "game:hoovedwearables-middleback-saddle1",
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:leather-normal-plain",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:rope",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 12
+                        }
+                    ]
+                }
+            ]
         },
         {
             "id": "make-saddlebags",
@@ -112,6 +162,13 @@
                 {
                     "type": "craft",
                     "item": "game:hoovedwearables-lowerbackside-saddlebags1"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -127,6 +184,13 @@
                     "type": "craft",
                     "item": "game:instrument-flute1"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -140,6 +204,13 @@
                 {
                     "type": "craft",
                     "item": "game:hoovedwearables-lowerbackside-pillion-leather"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         }

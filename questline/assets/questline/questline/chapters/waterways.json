@@ -15,6 +15,13 @@
                     "type": "craft",
                     "item": "game:wormgrunter"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 4
+                }
             ]
         },
         {
@@ -28,6 +35,13 @@
                 {
                     "type": "craft",
                     "item": "game:fishingpole-simple-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fishingbait-redmeat",
+                    "count": 4
                 }
             ]
         },
@@ -46,6 +60,13 @@
                     "type": "craft",
                     "item": "game:fishingpole-simple-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fishingbait-redmeat",
+                    "count": 4
+                }
             ]
         },
         {
@@ -60,6 +81,13 @@
                     "type": "obtain",
                     "item": "game:fishraw-*",
                     "count": 3
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fishingbait-poultry",
+                    "count": 4
                 }
             ]
         },
@@ -76,6 +104,13 @@
                     "item": "game:fish-raw",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -91,6 +126,13 @@
                     "item": "game:fish-cooked",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -105,6 +147,13 @@
                     "type": "craft",
                     "item": "game:oar-crude-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -118,6 +167,13 @@
                 {
                     "type": "craft",
                     "item": "game:boat-raft-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -137,7 +193,14 @@
                     "entity": "game:boat-raft-*"
                 }
             ],
-            "icon": "game:boat-raft-oak"
+            "icon": "game:boat-raft-oak",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
         },
         {
             "id": "make-rollers",
@@ -151,6 +214,13 @@
                     "type": "craft",
                     "item": "game:roller",
                     "count": 5
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -166,6 +236,13 @@
                     "type": "craft",
                     "item": "game:plumbandsquare",
                     "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -189,14 +266,29 @@
                     "entity": "game:boat-sailed-*"
                 }
             ],
+            "icon": "game:boat-sailed-oak",
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:rope",
-                    "count": 4
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:rope",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 12
+                        }
+                    ]
                 }
-            ],
-            "icon": "game:boat-sailed-oak"
+            ]
         },
         {
             "id": "make-ratlines",
@@ -209,6 +301,13 @@
                 {
                     "type": "craft",
                     "item": "game:ratlines"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -224,6 +323,13 @@
                     "type": "craft",
                     "item": "game:boatseat-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -237,6 +343,13 @@
                 {
                     "type": "craft",
                     "item": "game:anchor-stone"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         }

@@ -16,6 +16,13 @@
                     "item": "game:ore-quartz",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
+                }
             ]
         },
         {
@@ -33,6 +40,13 @@
                     "type": "craft",
                     "item": "game:refractorybrick-raw-*",
                     "count": 12
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -52,6 +66,13 @@
                     "item": "game:claybricks-good-fire",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -66,6 +87,13 @@
                     "type": "smith",
                     "item": "game:cokeovendoor-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -79,6 +107,13 @@
                 {
                     "type": "craft",
                     "item": "game:lantern-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -95,6 +130,13 @@
                     "item": "game:glass-*",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 12
+                }
             ]
         },
         {
@@ -109,6 +151,13 @@
                     "type": "obtain",
                     "item": "game:refractorybrick-fired-*",
                     "count": 12
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -127,6 +176,13 @@
                     "type": "place",
                     "block": "game:cokeovendoor-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:ore-bituminouscoal",
+                    "count": 8
+                }
             ]
         },
         {
@@ -141,6 +197,13 @@
                     "type": "craft",
                     "item": "game:glasspane-leaded-*",
                     "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -160,6 +223,13 @@
                     "item": "game:refractorybricks-good-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -178,6 +248,13 @@
                     "item": "game:refractorybrickgrating-good-*",
                     "count": 9
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -193,6 +270,13 @@
                     "item": "game:coke",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -206,6 +290,13 @@
                 {
                     "type": "craft",
                     "item": "game:doorkiln-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -230,6 +321,13 @@
                     "block": "game:refractorybrickgrating-good-*",
                     "count": 9
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 32
+                }
             ]
         },
         {
@@ -246,14 +344,29 @@
             ],
             "shape": "gear",
             "size": 1.25,
+            "icon": "game:doorkiln-tier1",
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:firewood",
-                    "count": 16
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 10
+                        }
+                    ]
                 }
-            ],
-            "icon": "game:doorkiln-tier1"
+            ]
         }
     ]
 }

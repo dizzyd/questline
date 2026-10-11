@@ -16,6 +16,13 @@
                     "item": "game:salt",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:redmeat-raw",
+                    "count": 4
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                 {
                     "type": "craft",
                     "item": "game:barrel"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -46,6 +60,13 @@
                 {
                     "type": "obtain",
                     "item": "game:*-cured",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:salt",
                     "count": 4
                 }
             ]
@@ -66,6 +87,13 @@
                     "item": "game:brineportion",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-cabbage",
+                    "count": 3
+                }
             ]
         },
         {
@@ -81,6 +109,13 @@
                     "item": "game:pickledvegetable-*",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -95,6 +130,13 @@
                     "type": "clayform",
                     "item": "game:crock-*-raw"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
             ]
         },
         {
@@ -108,6 +150,13 @@
                 {
                     "type": "obtain",
                     "item": "game:crock-*-fired"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fat",
+                    "count": 2
                 }
             ]
         },
@@ -148,6 +197,13 @@
                     "type": "place",
                     "block": "game:shelf-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -186,9 +242,24 @@
             "size": 1.25,
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:salt",
-                    "count": 8
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:salt",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:fat",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
                 }
             ]
         }

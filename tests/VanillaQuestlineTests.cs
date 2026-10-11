@@ -133,7 +133,26 @@ namespace Questline.Tests
                 await Frames.Wait(20);
                 Log(await Shot.Take($"questline-chapter-{id[10..]}.png"));
             }
+            // A milestone's page, with its choice of three rewards.
+            book.SelectQuest("questline:first-smithing");
+            await Frames.Wait(20);
+            Log(await Shot.Take("questline-chapter-milestone-reward.png"));
             book.TryClose();
+        }
+
+        /// <summary>Every quest that isn't ticked by hand gives something, and every milestone offers a choice.</summary>
+        [VsTest(TimeoutMs = 30000)]
+        public async Task QuestsGiveRewardsAndMilestonesAChoice()
+        {
+            await OnServer();
+            var quests = Engine.Registry.Quests.Values.Where(q => q.Id.StartsWith("questline:")).ToList();
+            var bare = quests.Where(q => q.Rewards.Count == 0 && q.Tasks.Any(t => t.Type != "checkbox")).ToList();
+            foreach (var q in bare) Log("no reward: " + q.Id);
+            Assert.Equal(0, bare.Count, "every quest with real tasks rewards the player");
+
+            var milestones = quests.Where(q => q.Shape == NodeShape.Gear).ToList();
+            foreach (var q in milestones.Where(q => !q.Rewards.Any(r => r.Type == "choice"))) Log("milestone without a choice: " + q.Id);
+            Assert.True(milestones.All(q => q.Rewards.Any(r => r.Type == "choice" && r.Options.Count == 3)), "each milestone offers three");
         }
     }
 }

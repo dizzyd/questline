@@ -16,6 +16,13 @@
                     "item": "game:clay-*",
                     "count": 20
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
             ]
         },
         {
@@ -31,6 +38,13 @@
                     "item": "game:clay-fire",
                     "count": 30
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -44,6 +58,13 @@
                 {
                     "type": "clayform",
                     "item": "game:bowl-*-raw"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:drygrass",
+                    "count": 6
                 }
             ]
         },
@@ -59,6 +80,13 @@
                     "type": "clayform",
                     "item": "game:claypot-*-raw"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 6
+                }
             ]
         },
         {
@@ -73,6 +101,13 @@
                     "type": "clayform",
                     "item": "game:storagevessel-*-raw"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
             ]
         },
         {
@@ -86,6 +121,13 @@
                 {
                     "type": "clayform",
                     "item": "game:clayoven-north"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
                 }
             ]
         },
@@ -104,6 +146,13 @@
                     "type": "obtain",
                     "item": "game:bowl-*-fired"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-carrot",
+                    "count": 2
+                }
             ]
         },
         {
@@ -117,6 +166,13 @@
                 {
                     "type": "obtain",
                     "item": "game:claypot-*-fired"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:redmeat-raw",
+                    "count": 2
                 }
             ]
         },
@@ -133,6 +189,28 @@
                 {
                     "type": "place",
                     "block": "game:clayoven-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 24
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:seeds-rye",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 4
+                        }
+                    ]
                 }
             ]
         },
@@ -154,6 +232,13 @@
                     "item": "game:burnedbrick-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -167,6 +252,13 @@
                 {
                     "type": "obtain",
                     "item": "game:jug-*-fired"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-onion",
+                    "count": 2
                 }
             ]
         },
@@ -182,6 +274,13 @@
                     "type": "obtain",
                     "item": "game:wateringcan-*-fired"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-turnip",
+                    "count": 2
+                }
             ]
         },
         {
@@ -196,6 +295,13 @@
                     "type": "cook",
                     "item": "game:claypot-*-cooked"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:bowl-blue-fired",
+                    "count": 2
+                }
             ]
         },
         {
@@ -209,6 +315,13 @@
                 {
                     "type": "place",
                     "block": "game:clayplanter-*-fired"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-cabbage",
+                    "count": 2
                 }
             ]
         },
@@ -227,6 +340,13 @@
                     "type": "place",
                     "block": "game:storagevessel-*-fired"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -241,6 +361,13 @@
                     "type": "obtain",
                     "item": "game:shingle-burned-*",
                     "count": 12
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         }

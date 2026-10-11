@@ -15,6 +15,13 @@
                     "type": "obtain",
                     "item": "game:fruitingbushcutting-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                     "type": "obtain",
                     "item": "game:fruittree-cutting"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -42,6 +56,13 @@
                 {
                     "type": "place",
                     "block": "game:flowerpot-*-fired"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -58,6 +79,13 @@
                     "block": "game:glass-*",
                     "count": 12
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-bellpepper",
+                    "count": 3
+                }
             ]
         },
         {
@@ -71,6 +99,13 @@
                 {
                     "type": "place",
                     "block": "game:fruitingbushcutting-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fruit-blueberry",
+                    "count": 8
                 }
             ]
         },
@@ -86,6 +121,13 @@
                     "type": "place",
                     "block": "game:fruittree-cutting"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -100,6 +142,13 @@
                     "type": "place",
                     "block": "game:fruittree-cutting",
                     "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fruit-redapple",
+                    "count": 6
                 }
             ]
         },
@@ -117,7 +166,29 @@
                     "type": "checkbox"
                 }
             ],
-            "icon": "game:glass-plain"
+            "icon": "game:glass-plain",
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:seeds-pineapple",
+                            "count": 3
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:seeds-peanut",
+                            "count": 4
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
         }
     ]
 }

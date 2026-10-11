@@ -15,6 +15,13 @@
                     "type": "smith",
                     "item": "game:rod-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                     "type": "obtain",
                     "item": "game:resin",
                     "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -49,6 +63,13 @@
                     "type": "place",
                     "block": "game:fruitpress-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fruit-redapple",
+                    "count": 12
+                }
             ]
         },
         {
@@ -62,6 +83,13 @@
                 {
                     "type": "obtain",
                     "item": "game:juiceportion-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
                     "count": 2
                 }
             ]
@@ -89,6 +117,13 @@
                     "type": "obtain",
                     "item": "game:ciderportion-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -104,6 +139,13 @@
                     "item": "game:nugget-galena",
                     "count": 10
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
+                }
             ]
         },
         {
@@ -117,6 +159,13 @@
                 {
                     "type": "craft",
                     "item": "game:solderingiron"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -132,6 +181,13 @@
                     "type": "smith",
                     "item": "game:metalplate-copper",
                     "count": 7
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 16
                 }
             ]
         },
@@ -150,6 +206,13 @@
                     "type": "smelt",
                     "item": "game:ingot-leadsolder"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -166,6 +229,13 @@
                 {
                     "type": "craft",
                     "item": "game:solderbar-tin"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -185,6 +255,13 @@
                     "type": "place",
                     "block": "game:verticalboiler-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 24
+                }
             ]
         },
         {
@@ -202,6 +279,13 @@
                 {
                     "type": "place",
                     "block": "game:condenser-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -223,7 +307,29 @@
                 }
             ],
             "shape": "gear",
-            "size": 1.25
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:fruit-redapple",
+                            "count": 24
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 8
+                        }
+                    ]
+                }
+            ]
         },
         {
             "id": "aqua-vitae",
@@ -236,6 +342,13 @@
                 {
                     "type": "obtain",
                     "item": "game:alcoholportion"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
                 }
             ]
         }

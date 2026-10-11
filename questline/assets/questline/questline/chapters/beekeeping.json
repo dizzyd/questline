@@ -16,6 +16,13 @@
                     "item": "game:honeycomb",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:cattailtops",
+                    "count": 6
+                }
             ]
         },
         {
@@ -33,6 +40,13 @@
                     "type": "craft",
                     "item": "game:skep-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:cattailtops",
+                    "count": 6
+                }
             ]
         },
         {
@@ -47,6 +61,13 @@
                     "type": "place",
                     "block": "game:flower-*",
                     "count": 6
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -65,6 +86,13 @@
                     "type": "place",
                     "block": "game:skep-*-populated-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -80,6 +108,13 @@
                     "item": "game:honeycomb",
                     "count": 6
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -94,6 +129,13 @@
                     "type": "place",
                     "block": "game:skep-*",
                     "count": 3
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -116,7 +158,29 @@
                 }
             ],
             "shape": "gear",
-            "size": 1.25
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:fruit-redapple",
+                            "count": 10
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:cattailtops",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 5
+                        }
+                    ]
+                }
+            ]
         },
         {
             "id": "collect-beeswax",
@@ -136,6 +200,13 @@
                     "item": "game:beeswax",
                     "count": 6
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -148,6 +219,13 @@
             "tasks": [
                 {
                     "type": "obtain",
+                    "item": "game:candle",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
                     "item": "game:candle",
                     "count": 2
                 }

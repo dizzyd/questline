@@ -16,6 +16,13 @@
                     "block": "game:refractorybrickgrating-good-*",
                     "count": 6
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                 {
                     "type": "place",
                     "block": "game:stonecoffinsection-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
                 }
             ]
         },
@@ -44,6 +58,13 @@
                     "type": "craft",
                     "item": "game:metaldoor-s*-iron"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -58,6 +79,13 @@
                     "type": "obtain",
                     "item": "game:ingot-iron",
                     "count": 16
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 24
                 }
             ]
         },
@@ -82,6 +110,13 @@
                     "type": "place",
                     "block": "game:metaldoor-s*-iron"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 24
+                }
             ]
         },
         {
@@ -98,6 +133,13 @@
                 {
                     "type": "obtain",
                     "item": "game:ingot-blistersteel"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
                 }
             ]
         },
@@ -118,9 +160,24 @@
             "size": 1.25,
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:charcoal",
-                    "count": 16
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:ingot-iron",
+                            "count": 4
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 12
+                        }
+                    ]
                 }
             ]
         },
@@ -135,6 +192,13 @@
                 {
                     "type": "smith",
                     "item": "game:*-steel"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
                 }
             ]
         },
@@ -154,6 +218,13 @@
                     "type": "craft",
                     "item": "game:axe-felling-steel"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
             ]
         },
         {
@@ -167,6 +238,13 @@
                 {
                     "type": "craft",
                     "item": "game:*head-steel"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
                 }
             ]
         },
@@ -185,6 +263,13 @@
                 {
                     "type": "smith",
                     "item": "game:anvilpart-top-steel"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 8
                 }
             ]
         }

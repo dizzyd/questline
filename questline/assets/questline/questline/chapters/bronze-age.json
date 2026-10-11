@@ -15,6 +15,13 @@
                     "type": "craft",
                     "item": "game:prospectingpick-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 6
+                }
             ]
         },
         {
@@ -30,6 +37,13 @@
                     "item": "game:nugget-cassiterite",
                     "count": 10
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
+                }
             ]
         },
         {
@@ -43,6 +57,13 @@
                 {
                     "type": "smelt",
                     "item": "game:ingot-tinbronze"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
                 }
             ]
         },
@@ -58,6 +79,13 @@
                     "type": "smelt",
                     "item": "game:anvil-*bronze"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 10
+                }
             ]
         },
         {
@@ -71,6 +99,13 @@
                 {
                     "type": "craft",
                     "item": "game:pickaxe-*bronze"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -91,9 +126,24 @@
             ],
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:charcoal",
-                    "count": 16
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-tinbronze",
+                            "count": 2
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 8
+                        }
+                    ]
                 }
             ]
         },
@@ -108,6 +158,13 @@
                 {
                     "type": "craft",
                     "item": "game:axe-felling-*bronze"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -124,6 +181,13 @@
                     "item": "game:nugget-bismuthinite",
                     "count": 10
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -138,6 +202,13 @@
                     "type": "obtain",
                     "item": "game:nugget-sphalerite",
                     "count": 20
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -156,6 +227,13 @@
                     "type": "smelt",
                     "item": "game:ingot-bismuthbronze"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -171,6 +249,13 @@
                     "item": "game:nugget-nativegold",
                     "count": 5
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -185,6 +270,13 @@
                     "type": "obtain",
                     "item": "game:nugget-nativesilver",
                     "count": 5
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -202,6 +294,13 @@
                 {
                     "type": "smelt",
                     "item": "game:ingot-blackbronze"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
                 }
             ]
         }

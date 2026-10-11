@@ -16,6 +16,13 @@
                     "item": "game:flaxfibers",
                     "count": 16
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:seeds-flax",
+                    "count": 4
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                 {
                     "type": "craft",
                     "item": "game:flaxtwine",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flaxfibers",
                     "count": 4
                 }
             ]
@@ -46,6 +60,13 @@
                     "item": "game:linen-*",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -60,6 +81,13 @@
                     "type": "craft",
                     "item": "game:sewingkit"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flaxtwine",
+                    "count": 4
+                }
             ]
         },
         {
@@ -73,6 +101,13 @@
                 {
                     "type": "craft",
                     "item": "game:linensack"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -89,6 +124,13 @@
                     "item": "game:cloth-plain",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -102,6 +144,13 @@
                 {
                     "type": "craft",
                     "item": "game:clothes-upperbody-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -117,6 +166,13 @@
                     "type": "craft",
                     "item": "game:clothes-lowerbody-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -131,6 +187,13 @@
                     "type": "craft",
                     "item": "game:rope"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:cattailtops",
+                    "count": 6
+                }
             ]
         },
         {
@@ -144,6 +207,13 @@
                 {
                     "type": "obtain",
                     "item": "game:dye-woad",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
                     "count": 2
                 }
             ]
@@ -163,6 +233,13 @@
                     "type": "obtain",
                     "item": "game:cloth-blue"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
             ]
         },
         {
@@ -176,6 +253,13 @@
                 {
                     "type": "obtain",
                     "item": "game:crushed-alum"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -194,6 +278,13 @@
                     "type": "obtain",
                     "item": "game:cloth-mordant"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -207,6 +298,13 @@
                 {
                     "type": "obtain",
                     "item": "game:dye-yellow",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
                     "count": 2
                 }
             ]
@@ -231,9 +329,24 @@
             ],
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:flaxtwine",
-                    "count": 4
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:flaxtwine",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:seeds-flax",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
                 }
             ]
         }

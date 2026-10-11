@@ -15,6 +15,13 @@
                     "type": "craft",
                     "item": "game:blade-falx-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -30,6 +37,13 @@
                     "item": "game:arrowhead-flint",
                     "count": 4
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 8
+                }
             ]
         },
         {
@@ -43,6 +57,13 @@
                 {
                     "type": "craft",
                     "item": "game:bow-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -62,6 +83,13 @@
                     "item": "game:arrow-*",
                     "count": 8
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:arrowhead-flint",
+                    "count": 4
+                }
             ]
         },
         {
@@ -78,6 +106,13 @@
                 {
                     "type": "craft",
                     "item": "game:bowstave-*-raw"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -96,6 +131,13 @@
                     "type": "craft",
                     "item": "game:bow-long"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -110,6 +152,13 @@
                     "type": "craft",
                     "item": "game:sling"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
             ]
         },
         {
@@ -123,6 +172,13 @@
                 {
                     "type": "craft",
                     "item": "game:shield-crude"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         },
@@ -142,6 +198,13 @@
                     "type": "craft",
                     "item": "game:shield-woodmetal"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -158,6 +221,13 @@
                 {
                     "type": "craft",
                     "item": "game:armor-body-improvised-wood"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
                 }
             ]
         },
@@ -176,6 +246,13 @@
                     "type": "craft",
                     "item": "game:armor-body-lamellar-wood"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -193,6 +270,13 @@
                     "type": "craft",
                     "item": "game:armor-body-lamellar-copper"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -207,6 +291,13 @@
                     "type": "craft",
                     "item": "game:armor-body-jerkin-leather"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -220,6 +311,13 @@
                 {
                     "type": "craft",
                     "item": "game:armor-body-sewn-leather"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
                 }
             ]
         },
@@ -238,6 +336,13 @@
                     "type": "craft",
                     "item": "game:armor-body-brigandine-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -251,6 +356,13 @@
                 {
                     "type": "craft",
                     "item": "game:armor-body-chain-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
                 }
             ]
         },
@@ -266,6 +378,13 @@
                     "type": "craft",
                     "item": "game:armor-body-scale-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
             ]
         },
         {
@@ -279,6 +398,13 @@
                 {
                     "type": "craft",
                     "item": "game:armor-body-plate-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
                 }
             ]
         },
@@ -299,6 +425,28 @@
                     "type": "craft",
                     "item": "game:armor-body-plate-steel"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:arrow-steel",
+                            "count": 16
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-steel",
+                            "count": 1
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 15
+                        }
+                    ]
+                }
             ]
         },
         {
@@ -312,6 +460,13 @@
                 {
                     "type": "craft",
                     "item": "game:armor-body-sewn-linen"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         }

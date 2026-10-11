@@ -15,6 +15,13 @@
                     "type": "place",
                     "block": "game:bellows-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -29,6 +36,13 @@
                     "type": "obtain",
                     "item": "game:nugget-limonite",
                     "count": 20
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 12
                 }
             ]
         },
@@ -45,6 +59,13 @@
                     "item": "game:powder-borax",
                     "count": 2
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -58,6 +79,13 @@
                 {
                     "type": "obtain",
                     "item": "game:stone-meteorite-iron",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
                     "count": 4
                 }
             ]
@@ -75,6 +103,13 @@
                     "item": "game:burnedbrick-fire",
                     "count": 12
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
+                }
             ]
         },
         {
@@ -88,6 +123,13 @@
                 {
                     "type": "place",
                     "block": "game:bloomerybase-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 12
                 }
             ]
         },
@@ -106,6 +148,13 @@
                     "type": "smelt",
                     "item": "game:ironbloom"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 12
+                }
             ]
         },
         {
@@ -123,6 +172,13 @@
                     "type": "smith",
                     "item": "game:ingot-iron"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -136,6 +192,13 @@
                 {
                     "type": "smith",
                     "item": "game:*-iron"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:nugget-limonite",
+                    "count": 10
                 }
             ]
         },
@@ -151,6 +214,13 @@
                     "type": "smith",
                     "item": "game:tongsmetal-standard-iron"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
             ]
         },
         {
@@ -164,6 +234,13 @@
                 {
                     "type": "craft",
                     "item": "game:*head-iron"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
                 }
             ]
         },
@@ -183,6 +260,13 @@
                     "type": "smith",
                     "item": "game:anvilpart-top-iron"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -200,6 +284,13 @@
                     "type": "place",
                     "block": "game:waterwheel-*"
                 }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
             ]
         },
         {
@@ -216,6 +307,13 @@
                 {
                     "type": "place",
                     "block": "game:windmillrotor-metal-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
                 }
             ]
         },
@@ -250,14 +348,29 @@
             ],
             "shape": "gear",
             "size": 1.25,
+            "icon": "game:anvil-iron",
             "rewards": [
                 {
-                    "type": "item",
-                    "item": "game:ingot-iron",
-                    "count": 4
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:ingot-iron",
+                            "count": 3
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 10
+                        }
+                    ]
                 }
-            ],
-            "icon": "game:anvil-iron"
+            ]
         },
         {
             "id": "smith-meteoric",
@@ -273,6 +386,13 @@
                 {
                     "type": "smith",
                     "item": "game:*-meteoriciron"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
                 }
             ]
         }
