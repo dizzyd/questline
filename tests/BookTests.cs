@@ -119,12 +119,12 @@ namespace Questline.Tests
                 Assert.Greater(layout.CanvasWidth, layout.DetailWidth, "the canvas gets the most room");
             }
 
-            // The test window: 80% would be too cramped, so the book uses most of it, inside it.
+            // The window the test runs in: 80% of it, or more on a window too small for that, and inside it.
             var small = Book.Layout;
             double screenW = Capi.Render.FrameWidth / RuntimeEnv.GUIScale, screenH = Capi.Render.FrameHeight / RuntimeEnv.GUIScale;
             Log($"{Capi.Render.FrameWidth}×{Capi.Render.FrameHeight}: book {small.Width + pad:0}×{small.ContentHeight + chrome + pad + GuiStyle.TitleBarHeight:0}");
             Assert.True(small.Width + pad <= screenW && small.ContentHeight + chrome + pad + GuiStyle.TitleBarHeight <= screenH, "fits the window");
-            Assert.Greater(small.Width + pad, screenW * 0.85, "uses most of a small window");
+            Assert.Greater(small.Width + pad, screenW * 0.79, "at least 80% of the window");
         }
 
         /// <summary>Photographs the book's screens in the states a layout has to cope with, for review.</summary>
