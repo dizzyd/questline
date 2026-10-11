@@ -142,6 +142,28 @@ public class QuestlineModSystem : ModSystem
                     return TextCommandResult.Success($"Exported {count} chapters to {folder}");
                 })
             .EndSubCommand()
+            .BeginSubCommand("graph")
+                .WithDescription("Show what makes an item and what it's used in, or 'export' the recipe graph as JSON")
+                .WithArgs(parsers.Word("item code or export"))
+                .HandleWith(args =>
+                {
+                    string arg = (string)args[0];
+                    if (arg == "export")
+                    {
+                        string file = System.IO.Path.Combine(api.GetOrCreateDataPath("ModConfig"), "questline", "recipe-graph.json");
+                        System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(file));
+                        System.IO.File.WriteAllText(file, Engine.Graph.ToJson());
+                        return TextCommandResult.Success($"Wrote {Engine.Graph.Edges.Count} edges to {file}");
+                    }
+                    var loc = new AssetLocation(arg);
+                    CollectibleObject item = api.World.GetItem(loc) ?? (CollectibleObject)api.World.GetBlock(loc);
+                    if (item == null) return TextCommandResult.Error($"No item or block {arg}");
+                    string Line(Graph.GraphEdge e) => $"{e.Kind}: {string.Join(" + ", e.Inputs.Select(i => $"{i.Quantity}× {string.Join("|", i.Codes)}"))} → {string.Join(", ", e.Outputs.Select(o => $"{o.Quantity}× {o.Code}"))}";
+                    var made = Engine.Graph.MadeBy(item.Code.ToString()).Take(15).Select(Line);
+                    var used = Engine.Graph.UsedIn(item).Take(15).Select(Line);
+                    return TextCommandResult.Success($"Made by:\n  {string.Join("\n  ", made)}\nUsed in:\n  {string.Join("\n  ", used)}");
+                })
+            .EndSubCommand()
             .BeginSubCommand("resetserver")
                 .WithDescription("Forget the progress and stages of every server quest")
                 .HandleWith(_ =>

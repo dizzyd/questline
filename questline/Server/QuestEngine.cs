@@ -46,6 +46,10 @@ public partial class QuestEngine
     static readonly HashSet<string> HistoryTypes = ["kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom"];
     public List<string> Problems { get; private set; } = [];
 
+    /// <summary>Every recipe as a graph, built on first use.</summary>
+    public Graph.RecipeGraph Graph => graph ??= questline.Graph.RecipeGraph.Build(api);
+    Graph.RecipeGraph graph;
+
     /// <summary>The in-game editor's server half: working copies and export.</summary>
     public QuestEditor Editor { get; private set; }
     Dictionary<string, string> rawChapters = [];

@@ -32,6 +32,10 @@ public class QuestClient
     public EditorState Editor { get; private set; }
 
     public bool CanEdit => Editor != null;
+
+    /// <summary>Every recipe as a graph, from the client's own copy of the recipes; built on first use.</summary>
+    public Graph.RecipeGraph Graph => graph ??= questline.Graph.RecipeGraph.Build(capi);
+    Graph.RecipeGraph graph;
     public bool Ready => Registry != null;
 
     /// <summary>Fires after definitions or states arrive.</summary>
