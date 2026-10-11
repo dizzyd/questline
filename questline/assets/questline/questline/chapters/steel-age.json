@@ -1,0 +1,81 @@
+{
+    "id": "steel-age",
+    "order": 70,
+    "icon": "game:ingot-steel",
+    "quests": [
+        {
+            "id": "make-charcoal",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:charcoal",
+                    "count": 32
+                }
+            ]
+        },
+        {
+            "id": "build-furnace",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:stonecoffinsection-*"
+                }
+            ]
+        },
+        {
+            "id": "blister-steel",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "make-charcoal",
+                "build-furnace"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ingot-blistersteel"
+                }
+            ]
+        },
+        {
+            "id": "forge-steel",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "blister-steel",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:ingot-steel"
+                }
+            ]
+        },
+        {
+            "id": "smith-steel",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "forge-steel",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-steel"
+                }
+            ]
+        }
+    ]
+}

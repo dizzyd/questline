@@ -141,13 +141,13 @@ namespace Questline.Tests
             await Frames.Wait(10);
             Log($"basics: {Book.Canvas.VisibleNodes} of {Book.Canvas.Nodes.Count} in view at zoom {Book.Canvas.Zoom:0.00}");
             Assert.Equal(Book.Canvas.Nodes.Count, Book.Canvas.VisibleNodes, "the whole small chapter");
-            Assert.Greater(Book.Canvas.Zoom, 0.99f, "zoomed in to fill the canvas, not left small");
+            Assert.Greater(Book.Canvas.Zoom, 0.9f, "zoomed in to fill the canvas, not left small");
 
             Book.ShowBenchmarkTree();
             await Frames.Wait(10);
             Log($"benchmark: {Book.Canvas.VisibleNodes} of {Book.Canvas.Nodes.Count} in view at zoom {Book.Canvas.Zoom:0.00}");
             Assert.True(Book.Canvas.VisibleNodes >= GuiElementQuestCanvas.FocusCount, "at least twenty quests in view");
-            Assert.True(Book.Canvas.Zoom >= 0.6f, "still readable");
+            Assert.True(Book.Canvas.Zoom >= 0.75f, "still readable");
             Book.LeaveBenchmarkTree();
             Book.TryClose();
         }
@@ -169,6 +169,14 @@ namespace Questline.Tests
             Book.SelectChapter("qltest:together");
             await Frames.Wait(20);
             Log(await Shot.Take("questline-screen-nothing-selected.png"));
+
+            foreach (string chapter in new[] { "questline:stone-age", "questline:copper-age" })
+            {
+                Book.ForgetViews();
+                Book.SelectChapter(chapter);
+                await Frames.Wait(20);
+                Log(await Shot.Take($"questline-screen-{chapter[10..]}.png"));
+            }
 
             Book.SelectTab(1);
             await Frames.Wait(20);

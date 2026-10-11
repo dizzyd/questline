@@ -1,0 +1,111 @@
+{
+    "id": "farming",
+    "order": 30,
+    "icon": "game:grain-spelt",
+    "quests": [
+        {
+            "id": "knap-hoe",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:hoehead-flint"
+                }
+            ]
+        },
+        {
+            "id": "make-hoe",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "knap-hoe",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoe-flint"
+                }
+            ]
+        },
+        {
+            "id": "gather-seeds",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:seeds-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "harvest-grain",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "make-hoe",
+                "gather-seeds"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:grain-*",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "make-quern",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": "harvest-grain",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:quern-*"
+                }
+            ]
+        },
+        {
+            "id": "grind-flour",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": "make-quern",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:flour-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "bake-bread",
+            "pos": [
+                8,
+                3.0
+            ],
+            "requires": "grind-flour",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:bread-*-perfect"
+                }
+            ]
+        }
+    ]
+}

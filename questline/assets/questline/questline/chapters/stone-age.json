@@ -1,0 +1,253 @@
+{
+    "id": "stone-age",
+    "order": 10,
+    "icon": "game:flint",
+    "quests": [
+        {
+            "id": "gather-flint",
+            "pos": [
+                0,
+                0.0
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:flint",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "gather-sticks",
+            "pos": [
+                0,
+                3.0
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:stick",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "forage",
+            "pos": [
+                0,
+                6.0
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fruit-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "knap-axe-head",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": "gather-flint",
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:axehead-flint"
+                }
+            ]
+        },
+        {
+            "id": "make-axe",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": [
+                "knap-axe-head",
+                "gather-sticks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:axe-flint"
+                }
+            ]
+        },
+        {
+            "id": "knap-knife",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "gather-flint",
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:knifeblade-flint"
+                }
+            ]
+        },
+        {
+            "id": "make-knife",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": [
+                "knap-knife",
+                "gather-sticks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:knife-generic-flint"
+                }
+            ]
+        },
+        {
+            "id": "cut-grass",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:drygrass",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "chop-wood",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": "make-axe",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:firewood",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-firestarter",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": "gather-sticks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:firestarter"
+                }
+            ]
+        },
+        {
+            "id": "make-fire",
+            "pos": [
+                8,
+                3.0
+            ],
+            "requires": [
+                "cut-grass",
+                "chop-wood",
+                "make-firestarter"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-torch",
+            "pos": [
+                10,
+                1.5
+            ],
+            "requires": "make-fire",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:torch-basic-*",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "hay-bed",
+            "pos": [
+                10,
+                4.5
+            ],
+            "requires": "cut-grass",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bed-hay-*"
+                }
+            ]
+        },
+        {
+            "id": "knap-spear",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "gather-flint",
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:spearhead-flint"
+                }
+            ]
+        },
+        {
+            "id": "make-spear",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": [
+                "knap-spear",
+                "gather-sticks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:spear-generic-flint"
+                }
+            ]
+        },
+        {
+            "id": "first-hunt",
+            "pos": [
+                6,
+                9.0
+            ],
+            "requires": "make-spear",
+            "tasks": [
+                {
+                    "type": "kill",
+                    "entity": "game:chicken-*"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,81 @@
+{
+    "id": "iron-age",
+    "order": 60,
+    "icon": "game:ingot-iron",
+    "quests": [
+        {
+            "id": "find-iron",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "smith-bronze",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-limonite",
+                    "count": 20
+                }
+            ]
+        },
+        {
+            "id": "build-bloomery",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "smith-bronze",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:bloomerybase-*"
+                }
+            ]
+        },
+        {
+            "id": "make-bloom",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "find-iron",
+                "build-bloomery"
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:ironbloom"
+                }
+            ]
+        },
+        {
+            "id": "refine-bloom",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "make-bloom",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:ingot-iron"
+                }
+            ]
+        },
+        {
+            "id": "smith-iron",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "refine-bloom",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-iron"
+                }
+            ]
+        }
+    ]
+}

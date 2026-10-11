@@ -1,0 +1,69 @@
+{
+    "id": "winter",
+    "order": 80,
+    "icon": "game:firewood",
+    "quests": [
+        {
+            "id": "stock-firewood",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-fire",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:firewood",
+                    "count": 64
+                }
+            ]
+        },
+        {
+            "id": "make-barrel",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-axe",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:barrel"
+                }
+            ]
+        },
+        {
+            "id": "cure-meat",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "make-barrel",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:redmeat-cured",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "cellar-food",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "stock-firewood",
+                "place-vessel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:vegetable-*",
+                    "count": 16
+                }
+            ]
+        }
+    ]
+}

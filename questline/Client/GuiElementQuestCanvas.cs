@@ -166,17 +166,21 @@ public class GuiElementQuestCanvas : GuiElement
     /// <summary>When the whole chapter won't fit readably, the opening view shows this many quests around the player.</summary>
     public const int FocusCount = 20;
 
+    /// <summary>The least zoom an opening view uses: labels scale with the tree, and below this they're too small to read.</summary>
+    const float ReadableZoom = 0.75f;
+
     /// <summary>
-    /// The opening view. The whole chapter, zoomed to fill the canvas, if it can be shown with
-    /// its labels readable; otherwise the <see cref="FocusCount"/> quests nearest where the
-    /// player is: the selected quest, else the first one they can work on, else the first.
+    /// The opening view. The whole chapter, zoomed to fill the canvas, if it fits at a readable
+    /// zoom; otherwise the <see cref="FocusCount"/> quests nearest where the player is (the
+    /// selected quest, else the first one they can work on, else the first), at a readable zoom,
+    /// with the rest a pan away.
     /// </summary>
     void FitView()
     {
         var all = Extent();
-        if (ZoomToFit(all) >= LabelMinZoom || nodes.Count <= FocusCount)
+        if (ZoomToFit(all) >= ReadableZoom)
         {
-            LookAt(all, Math.Max(MinZoom, ZoomToFit(all)));
+            LookAt(all, ZoomToFit(all));
             return;
         }
 
@@ -185,13 +189,29 @@ public class GuiElementQuestCanvas : GuiElement
         var a = nodes[Math.Max(0, anchor)];
         var near = nodes.OrderBy(n => (n.X - a.X) * (n.X - a.X) + (n.Y - a.Y) * (n.Y - a.Y)).Take(FocusCount).ToList();
         var focus = (near.Min(n => n.X) * CellSize, near.Min(n => n.Y) * CellSize, near.Max(n => n.X) * CellSize, near.Max(n => n.Y) * CellSize);
-        LookAt(focus, Math.Max(LabelMinZoom, ZoomToFit(focus)));
+        float z = ZoomToFit(focus);
+        if (z >= ReadableZoom)
+        {
+            LookAt(focus, z);
+            return;
+        }
+
+        // Even those don't fit readably. Trees read left to right, so the view starts at the
+        // focus's left edge and keeps the player's quest in it, as near the middle as the focus allows.
+        zoom = ReadableZoom;
+        float s = ViewScale, margin = CellSize * 1.5f;
+        float viewW = (float)Bounds.InnerWidth / s, viewH = (float)Bounds.InnerHeight / s;
+        panX = focus.Item1 - margin;
+        if (a.X * CellSize > panX + viewW - margin) panX = a.X * CellSize - viewW / 2;
+        float top = focus.Item2 - margin, bottom = Math.Max(top, focus.Item4 + margin - viewH);
+        panY = Math.Clamp(a.Y * CellSize - viewH / 2, top, bottom);
     }
 
     /// <summary>The zoom at which a canvas-unit rectangle, with a cell of margin, fills the canvas; never above <see cref="FitMaxZoom"/>.</summary>
     float ZoomToFit((float MinX, float MinY, float MaxX, float MaxY) r)
     {
-        float width = r.MaxX - r.MinX + CellSize * 2, height = r.MaxY - r.MinY + CellSize * 2;
+        // A cell and a half of margin each way: room for the labels of the outermost quests.
+        float width = r.MaxX - r.MinX + CellSize * 3, height = r.MaxY - r.MinY + CellSize * 3;
         float gs = RuntimeEnv.GUIScale;
         return Math.Min(FitMaxZoom, Math.Min((float)Bounds.InnerWidth / (width * gs), (float)Bounds.InnerHeight / (height * gs)));
     }
@@ -503,8 +523,11 @@ public class GuiElementQuestCanvas : GuiElement
             // Below where the selection ring reaches, so selecting a quest never hides its name.
             if (showLabels && GetLabel(i, ref labelBudget) is { } tex)
             {
-                api.Render.Render2DTexturePremultipliedAlpha(tex.TextureId,
-                    (float)(sx - tex.Width / 2.0), (float)(sy + size * 0.65f * s + 2), tex.Width, tex.Height, 250);
+                // Labels scale with the tree, so they keep to the space between quests at any zoom;
+                // a little larger than the grid at high zoom, where they'd otherwise be tiny.
+                float k = Math.Min(zoom, 1.25f);
+                float w = tex.Width * k, h = tex.Height * k;
+                api.Render.Render2DTexturePremultipliedAlpha(tex.TextureId, (float)(sx - w / 2), (float)(sy + size * 0.65f * s + 2), w, h, 250);
             }
         }
 

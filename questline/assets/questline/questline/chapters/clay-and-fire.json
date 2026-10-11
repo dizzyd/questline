@@ -1,0 +1,126 @@
+{
+    "id": "clay-and-fire",
+    "order": 20,
+    "icon": "game:bowl-blue-fired",
+    "quests": [
+        {
+            "id": "find-clay",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-fire",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:clay-*",
+                    "count": 20
+                }
+            ]
+        },
+        {
+            "id": "form-bowl",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": "find-clay",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:bowl-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "form-pot",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "find-clay",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:claypot-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "form-vessel",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "find-clay",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:storagevessel-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "fire-pottery",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": [
+                "form-bowl",
+                "form-pot"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:bowl-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "fire-pot",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:claypot-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "cook-meal",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": "fire-pot",
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "game:claypot-*-cooked"
+                }
+            ]
+        },
+        {
+            "id": "place-vessel",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": [
+                "form-vessel",
+                "fire-pottery"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:storagevessel-*-fired"
+                }
+            ]
+        }
+    ]
+}

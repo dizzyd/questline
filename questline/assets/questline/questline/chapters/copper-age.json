@@ -1,0 +1,174 @@
+{
+    "id": "copper-age",
+    "order": 40,
+    "icon": "game:ingot-copper",
+    "quests": [
+        {
+            "id": "find-copper",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-nativecopper",
+                    "count": 20
+                }
+            ]
+        },
+        {
+            "id": "form-crucible",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:crucible-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "form-mold",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:toolmold-*-raw-*"
+                }
+            ]
+        },
+        {
+            "id": "fire-metalwork",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": [
+                "form-crucible",
+                "form-mold"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:crucible-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "cast-tool",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "find-copper",
+                "fire-metalwork"
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:*head-copper"
+                }
+            ]
+        },
+        {
+            "id": "make-pickaxe",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": "cast-tool",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:pickaxe-copper"
+                }
+            ]
+        },
+        {
+            "id": "form-ingot-mold",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": "fire-metalwork",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:ingotmold-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "cast-ingot",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": [
+                "form-ingot-mold",
+                "cast-tool"
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:ingot-copper"
+                }
+            ]
+        },
+        {
+            "id": "cast-anvil",
+            "pos": [
+                8,
+                3.0
+            ],
+            "requires": "cast-ingot",
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:anvil-copper"
+                }
+            ]
+        },
+        {
+            "id": "make-hammer",
+            "pos": [
+                8,
+                6.0
+            ],
+            "requires": "cast-tool",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hammer-copper"
+                }
+            ]
+        },
+        {
+            "id": "first-smithing",
+            "pos": [
+                10,
+                4.5
+            ],
+            "requires": [
+                "cast-anvil",
+                "make-hammer"
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-copper"
+                }
+            ]
+        }
+    ]
+}

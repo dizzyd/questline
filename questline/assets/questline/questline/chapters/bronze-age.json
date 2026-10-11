@@ -1,0 +1,64 @@
+{
+    "id": "bronze-age",
+    "order": 50,
+    "icon": "game:ingot-tinbronze",
+    "quests": [
+        {
+            "id": "find-tin",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-cassiterite",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "make-prospecting-pick",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:prospectingpick-*"
+                }
+            ]
+        },
+        {
+            "id": "alloy-bronze",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "find-tin",
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:ingot-tinbronze"
+                }
+            ]
+        },
+        {
+            "id": "smith-bronze",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "alloy-bronze",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-tinbronze"
+                }
+            ]
+        }
+    ]
+}

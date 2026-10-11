@@ -17,11 +17,33 @@ namespace questline.Graph;
 public class RecipeGraphBuilder(ICoreAPI api)
 {
     readonly RecipeGraph graph = new();
+    readonly Dictionary<string, List<string>> meltsInto = [];
+    List<string> cookedPots = [];
 
     public RecipeGraph Build()
     {
         var watch = Stopwatch.StartNew();
         var world = api.World;
+
+        // What melts into each metal, so casting can take the metal in any form, not just as ingots.
+        foreach (var c in world.Collectibles)
+        {
+            if (c?.Code == null) continue;
+            try
+            {
+                if (c.GetCombustibleProperties(world, new ItemStack(c), null)?.SmeltedStack?.ResolvedItemstack is { Collectible.Code.Path: var path } smelted && path.StartsWith("ingot-"))
+                {
+                    string metal = smelted.Collectible.LastCodePart();
+                    if (!meltsInto.TryGetValue(metal, out var list)) meltsInto[metal] = list = [];
+                    list.Add(c.Code.ToString());
+                }
+            }
+            catch (Exception)
+            {
+                // A collectible whose properties throw is reported when its own edges are scanned.
+            }
+        }
+        cookedPots = world.Collectibles.Where(c => c is BlockCookedContainer).Select(c => c.Code.ToString()).ToList();
 
         AddRecipes("grid", world.GridRecipes);
         AddRecipes("smithing", api.GetSmithingRecipes());
@@ -86,9 +108,13 @@ public class RecipeGraphBuilder(ICoreAPI api)
                     Quantity = Math.Max(1, ingredient.MinQuantity),
                 });
             }
-            // A meal has no item of its own: it's named by its recipe, in the cooking pot's domain.
+            // A meal has no item of its own: it's named by its recipe, and taken from the fire in a cooked pot.
             if (recipe.CooksInto?.ResolvedItemstack is { } into) Output(edge, into);
-            else edge.Outputs.Add(new GraphOutput { Code = "meal:" + recipe.Code });
+            else
+            {
+                edge.Outputs.Add(new GraphOutput { Code = "meal:" + recipe.Code });
+                foreach (string pot in cookedPots) edge.Outputs.Add(new GraphOutput { Code = pot });
+            }
             graph.AddEdge(edge);
         }
     }
@@ -209,7 +235,7 @@ public class RecipeGraphBuilder(ICoreAPI api)
             {
                 Kind = "cast",
                 Source = mold.Code.ToString(),
-                Inputs = [new GraphInput { Codes = [$"game:ingot-{metal}"] }, new GraphInput { Codes = [mold.Code.ToString()], Tool = true }],
+                Inputs = [new GraphInput { Codes = [$"game:ingot-{metal}", .. meltsInto.GetValueOrDefault(metal) ?? []] }, new GraphInput { Codes = [mold.Code.ToString()], Tool = true }],
             };
             foreach (var template in outputs)
             {
