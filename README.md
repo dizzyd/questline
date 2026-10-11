@@ -6,7 +6,7 @@ claimed in the book. The design lives in the Questline design doc.
 
 ## Status
 
-Phases 1 and 2 of the roadmap, minus the VS Quest importer:
+Phases 1 to 3 of the roadmap, minus the VS Quest importer:
 
 - Chapters from any mod's `assets/<domain>/questline/chapters/`, merged and checked at load;
   a broken quest is disabled and reported, never its chapter
@@ -20,7 +20,20 @@ Phases 1 and 2 of the roadmap, minus the VS Quest importer:
   event bus for mods that don't reference Questline
 - The book (L): a chapter rail, a pannable and zoomable tree, and quest pages with text,
   images, item rows and recipes; a Reference tab that hosts the handbook's item pages
-- `/questline reload | complete <quest> | reset [quest]`
+- Quest modes: each player, the party (pooled, each member claims once) or the whole server
+  (pooled; `"claim": "first"` lets the first claim take it). Parties are made in the book's
+  Party tab and turned off with `"Parties": false`
+- Up to three quests pinned under the minimap; `.questline toasts on|off` per player
+- Chapter art: a background, images, labels and arrows; quests as squares, circles, hexagons
+  or gears, at any size
+- The in-game editor, for players with `questline.edit` (admins have it): add, move and link
+  quests on the canvas, edit them in a form, and export the result as content-mod assets.
+  Working copies live in `ModConfig/questline/working/`, never in installed mods. A Problems
+  tab lists what the last load found
+- The book takes 80% of the screen, and opens each chapter on all of it or on twenty quests
+  around the player
+- `/questline reload | complete <quest> [player] | unlock <quest> [player] |
+  reset [quest] [player] | resetserver | export`
 
 ## Building
 

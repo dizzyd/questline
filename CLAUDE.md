@@ -10,9 +10,9 @@ and the rendering spike settled.
 | | |
 |---|---|
 | `questline/Model/` | Definitions (chapters, quests, tasks, rewards, page blocks), the `requires` tree and its JSON converter, progress and quest states. Shared by both sides |
-| `questline/Server/` | `QuestLoader` (assets → registry, validation), `QuestEngine` (progress, claims, sync, save game), `Trackers` (game events → task reports) |
-| `questline/Network/` | The four packets. Channel `questline`; message types must be registered in the same order on both sides |
-| `questline/Client/` | `QuestClient` (the client's copy), the book dialog (Quests and Reference tabs), the canvas |
+| `questline/Server/` | `QuestLoader` (assets and the editor's working copies → registry, validation), `QuestEngine` (progress, parties, claims, sync, save game), `QuestEditor` (working copies, export), `Trackers` and `StationPatches` (game events → task reports) |
+| `questline/Network/` | The packets. Channel `questline`; message types must be registered in the same order on both sides |
+| `questline/Client/` | `QuestClient` (the client's copy), the book dialog (Quests, Reference, Party and, for editors, Problems tabs; edit mode in `GuiDialogQuestBook.Editor.cs`), the canvas, the chapter rail, the HUD pins. `BookStyle` and `BookLayout` hold the type scale, colours and sizing every panel uses |
 | `tests/` | vstestkit suites; `tests/fixtures/Mods/qltest` is a content mod of test chapters, committed (it's ours, not downloaded) |
 
 The server owns every quest. The client gets the whole registry as JSON when a player is
@@ -59,3 +59,16 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   default usings include `Vintagestory.GameContent`.
 - The test window is 960×600, so the book sizes itself to the screen. Check new layout in a
   screenshot there, not just at a desktop size.
+- **Every panel goes on the book's grid.** Panels are insets the same height, buttons sit in
+  the row under them (`AddRowButton` sizes them to their label), text uses `BookStyle`. Check
+  new layout in a screenshot at 960×600, where the book is at its minimum.
+- **A form in a dialog can't scroll.** Text inputs and dropdowns draw their frames into the
+  dialog's static texture, so moving their bounds leaves the frames behind. The editor splits
+  its form into pages instead.
+- **The definitions packet arrives before the editor packet** after every reload. Only the
+  editor packet (`QuestClient.EditorChanged`) may replace the editor's draft; on definitions
+  alone the editor still holds the old chapters.
+- **Editor tests work in the domain `qleditor`** and clear its working copies (and `qltest`'s)
+  before each test, so a failed run doesn't leave edits loaded into the next.
+- **Text rendered at a z below 50 is hidden** behind the dialog's own texture, which draws at
+  50. The canvas draws its art just above that.
