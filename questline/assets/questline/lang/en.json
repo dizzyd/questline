@@ -60,7 +60,7 @@
     "pin": "Pin to screen",
     "unpin": "Unpin",
     "pins-full": "You can pin {0} quests at most. Unpin one first.",
-    "reference-empty": "Click an item in a quest to read its handbook page here.",
+    "reference-empty": "Pick a guide on the left, or search for a quest, a guide or an item. Clicking an item anywhere in the book opens its page here.",
     "party-none-title": "No party",
     "party-members": "Members ({0})",
     "party-no-invites": "No invites right now.",
@@ -129,5 +129,13 @@
     "type-checkbox": "Checkbox",
     "type-item": "Item",
     "type-stage": "Stage",
-    "edit-page-options": "Options"
+    "edit-page-options": "Options",
+    "forward": "Forward",
+    "ref-search": "Search quests, guides and items",
+    "ref-kind-quest": "quest",
+    "ref-kind-guide": "guide",
+    "ref-open-quest": "Open in the quest book",
+    "ref-quests": "Quests",
+    "ref-needed-by": "Needed by",
+    "ref-given-by": "Given by"
 }

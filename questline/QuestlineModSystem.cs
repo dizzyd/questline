@@ -24,6 +24,9 @@ public class QuestlineModSystem : ModSystem
     /// <summary>The quest book, created on first use. Client side only.</summary>
     public GuiDialogQuestBook Book => book ??= new GuiDialogQuestBook(capi, Client);
 
+    /// <summary>The H key and handbook links, pointed at the book. Client side only.</summary>
+    public HandbookTakeover Takeover { get; private set; }
+
     /// <summary>The HUD tracker for pinned quests. Client side only.</summary>
     public HudQuestPins Pins => pins;
 
@@ -56,9 +59,30 @@ public class QuestlineModSystem : ModSystem
         Client = new QuestClient(api);
 
         pins = new HudQuestPins(api, Client);
+        Takeover = new HandbookTakeover(api, () => Book);
+        // The handbook sets its keys and links in its own StartClientSide; replacing them is left
+        // until the level is ready, after every mod has started.
+        api.Event.LevelFinalize += () => { if (Client.Settings.TakeOverHandbook) Takeover.Enable(); };
+        if (api.ModLoader.GetModSystem<Vintagestory.GameContent.ModSystemSurvivalHandbook>() is { } handbook)
+        {
+            handbook.OnInitCustomPages += pages => Book.OnHandbookPages(pages);
+        }
         api.Event.LevelFinalize += pins.Refresh;
         api.ChatCommands.Create("questline")
             .WithDescription("Quest book settings")
+            .BeginSubCommand("handbook")
+                .WithDescription("Whether H opens the quest book's Reference tab (on) or the vanilla handbook (off)")
+                .WithArgs(api.ChatCommands.Parsers.Bool("on or off"))
+                .HandleWith(args =>
+                {
+                    bool on = (bool)args[0];
+                    Client.Settings.TakeOverHandbook = on;
+                    Client.SaveSettings();
+                    if (on) Takeover.Enable();
+                    else Takeover.Disable();
+                    return TextCommandResult.Success(on ? "H opens the quest book's Reference tab" : "H opens the vanilla handbook");
+                })
+            .EndSubCommand()
             .BeginSubCommand("toasts")
                 .WithDescription("Turn the quest-complete toasts on or off")
                 .WithArgs(api.ChatCommands.Parsers.Bool("on or off"))

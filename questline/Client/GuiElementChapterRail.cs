@@ -24,17 +24,22 @@ public class GuiElementChapterRail : GuiElement
         public string Note { get; init; }
         /// <summary>Draws the note in the problem colour.</summary>
         public bool Warn { get; init; }
+        /// <summary>A heading over the rows after it, not a row to pick.</summary>
+        public bool Heading { get; init; }
     }
 
-    readonly List<Row> rows;
-    readonly string selected;
+    List<Row> rows;
+    string selected;
     readonly Action<string> onSelect;
     LoadedTexture rowsTexture, hoverTexture;
     double scroll;
     int hover = -1;
 
+    readonly ElementBounds iconCell;
+
     public GuiElementChapterRail(ICoreClientAPI capi, ElementBounds bounds, List<Row> rows, string selected, Action<string> onSelect) : base(capi, bounds)
     {
+        iconCell = ElementBounds.Fixed(0, 0, 8 + IconSize + 4, RowHeight).WithParent(bounds);
         this.rows = rows;
         this.selected = selected;
         this.onSelect = onSelect;
@@ -54,14 +59,8 @@ public class GuiElementChapterRail : GuiElement
         ctxStatic.Fill();
         EmbossRoundRectangleElement(ctxStatic, Bounds, true, 2, 1);
 
-        int width = (int)Bounds.InnerWidth, height = Math.Max(1, (int)Math.Ceiling(ContentHeight));
-        using (var surface = new ImageSurface(Format.Argb32, width, height))
-        using (var ctx = new Context(surface))
-        {
-            for (int i = 0; i < rows.Count; i++) DrawRow(ctx, rows[i], i * S(RowHeight), width);
-            rowsTexture ??= new LoadedTexture(api);
-            generateTexture(surface, ref rowsTexture);
-        }
+        ComposeRows();
+        int width = (int)Bounds.InnerWidth;
 
         using (var surface = new ImageSurface(Format.Argb32, width, (int)S(RowHeight)))
         using (var ctx = new Context(surface))
@@ -83,9 +82,37 @@ public class GuiElementChapterRail : GuiElement
         }
     }
 
+    void ComposeRows()
+    {
+        int width = (int)Bounds.InnerWidth, height = Math.Max(1, (int)Math.Ceiling(ContentHeight));
+        using var surface = new ImageSurface(Format.Argb32, width, height);
+        using var ctx = new Context(surface);
+        for (int i = 0; i < rows.Count; i++) DrawRow(ctx, rows[i], i * S(RowHeight), width);
+        rowsTexture ??= new LoadedTexture(api);
+        generateTexture(surface, ref rowsTexture);
+    }
+
+    /// <summary>Replaces the rows without recomposing the dialog, so a search box keeps its focus while the list follows it.</summary>
+    public void SetRows(List<Row> newRows, string newSelected)
+    {
+        rows = newRows;
+        selected = newSelected;
+        scroll = 0;
+        ComposeRows();
+    }
+
+    public IReadOnlyList<Row> Rows => rows;
+
     void DrawRow(Context ctx, Row row, double y, int width)
     {
         double h = S(RowHeight), pad = S(8);
+        if (row.Heading)
+        {
+            var heading = BookStyle.Heading();
+            heading.SetupContext(ctx);
+            new TextDrawUtil().DrawTextLine(ctx, heading, Fit(heading, row.Title.ToUpperInvariant(), width - 2 * pad), pad, y + h - heading.GetFontExtents().Height - S(4));
+            return;
+        }
         bool isSelected = row.Id == selected;
         if (isSelected)
         {
@@ -130,7 +157,7 @@ public class GuiElementChapterRail : GuiElement
 
         int mouseRow = RowAt(api.Input.MouseX, api.Input.MouseY);
         hover = mouseRow;
-        if (hover >= 0 && rows[hover].Id != selected)
+        if (hover >= 0 && rows[hover].Id != selected && !rows[hover].Heading)
         {
             api.Render.Render2DTexturePremultipliedAlpha(hoverTexture.TextureId, x, y + hover * S(RowHeight), hoverTexture.Width, hoverTexture.Height, 55);
         }
@@ -142,7 +169,12 @@ public class GuiElementChapterRail : GuiElement
             if (rows[i].Icon?.Itemstack == null) continue;
             double cy = y + i * S(RowHeight) + S(RowHeight) / 2;
             if (cy < Bounds.renderY - icon || cy > Bounds.renderY + Bounds.InnerHeight + icon) continue;
-            api.Render.RenderItemstackToGui(rows[i].Icon, x + S(8) + icon / 2, cy, 100, (float)icon * 0.9f, ColorUtil.WhiteArgb, true, false, false);
+            // Each icon is clipped to its own cell: long models such as spears would cross into the next row.
+            iconCell.fixedY = (i * S(RowHeight) - scroll) / Vintagestory.API.Config.RuntimeEnv.GUIScale;
+            iconCell.CalcWorldBounds();
+            api.Render.PushScissor(iconCell, true);
+            api.Render.RenderItemstackToGui(rows[i].Icon, x + S(8) + icon / 2, cy, 100, (float)icon * 0.85f, ColorUtil.WhiteArgb, true, false, false);
+            api.Render.PopScissor();
         }
         api.Render.PopScissor();
     }
@@ -161,7 +193,7 @@ public class GuiElementChapterRail : GuiElement
     public override void OnMouseDownOnElement(ICoreClientAPI api, MouseEvent args)
     {
         int i = RowAt(args.X, args.Y);
-        if (i < 0) return;
+        if (i < 0 || rows[i].Heading) return;
         args.Handled = true;
         api.Gui.PlaySound("menubutton_press");
         onSelect(rows[i].Id);

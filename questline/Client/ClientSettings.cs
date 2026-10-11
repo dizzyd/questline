@@ -11,6 +11,9 @@ public class ClientSettings
     /// <summary>Show a toast when a quest is completed.</summary>
     public bool Toasts = true;
 
+    /// <summary>H opens the book's Reference tab instead of the vanilla handbook, and handbook links open there too.</summary>
+    public bool TakeOverHandbook = true;
+
     /// <summary>Pinned quest ids, per world (by savegame identifier), shown in the HUD tracker.</summary>
     public Dictionary<string, List<string>> Pins = [];
 }
