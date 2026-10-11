@@ -40,10 +40,10 @@ namespace Questline.Tests
         {
             string server = await Remote.Eval(@"
                 var g = sapi.ModLoader.GetModSystem<questline.QuestlineModSystem>().Engine.Graph;
-                return string.Join("","", g.CountByKind().Where(k => !k.Key.StartsWith(""drop"") && k.Key != ""entity-drop"" && k.Key != ""butcher"").Select(k => k.Key + ""="" + k.Value));");
+                return string.Join("","", g.CountByKind().Where(k => !k.Key.StartsWith(""drop"") && k.Key != ""entity-drop"" && k.Key != ""butcher"" && k.Key != ""trade"").Select(k => k.Key + ""="" + k.Value));");
             await OnClient();
             var graph = Client.Graph;
-            string client = string.Join(",", graph.CountByKind().Where(k => !k.Key.StartsWith("drop") && k.Key != "entity-drop" && k.Key != "butcher").Select(k => k.Key + "=" + k.Value));
+            string client = string.Join(",", graph.CountByKind().Where(k => !k.Key.StartsWith("drop") && k.Key != "entity-drop" && k.Key != "butcher" && k.Key != "trade").Select(k => k.Key + "=" + k.Value));
             Log($"server: {server.Trim()}");
             Log($"client: {client}");
             Assert.Equal(server.Trim(), client, "the same recipes on both sides");

@@ -87,6 +87,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
             ModRequirement m => Lang.Get("questline:req-mod", m.ModId),
             StageRequirement s => Lang.Get("questline:req-stage", Named(s.Stage)),
             ChapterCompleteRequirement c => Lang.Get("questline:req-chapter", ChapterTitle(c.ChapterId)),
+            DiscoveredRequirement => Lang.Get("questline:req-discovered"),
             AllRequirement a => string.Join(Lang.Get("questline:req-and"), a.Of.Select(x => Describe(x, true))),
             AnyRequirement a => string.Join(Lang.Get("questline:req-or"), a.Of.Select(x => Describe(x, true))),
             AtLeastRequirement a => Lang.Get("questline:req-atleast", a.N, string.Join(", ", a.Of.Select(x => Describe(x, true)))),

@@ -7,7 +7,6 @@ namespace questline.Client;
 public class RuleTextComponent : RichTextComponentBase
 {
     readonly double space;
-    LoadedTexture line;
 
     public RuleTextComponent(ICoreClientAPI capi, double space = 8) : base(capi)
     {
@@ -34,11 +33,5 @@ public class RuleTextComponent : RichTextComponentBase
         ctx.SetSourceRGBA(BookStyle.Muted[0], BookStyle.Muted[1], BookStyle.Muted[2], 0.35);
         ctx.Rectangle(b.X, b.Y + GuiElement.scaled(space), b.Width, 1);
         ctx.Fill();
-    }
-
-    public override void Dispose()
-    {
-        line?.Dispose();
-        base.Dispose();
     }
 }

@@ -98,6 +98,12 @@ public partial class QuestEngine
             .SetMessageHandler<PartyRequest>(OnPartyRequest);
 
         Editor = new QuestEditor(api, this);
+        // The graph checks need every recipe, which the game has only once the world is running.
+        api.Event.ServerRunPhase(EnumServerRunPhase.RunGame, () =>
+        {
+            recipesReady = true;
+            RunGraphChecks();
+        });
         api.Permissions.RegisterPrivilege(QuestEditor.Privilege, "Edit quests in the quest book");
 
         api.Event.SaveGameLoaded += LoadProgress;
@@ -119,11 +125,12 @@ public partial class QuestEngine
     /// <summary>Re-reads every chapter and resends definitions and state to everyone online.</summary>
     public void Reload()
     {
-        var loader = new QuestLoader(api, Editor?.WorkingDir);
+        var loader = new QuestLoader(new ServerFacts(api), api.Logger, Editor?.WorkingDir);
         Registry = loader.Load();
         Problems = loader.Problems;
         rawChapters = loader.RawChapters;
         edited = loader.Edited;
+        if (recipesReady) RunGraphChecks(resend: false);
 
         tasksByType = [];
         foreach (var quest in Registry.Quests.Values)
@@ -142,6 +149,27 @@ public partial class QuestEngine
         {
             SendDefinitions(player);
             inventoryDirty.Add(player.PlayerUID);
+        }
+    }
+
+    bool recipesReady;
+
+    /// <summary>Adds what the recipe graph says about the quests to <see cref="Problems"/>, and tells editors.</summary>
+    public void RunGraphChecks(bool resend = true)
+    {
+        var checks = new GraphChecks(Registry, Graph,
+            api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()),
+            api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()),
+            api.World.EntityTypes.Select(e => e.Code.ToString()));
+        foreach (var problem in checks.Run())
+        {
+            Problems.Add(problem);
+            api.Logger.Warning("[questline] " + problem);
+        }
+        if (!resend) return;
+        foreach (IServerPlayer player in api.World.AllOnlinePlayers)
+        {
+            if (QuestEditor.CanEdit(player)) SendEditor(player);
         }
     }
 
@@ -308,7 +336,8 @@ public partial class QuestEngine
         foreach (string uid in inventoryDirty.ToList())
         {
             inventoryDirty.Remove(uid);
-            if (api.World.PlayerByUid(uid) is not IServerPlayer { ConnectionState: EnumClientState.Playing }) continue;
+            if (api.World.PlayerByUid(uid) is not IServerPlayer { ConnectionState: EnumClientState.Playing } player) continue;
+            RecordFound(player);
             SeedFromHistory(uid);
             ScanInventory(uid);
         }
@@ -479,6 +508,36 @@ public partial class QuestEngine
         var stack = new ItemStack(collectible, reward.Count);
         player.InventoryManager.TryGiveItemstack(stack, true);
         if (stack.StackSize > 0) api.World.SpawnItemEntity(stack, player.Entity.Pos.XYZ);
+    }
+
+    #endregion
+
+    #region Discovery
+
+    /// <summary>Whether the player has carried, made, killed, placed or broken anything matching the pattern.</summary>
+    public bool HasDiscovered(string playerUid, string pattern)
+    {
+        var loc = new AssetLocation(pattern);
+        foreach (string key in ProgressOf(playerUid).History.Keys)
+        {
+            int bar = key.IndexOf('|');
+            if (bar > 0 && WildcardUtil.Match(loc, new AssetLocation(key[(bar + 1)..]))) return true;
+        }
+        return false;
+    }
+
+    /// <summary>Remembers each thing the player carries, once, so discovered requirements can see it.</summary>
+    void RecordFound(IServerPlayer player)
+    {
+        var history = ProgressOf(player.PlayerUID).History;
+        bool added = false;
+        foreach (var slot in CarriedSlots(player))
+        {
+            if (slot.Itemstack?.Collectible?.Code is not { } code) continue;
+            added |= history.TryAdd(PlayerProgress.HistoryKey("found", code.ToString()), 1);
+        }
+        // Something new may unlock a quest gated on finding it.
+        if (added) syncDirty.Add(player.PlayerUID);
     }
 
     #endregion
@@ -672,17 +731,16 @@ public partial class QuestEngine
         channel.SendPacket(new DefinitionsPacket { RegistryJson = Registry.ToJson() }, player);
         sent.Remove(player.PlayerUID);
         Sync(player);
-        if (QuestEditor.CanEdit(player))
-        {
-            channel.SendPacket(new EditorPacket
-            {
-                Domain = Config.EditorDomain,
-                Chapters = rawChapters,
-                Problems = Problems,
-                Edited = edited.ToList(),
-            }, player);
-        }
+        if (QuestEditor.CanEdit(player)) SendEditor(player);
     }
+
+    void SendEditor(IServerPlayer player) => channel.SendPacket(new EditorPacket
+    {
+        Domain = Config.EditorDomain,
+        Chapters = rawChapters,
+        Problems = Problems,
+        Edited = edited.ToList(),
+    }, player);
 
     void OnSaveChapter(IServerPlayer player, SaveChapterRequest req)
     {
@@ -787,5 +845,6 @@ public partial class QuestEngine
         public bool HasStage(string stage) => engine.HasStage(playerUid, stage);
         public bool IsChapterComplete(string chapterId) =>
             engine.Registry.ChaptersById.TryGetValue(chapterId, out var chapter) && chapter.Quests.All(q => engine.IsComplete(playerUid, q.Id));
+        public bool HasDiscovered(string pattern) => engine.HasDiscovered(playerUid, pattern);
     }
 }

@@ -1,0 +1,8 @@
+{
+	code: "gizmo",
+	variantgroups: [ { code: "part", states: ["whole", "part"] } ],
+	shape: { base: "game:item/resource/flint" },
+	texture: { base: "game:block/stone/flint" },
+	creativeinventory: { "general": ["*"] },
+	maxstacksize: 64
+}

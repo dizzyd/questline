@@ -1,0 +1,75 @@
+{
+    "id": "checks",
+    "order": 70,
+    "quests": [
+        {
+            "id": "check-wrong-method",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:flint"
+                }
+            ]
+        },
+        {
+            "id": "check-early-gizmo",
+            "pos": [
+                0,
+                2
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "qltest:gizmo-whole"
+                }
+            ]
+        },
+        {
+            "id": "check-late-part",
+            "pos": [
+                2,
+                2
+            ],
+            "requires": "check-early-gizmo",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "qltest:gizmo-part"
+                }
+            ]
+        },
+        {
+            "id": "check-spoiler",
+            "pos": [
+                0,
+                4
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:jonasparts-*"
+                }
+            ]
+        },
+        {
+            "id": "check-spoiler-found-first",
+            "pos": [
+                2,
+                4
+            ],
+            "requires": {
+                "discovered": "game:jonasparts-*"
+            },
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:jonasparts-*"
+                }
+            ]
+        }
+    ]
+}

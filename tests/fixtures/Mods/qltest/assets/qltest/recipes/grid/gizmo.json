@@ -1,0 +1,21 @@
+[
+	{
+		ingredientPattern: "F,S",
+		ingredients: {
+			"F": { type: "item", code: "game:flint" },
+			"S": { type: "item", code: "game:stick" }
+		},
+		width: 1,
+		height: 2,
+		output: { type: "item", code: "qltest:gizmo-part", quantity: 1 }
+	},
+	{
+		ingredientPattern: "P,P",
+		ingredients: {
+			"P": { type: "item", code: "qltest:gizmo-part" }
+		},
+		width: 1,
+		height: 2,
+		output: { type: "item", code: "qltest:gizmo-whole", quantity: 1 }
+	}
+]

@@ -13,12 +13,14 @@ public interface IRequirementContext
     bool IsModLoaded(string modId);
     bool HasStage(string stage);
     bool IsChapterComplete(string chapterId);
+    /// <summary>Whether the player has come across something matching this code: carried it, made it, killed it.</summary>
+    bool HasDiscovered(string pattern);
 }
 
 /// <summary>
 /// A quest's <c>requires</c>: a boolean tree. In JSON a bare string is a quest id, an array is
 /// <c>all</c>, and an object's keys (<c>all</c>, <c>any</c>, <c>atLeast</c>, <c>quest</c>,
-/// <c>mod</c>, <c>stage</c>, <c>chapterComplete</c>) must all hold.
+/// <c>mod</c>, <c>stage</c>, <c>chapterComplete</c>, <c>discovered</c>) must all hold.
 /// </summary>
 [JsonConverter(typeof(RequirementConverter))]
 public abstract class Requirement
@@ -72,6 +74,16 @@ public class ChapterCompleteRequirement(string chapterId) : Requirement
     public override bool Evaluate(IRequirementContext ctx) => ctx.IsChapterComplete(ChapterId);
     public override void Qualify(string domain) => ChapterId = QualifyId(ChapterId, domain);
     public override void Unqualify(string domain) => ChapterId = UnqualifyId(ChapterId, domain);
+}
+
+/// <summary>
+/// The player has found something on their own: <c>{"discovered": "game:lore-*"}</c>. Lets a quest
+/// touch a story item only after the player has come across it, without the book pointing to it.
+/// </summary>
+public class DiscoveredRequirement(string pattern) : Requirement
+{
+    public string Pattern { get; } = pattern;
+    public override bool Evaluate(IRequirementContext ctx) => ctx.HasDiscovered(Pattern);
 }
 
 public abstract class CompositeRequirement(List<Requirement> of) : Requirement
@@ -140,6 +152,7 @@ public class RequirementConverter : JsonConverter<Requirement>
         "mod" => new ModRequirement((string)p.Value),
         "stage" => new StageRequirement((string)p.Value),
         "chapterComplete" => new ChapterCompleteRequirement((string)p.Value),
+        "discovered" => new DiscoveredRequirement((string)p.Value),
         _ => throw new JsonSerializationException($"Unknown requirement '{p.Name}'"),
     };
 
@@ -157,6 +170,7 @@ public class RequirementConverter : JsonConverter<Requirement>
         ModRequirement m => new JObject { ["mod"] = m.ModId },
         StageRequirement s => new JObject { ["stage"] = s.Stage },
         ChapterCompleteRequirement c => new JObject { ["chapterComplete"] = c.ChapterId },
+        DiscoveredRequirement d => new JObject { ["discovered"] = d.Pattern },
         AllRequirement a => new JObject { ["all"] = new JArray(a.Of.Select(ToToken)) },
         AnyRequirement a => new JObject { ["any"] = new JArray(a.Of.Select(ToToken)) },
         AtLeastRequirement a => new JObject { ["atLeast"] = new JObject { ["n"] = a.N, ["of"] = new JArray(a.Of.Select(ToToken)) } },

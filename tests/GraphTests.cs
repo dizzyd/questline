@@ -74,6 +74,22 @@ namespace Questline.Tests
             Assert.True(graph.MadeBy(target).Any(e => e.Kind.StartsWith(kind) && e.Inputs.Any(i => i.Codes.Contains(from))), $"{from} → {target} by {kind}");
         }
 
+        /// <summary>The qltest "checks" chapter breaks each graph rule once, and keeps one spoiler behind a discovered gate.</summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task GraphChecksFindWhatTheChaptersGetWrong()
+        {
+            await OnServer();
+            var engine = Sapi.ModLoader.GetModSystem<QuestlineModSystem>().Engine;
+            var problems = engine.Problems.Where(p => p.StartsWith("qltest:check-")).ToList();
+            foreach (var p in problems) Log(p);
+
+            Assert.True(problems.Any(p => p.StartsWith("qltest:check-wrong-method:") && p.Contains("nothing makes that way")), "a smith task for flint");
+            Assert.True(problems.Any(p => p.StartsWith("qltest:check-early-gizmo:") && p.Contains("gizmo-part") && p.Contains("later")), "a gizmo asked for before its part");
+            Assert.True(problems.Any(p => p.StartsWith("qltest:check-spoiler:") && p.Contains("story item")), "a story item in the default questline");
+            Assert.False(problems.Any(p => p.StartsWith("qltest:check-spoiler-found-first:")), "a story item behind a discovered gate is fine");
+            Assert.False(problems.Any(p => p.StartsWith("qltest:check-late-part:")), "the part itself is fine");
+        }
+
         [VsTest(TimeoutMs = 60000)]
         public async Task KnownChainsAreThere()
         {

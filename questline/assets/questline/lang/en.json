@@ -137,5 +137,6 @@
     "ref-open-quest": "Open in the quest book",
     "ref-quests": "Quests",
     "ref-needed-by": "Needed by",
-    "ref-given-by": "Given by"
+    "ref-given-by": "Given by",
+    "req-discovered": "something you'll find on your own"
 }

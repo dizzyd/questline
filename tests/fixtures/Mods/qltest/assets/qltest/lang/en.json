@@ -49,5 +49,13 @@
     "shape-square-title": "A square",
     "shape-circle-title": "A circle",
     "shape-hexagon-title": "A hexagon",
-    "shape-gear-title": "A milestone with a long title"
+    "shape-gear-title": "A milestone with a long title",
+    "checks-title": "Checks",
+    "check-wrong-method-title": "Smith some flint",
+    "check-spoiler-title": "A story part",
+    "check-spoiler-found-first-title": "A story part, found first",
+    "check-early-gizmo-title": "Have a gizmo",
+    "check-late-part-title": "Make a gizmo part",
+    "item-gizmo-whole": "Gizmo",
+    "item-gizmo-part": "Gizmo part"
 }

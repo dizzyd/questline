@@ -16,7 +16,7 @@ namespace questline.Server;
 /// questlines, merges their chapters and disables quests that can't work. Each problem is
 /// logged and kept in <see cref="Problems"/>; a broken quest never stops its chapter loading.
 /// </summary>
-public class QuestLoader(ICoreServerAPI api, string workingDir = null)
+public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = null)
 {
     public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom", "checkbox"];
     static readonly HashSet<string> BlockTasks = ["place", "break"];
@@ -39,25 +39,24 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
         var active = registry.Questlines.Select(q => q.Id).ToHashSet();
 
         var chapters = new List<ChapterDef>();
-        foreach (var asset in api.Assets.GetMany("questline/chapters/"))
+        foreach (var (domain, name, json) in facts.Chapters())
         {
-            if (!asset.Name.EndsWith(".json")) continue;
-
+            string where = $"{domain}:questline/chapters/{name}.json";
             ChapterDef chapter;
             try
             {
-                chapter = asset.ToObject<ChapterDef>();
+                chapter = JsonConvert.DeserializeObject<ChapterDef>(json);
             }
             catch (Exception e)
             {
-                Problem($"{asset.Location}: can't read chapter: {e.Message}");
+                Problem($"{where}: can't read chapter: {e.Message}");
                 continue;
             }
 
-            Qualify(chapter, asset.Location.Domain, asset.Location.GetName().RemoveFileEnding());
+            Qualify(chapter, domain, name);
             if (chapters.Any(c => c.Id == chapter.Id))
             {
-                Problem($"{asset.Location}: chapter {chapter.Id} is already defined; this copy is ignored");
+                Problem($"{where}: chapter {chapter.Id} is already defined; this copy is ignored");
                 continue;
             }
             chapters.Add(chapter);
@@ -73,7 +72,7 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
 
         foreach (var chapter in chapters)
         {
-            if (!chapter.RequiresMod.All(api.ModLoader.IsModEnabled)) continue;
+            if (!chapter.RequiresMod.All(facts.IsModLoaded)) continue;
             if (!active.Contains(chapter.Questline)) continue;
             RawChapters[chapter.Id] = JsonConvert.SerializeObject(chapter);
             registry.Chapters.Add(chapter);
@@ -95,7 +94,7 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
         Validate(registry);
         registry.Index();
 
-        api.Logger.Notification("[questline] loaded {0} quests in {1} chapters across {2} questlines, {3} problems",
+        logger.Notification("[questline] loaded {0} quests in {1} chapters across {2} questlines, {3} problems",
             registry.Quests.Count, registry.Chapters.Count, registry.Questlines.Count, Problems.Count);
         return registry;
     }
@@ -103,18 +102,18 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
     List<QuestlineDef> LoadQuestlines()
     {
         var list = new List<QuestlineDef>();
-        foreach (var asset in api.Assets.GetMany("questline/questline.json"))
+        foreach (var (domain, json) in facts.Questlines())
         {
             try
             {
-                var def = asset.ToObject<QuestlineDef>();
-                def.Domain = asset.Location.Domain;
+                var def = JsonConvert.DeserializeObject<QuestlineDef>(json);
+                def.Domain = domain;
                 def.Id = Requirement.QualifyId(def.Id ?? "default", def.Domain);
                 list.Add(def);
             }
             catch (Exception e)
             {
-                Problem($"{asset.Location}: can't read questline: {e.Message}");
+                Problem($"{domain}:questline/questline.json: can't read questline: {e.Message}");
             }
         }
         return list;
@@ -124,7 +123,7 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
     {
         var shipping = all.Select(q => q.Domain).ToHashSet();
         var active = all
-            .Where(q => q.RequiresMod.All(api.ModLoader.IsModEnabled))
+            .Where(q => q.RequiresMod.All(facts.IsModLoaded))
             .Where(q => !q.YieldsTo.Any(mod => mod != q.Domain && shipping.Contains(mod)))
             .ToList();
 
@@ -202,7 +201,7 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
         return list;
     }
 
-    bool HasText(string key) => key != null && (Text.ContainsKey(key) || Lang.HasTranslation(key, true, false));
+    bool HasText(string key) => key != null && (Text.ContainsKey(key) || facts.HasLang(key));
 
     void Validate(QuestRegistry registry)
     {
@@ -235,7 +234,7 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
         foreach (var chapter in registry.Chapters) chapter.Quests.RemoveAll(q => broken.Contains(q.Id));
         registry.Index();
 
-        var allDone = new EverythingDoneContext(registry, api);
+        var allDone = new EverythingDoneContext(registry, facts);
         foreach (var quest in registry.Quests.Values)
         {
             if (quest.Requires != null && !quest.Requires.Evaluate(allDone))
@@ -348,9 +347,9 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
 
     IEnumerable<string> TextureWarnings(string what, string src)
     {
-        var asset = api.Assets.TryGet(new AssetLocation(PageBlock.TexturePath(src)));
-        if (asset == null) yield return $"{what} {src} not found (looked for {PageBlock.TexturePath(src)})";
-        else if (PngSize(asset.Data) is var (w, h) && (w > MaxImageSize || h > MaxImageSize))
+        var data = facts.Texture(PageBlock.TexturePath(src));
+        if (data == null) yield return $"{what} {src} not found (looked for {PageBlock.TexturePath(src)})";
+        else if (PngSize(data) is var (w, h) && (w > MaxImageSize || h > MaxImageSize))
         {
             yield return $"{what} {src} is {w}×{h}; over {MaxImageSize} px it costs GPU memory on every client";
         }
@@ -368,18 +367,12 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
 
     bool TargetExists(TaskDef task)
     {
-        var loc = new AssetLocation(task.Target);
-        if (task.Type == "kill") return api.World.EntityTypes.Any(e => WildcardUtil.Match(loc, e.Code));
-        if (BlockTasks.Contains(task.Type)) return api.World.Blocks.Any(b => b.Code != null && WildcardUtil.Match(loc, b.Code));
-        return api.World.Collectibles.Any(c => c.Code != null && WildcardUtil.Match(loc, c.Code));
+        if (task.Type == "kill") return facts.AnyMatches("entity", task.Target);
+        if (BlockTasks.Contains(task.Type)) return facts.AnyMatches("block", task.Target);
+        return facts.AnyMatches("collectible", task.Target);
     }
 
-    bool CollectibleExists(string code)
-    {
-        if (code == null) return false;
-        var loc = new AssetLocation(code);
-        return api.World.GetItem(loc) != null || api.World.GetBlock(loc) != null;
-    }
+    bool CollectibleExists(string code) => facts.CollectibleExists(code);
 
     /// <summary>Quests on a requirement cycle, found by depth-first search over quest-to-prerequisite edges.</summary>
     static IEnumerable<string> FindCycles(QuestRegistry registry)
@@ -412,15 +405,16 @@ public class QuestLoader(ICoreServerAPI api, string workingDir = null)
     void Problem(string message)
     {
         Problems.Add(message);
-        api.Logger.Warning("[questline] " + message);
+        logger.Warning("[questline] " + message);
     }
 
     /// <summary>Asks whether a requirement could ever hold: every quest done, every stage reached.</summary>
-    class EverythingDoneContext(QuestRegistry registry, ICoreAPI api) : IRequirementContext
+    class EverythingDoneContext(QuestRegistry registry, IGameFacts facts) : IRequirementContext
     {
         public bool IsQuestComplete(string questId) => registry.Quests.ContainsKey(questId);
-        public bool IsModLoaded(string modId) => api.ModLoader.IsModEnabled(modId);
+        public bool IsModLoaded(string modId) => facts.IsModLoaded(modId);
         public bool HasStage(string stage) => true;
         public bool IsChapterComplete(string chapterId) => registry.ChaptersById.ContainsKey(chapterId);
+        public bool HasDiscovered(string pattern) => true;
     }
 }
