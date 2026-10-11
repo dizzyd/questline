@@ -1,0 +1,147 @@
+{
+    "id": "riding",
+    "order": 86,
+    "icon": "game:hoovedwearables-middleback-saddle1",
+    "quests": [
+        {
+            "id": "smith-nails",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "smith-bronze",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:metalnailsandstrips-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "trap-elk-calf",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "make-crate-trap",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:trapcrate-wood"
+        },
+        {
+            "id": "make-saddle",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": [
+                "smith-nails",
+                "make-leather"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-middleback-saddle1"
+                }
+            ]
+        },
+        {
+            "id": "make-bridle",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": "make-saddle",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-head-bridle*"
+                }
+            ]
+        },
+        {
+            "id": "break-in-elk",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": [
+                "trap-elk-calf",
+                "make-saddle"
+            ],
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "game:semitameddeer-*"
+                }
+            ],
+            "icon": "game:hoovedwearables-middleback-saddle1"
+        },
+        {
+            "id": "ride-elk",
+            "pos": [
+                8,
+                1.5
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "requires": [
+                "break-in-elk",
+                "make-bridle"
+            ],
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "game:tameddeer-*"
+                }
+            ],
+            "icon": "game:hoovedwearables-middleback-saddle1"
+        },
+        {
+            "id": "make-saddlebags",
+            "pos": [
+                10,
+                0.0
+            ],
+            "requires": "ride-elk",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-lowerbackside-saddlebags1"
+                }
+            ]
+        },
+        {
+            "id": "make-bone-flute",
+            "pos": [
+                10,
+                1.5
+            ],
+            "requires": "ride-elk",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:instrument-flute1"
+                }
+            ]
+        },
+        {
+            "id": "make-pillion",
+            "pos": [
+                10,
+                3.0
+            ],
+            "requires": "ride-elk",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-lowerbackside-pillion-leather"
+                }
+            ]
+        }
+    ]
+}

@@ -19,49 +19,100 @@
             ]
         },
         {
-            "id": "make-barrel",
+            "id": "stock-grain",
             "pos": [
                 0,
-                3.0
+                1.5
             ],
-            "requires": "make-axe",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:barrel"
-                }
-            ]
-        },
-        {
-            "id": "cure-meat",
-            "pos": [
-                2,
-                3.0
+            "requires": [
+                "harvest-grain",
+                "place-vessel"
             ],
-            "requires": "make-barrel",
             "tasks": [
                 {
                     "type": "obtain",
-                    "item": "game:redmeat-cured",
-                    "count": 4
+                    "item": "game:grain-*",
+                    "count": 64
                 }
             ]
         },
         {
             "id": "cellar-food",
             "pos": [
-                2,
-                0.0
+                0,
+                3.0
             ],
-            "requires": [
-                "stock-firewood",
-                "place-vessel"
-            ],
+            "requires": "build-cellar",
             "tasks": [
                 {
                     "type": "obtain",
                     "item": "game:vegetable-*",
                     "count": 16
+                }
+            ]
+        },
+        {
+            "id": "make-pelt",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "melt-fat",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:hide-pelt-*",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "dress-warm",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "make-pelt",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:clothes-*fur*"
+                }
+            ]
+        },
+        {
+            "id": "winter-larder",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "stock-firewood",
+                "stock-grain",
+                "cellar-food",
+                "dress-warm",
+                "cure-meat",
+                "pickle-vegetables"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:*-cured",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:pickledvegetable-*",
+                    "count": 8
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 32
                 }
             ]
         }

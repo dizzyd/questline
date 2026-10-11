@@ -4,21 +4,6 @@
     "icon": "game:ingot-tinbronze",
     "quests": [
         {
-            "id": "find-tin",
-            "pos": [
-                0,
-                0.0
-            ],
-            "requires": "first-smithing",
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:nugget-cassiterite",
-                    "count": 10
-                }
-            ]
-        },
-        {
             "id": "make-prospecting-pick",
             "pos": [
                 0,
@@ -33,10 +18,25 @@
             ]
         },
         {
-            "id": "alloy-bronze",
+            "id": "find-tin",
             "pos": [
                 2,
-                1.5
+                0.0
+            ],
+            "requires": "make-prospecting-pick",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-cassiterite",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "alloy-bronze",
+            "pos": [
+                4,
+                0.0
             ],
             "requires": "find-tin",
             "tasks": [
@@ -47,16 +47,161 @@
             ]
         },
         {
+            "id": "bronze-anvil",
+            "pos": [
+                6,
+                -3.0
+            ],
+            "requires": "alloy-bronze",
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:anvil-*bronze"
+                }
+            ]
+        },
+        {
+            "id": "bronze-pickaxe",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": "alloy-bronze",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:pickaxe-*bronze"
+                }
+            ]
+        },
+        {
             "id": "smith-bronze",
             "pos": [
-                4,
+                6,
+                0.0
+            ],
+            "requires": "alloy-bronze",
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-tinbronze"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "bronze-axe",
+            "pos": [
+                6,
                 1.5
             ],
             "requires": "alloy-bronze",
             "tasks": [
                 {
-                    "type": "smith",
-                    "item": "game:*-tinbronze"
+                    "type": "craft",
+                    "item": "game:axe-felling-*bronze"
+                }
+            ]
+        },
+        {
+            "id": "find-bismuth",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "make-prospecting-pick",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-bismuthinite",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "find-zinc",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "make-prospecting-pick",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-sphalerite",
+                    "count": 20
+                }
+            ]
+        },
+        {
+            "id": "alloy-bismuth-bronze",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": [
+                "find-bismuth",
+                "find-zinc"
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:ingot-bismuthbronze"
+                }
+            ]
+        },
+        {
+            "id": "find-gold",
+            "pos": [
+                2,
+                6.0
+            ],
+            "requires": "make-prospecting-pick",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-nativegold",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "find-silver",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "make-prospecting-pick",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-nativesilver",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "alloy-black-bronze",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": [
+                "find-gold",
+                "find-silver"
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:ingot-blackbronze"
                 }
             ]
         }

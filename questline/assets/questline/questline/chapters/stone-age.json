@@ -7,7 +7,7 @@
             "id": "gather-flint",
             "pos": [
                 0,
-                0.0
+                -1.5
             ],
             "tasks": [
                 {
@@ -35,7 +35,7 @@
             "id": "forage",
             "pos": [
                 0,
-                6.0
+                10.5
             ],
             "tasks": [
                 {
@@ -60,23 +60,6 @@
             ]
         },
         {
-            "id": "make-axe",
-            "pos": [
-                4,
-                0.0
-            ],
-            "requires": [
-                "knap-axe-head",
-                "gather-sticks"
-            ],
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:axe-flint"
-                }
-            ]
-        },
-        {
             "id": "knap-knife",
             "pos": [
                 2,
@@ -87,120 +70,6 @@
                 {
                     "type": "knap",
                     "item": "game:knifeblade-flint"
-                }
-            ]
-        },
-        {
-            "id": "make-knife",
-            "pos": [
-                4,
-                3.0
-            ],
-            "requires": [
-                "knap-knife",
-                "gather-sticks"
-            ],
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:knife-generic-flint"
-                }
-            ]
-        },
-        {
-            "id": "cut-grass",
-            "pos": [
-                6,
-                3.0
-            ],
-            "requires": "make-knife",
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:drygrass",
-                    "count": 10
-                }
-            ]
-        },
-        {
-            "id": "chop-wood",
-            "pos": [
-                6,
-                0.0
-            ],
-            "requires": "make-axe",
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:firewood",
-                    "count": 8
-                }
-            ]
-        },
-        {
-            "id": "make-firestarter",
-            "pos": [
-                6,
-                6.0
-            ],
-            "requires": "gather-sticks",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:firestarter"
-                }
-            ]
-        },
-        {
-            "id": "make-fire",
-            "pos": [
-                8,
-                3.0
-            ],
-            "requires": [
-                "cut-grass",
-                "chop-wood",
-                "make-firestarter"
-            ],
-            "tasks": [
-                {
-                    "type": "checkbox"
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:firewood",
-                    "count": 4
-                }
-            ]
-        },
-        {
-            "id": "make-torch",
-            "pos": [
-                10,
-                1.5
-            ],
-            "requires": "make-fire",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:torch-basic-*",
-                    "count": 2
-                }
-            ]
-        },
-        {
-            "id": "hay-bed",
-            "pos": [
-                10,
-                4.5
-            ],
-            "requires": "cut-grass",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:bed-hay-*"
                 }
             ]
         },
@@ -219,10 +88,58 @@
             ]
         },
         {
+            "id": "make-firestarter",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": "cut-grass",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:firestarter"
+                }
+            ]
+        },
+        {
+            "id": "make-axe",
+            "pos": [
+                4,
+                -1.5
+            ],
+            "requires": [
+                "knap-axe-head",
+                "gather-sticks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:axe-flint"
+                }
+            ]
+        },
+        {
+            "id": "make-knife",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "knap-knife",
+                "gather-sticks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:knife-generic-flint"
+                }
+            ]
+        },
+        {
             "id": "make-spear",
             "pos": [
                 4,
-                6.0
+                4.5
             ],
             "requires": [
                 "knap-spear",
@@ -236,16 +153,225 @@
             ]
         },
         {
+            "id": "knap-shovel",
+            "pos": [
+                4,
+                7.5
+            ],
+            "requires": [
+                "gather-flint",
+                "gather-sticks"
+            ],
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:shovelhead-*"
+                },
+                {
+                    "type": "craft",
+                    "item": "game:shovel-*"
+                }
+            ]
+        },
+        {
+            "id": "chop-wood",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": "make-axe",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:firewood",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-club",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": [
+                "make-axe",
+                "make-knife"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:club-generic-wood"
+                }
+            ]
+        },
+        {
+            "id": "cut-grass",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:drygrass",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "gather-reeds",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cattailtops",
+                    "count": 10
+                }
+            ]
+        },
+        {
             "id": "first-hunt",
             "pos": [
                 6,
-                9.0
+                4.5
             ],
             "requires": "make-spear",
             "tasks": [
                 {
                     "type": "kill",
                     "entity": "game:chicken-*"
+                }
+            ],
+            "icon": "game:spear-generic-flint"
+        },
+        {
+            "id": "ground-storage",
+            "pos": [
+                8,
+                -1.5
+            ],
+            "requires": "chop-wood",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:firewood"
+        },
+        {
+            "id": "make-fire",
+            "pos": [
+                10,
+                0.0
+            ],
+            "requires": [
+                "chop-wood",
+                "make-firestarter"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 4
+                }
+            ],
+            "icon": "game:firepit-lit"
+        },
+        {
+            "id": "make-basket",
+            "pos": [
+                8,
+                4.5
+            ],
+            "requires": "gather-reeds",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:basket-normal-*"
+                }
+            ]
+        },
+        {
+            "id": "hay-bed",
+            "pos": [
+                8,
+                6.0
+            ],
+            "requires": "cut-grass",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bed-hay-*"
+                }
+            ]
+        },
+        {
+            "id": "make-torch",
+            "pos": [
+                12,
+                0.0
+            ],
+            "requires": "make-fire",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:torch-basic-*",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "cook-roots",
+            "pos": [
+                12,
+                3.0
+            ],
+            "requires": [
+                "gather-reeds",
+                "make-fire"
+            ],
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "game:vegetable-cookedcattailroot"
+                }
+            ]
+        },
+        {
+            "id": "build-shelter",
+            "pos": [
+                10,
+                7.5
+            ],
+            "requires": [
+                "hay-bed",
+                "knap-shovel"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:cob-*",
+                    "count": 20
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
                 }
             ]
         }

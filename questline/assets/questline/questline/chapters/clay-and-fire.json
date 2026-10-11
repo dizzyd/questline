@@ -19,6 +19,21 @@
             ]
         },
         {
+            "id": "find-fireclay",
+            "pos": [
+                2,
+                9.0
+            ],
+            "requires": "find-clay",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:clay-fire",
+                    "count": 30
+                }
+            ]
+        },
+        {
             "id": "form-bowl",
             "pos": [
                 2,
@@ -61,6 +76,20 @@
             ]
         },
         {
+            "id": "form-oven",
+            "pos": [
+                4,
+                9.0
+            ],
+            "requires": "find-fireclay",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:clayoven-north"
+                }
+            ]
+        },
+        {
             "id": "fire-pottery",
             "pos": [
                 4,
@@ -80,7 +109,7 @@
         {
             "id": "fire-pot",
             "pos": [
-                4,
+                6,
                 3.0
             ],
             "requires": "fire-pottery",
@@ -92,9 +121,73 @@
             ]
         },
         {
-            "id": "cook-meal",
+            "id": "place-oven",
             "pos": [
                 6,
+                9.0
+            ],
+            "requires": "form-oven",
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:clayoven-*"
+                }
+            ]
+        },
+        {
+            "id": "make-bricks",
+            "pos": [
+                6,
+                -3.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:rawbrick-*",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:burnedbrick-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-jug",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:jug-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "make-watering-can",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:wateringcan-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "cook-meal",
+            "pos": [
+                8,
                 3.0
             ],
             "requires": "fire-pot",
@@ -102,6 +195,20 @@
                 {
                     "type": "cook",
                     "item": "game:claypot-*-cooked"
+                }
+            ]
+        },
+        {
+            "id": "make-planter",
+            "pos": [
+                6,
+                4.5
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:clayplanter-*-fired"
                 }
             ]
         },
@@ -119,6 +226,21 @@
                 {
                     "type": "place",
                     "block": "game:storagevessel-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "make-shingles",
+            "pos": [
+                8,
+                -3.0
+            ],
+            "requires": "make-bricks",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:shingle-burned-*",
+                    "count": 12
                 }
             ]
         }

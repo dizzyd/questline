@@ -1,0 +1,196 @@
+{
+    "id": "preservation",
+    "order": 75,
+    "icon": "game:salt",
+    "quests": [
+        {
+            "id": "find-salt",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-quern",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:salt",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-barrel",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:barrel"
+                }
+            ]
+        },
+        {
+            "id": "cure-meat",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "find-salt",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:*-cured",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-brine",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "find-salt",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:brineportion",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "pickle-vegetables",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "make-brine",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:pickledvegetable-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "form-crock",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "form-bowl",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:crock-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "fire-crock",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "form-crock",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:crock-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "seal-crock",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": {
+                "all": [
+                    "fire-crock",
+                    "cook-meal",
+                    {
+                        "any": [
+                            "melt-fat",
+                            "collect-beeswax"
+                        ]
+                    }
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:crock-blue-fired"
+        },
+        {
+            "id": "make-shelf",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:shelf-*"
+                }
+            ]
+        },
+        {
+            "id": "build-cellar",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": "place-vessel",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:storagevessel-blue-fired"
+        },
+        {
+            "id": "stock-cellar",
+            "pos": [
+                6,
+                4.5
+            ],
+            "requires": [
+                "seal-crock",
+                "make-shelf",
+                "build-cellar"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:crock-*-fired",
+                    "count": 4
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:salt",
+                    "count": 8
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,256 @@
+{
+    "id": "building",
+    "order": 42,
+    "icon": "game:plank-oak",
+    "quests": [
+        {
+            "id": "make-boards",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-saw",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:plank-*",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "make-door",
+            "pos": [
+                2,
+                -3.0
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:door-solid-*"
+                }
+            ]
+        },
+        {
+            "id": "make-ladder",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:ladder-wood-*"
+                }
+            ]
+        },
+        {
+            "id": "build-fence",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:woodenfence-*",
+                    "count": 8
+                },
+                {
+                    "type": "craft",
+                    "item": "game:woodenfencegate-*"
+                }
+            ]
+        },
+        {
+            "id": "make-roof",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:slantedroofing-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-nails",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:metalnailsandstrips-*"
+                }
+            ]
+        },
+        {
+            "id": "build-chest",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": [
+                "make-boards",
+                "make-nails"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:chest-*"
+                }
+            ]
+        },
+        {
+            "id": "make-oil-lamp",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:oillamp-*"
+                }
+            ]
+        },
+        {
+            "id": "make-chisel",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:chisel-*"
+                }
+            ]
+        },
+        {
+            "id": "cut-stone-bricks",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "make-chisel",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:stonebrick-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "grind-lime",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": "make-quern",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:lime",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "burn-quicklime",
+            "pos": [
+                2,
+                9.0
+            ],
+            "requires": "grind-lime",
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "game:quicklime",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "slake-lime",
+            "pos": [
+                4,
+                9.0
+            ],
+            "requires": [
+                "burn-quicklime",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:slakedlimeportion",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-plaster",
+            "pos": [
+                4,
+                10.5
+            ],
+            "requires": "burn-quicklime",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:plaster-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "mix-mortar",
+            "pos": [
+                6,
+                9.0
+            ],
+            "requires": "slake-lime",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:mortar",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "lay-stone-bricks",
+            "pos": [
+                8,
+                7.5
+            ],
+            "requires": [
+                "cut-stone-bricks",
+                "mix-mortar"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:stonebricks-*",
+                    "count": 4
+                }
+            ]
+        }
+    ]
+}

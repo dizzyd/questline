@@ -1,0 +1,259 @@
+{
+    "id": "glass-and-kilns",
+    "order": 65,
+    "icon": "game:glass-plain",
+    "quests": [
+        {
+            "id": "find-quartz",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "build-bloomery",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ore-quartz",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "mold-refractory",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": [
+                "crush-quartz",
+                "find-fireclay"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:refractorybrick-raw-*",
+                    "count": 12
+                }
+            ]
+        },
+        {
+            "id": "lay-fireclay-bricks",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": [
+                "fire-fireclay-bricks",
+                "mix-mortar"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:claybricks-good-fire",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "smith-hatch",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:cokeovendoor-*"
+                }
+            ]
+        },
+        {
+            "id": "make-lantern",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": "find-quartz",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:lantern-*"
+                }
+            ]
+        },
+        {
+            "id": "make-glass",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "find-quartz",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:glass-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "fire-refractory",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "mold-refractory",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:refractorybrick-fired-*",
+                    "count": 12
+                }
+            ]
+        },
+        {
+            "id": "build-coke-oven",
+            "pos": [
+                2,
+                6.0
+            ],
+            "requires": [
+                "lay-fireclay-bricks",
+                "smith-hatch"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:cokeovendoor-*"
+                }
+            ]
+        },
+        {
+            "id": "make-panes",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "make-glass",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:glasspane-leaded-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "lay-refractory",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": [
+                "fire-refractory",
+                "lay-fireclay-bricks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:refractorybricks-good-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-gratings",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": [
+                "fire-refractory",
+                "lay-fireclay-bricks"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:refractorybrickgrating-good-*",
+                    "count": 9
+                }
+            ]
+        },
+        {
+            "id": "make-coke",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": "build-coke-oven",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:coke",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-kiln-door",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": "lay-refractory",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:doorkiln-*"
+                }
+            ]
+        },
+        {
+            "id": "build-kiln",
+            "pos": [
+                8,
+                4.5
+            ],
+            "requires": [
+                "make-kiln-door",
+                "make-gratings",
+                "smith-hatch"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:doorkiln-*"
+                },
+                {
+                    "type": "place",
+                    "block": "game:refractorybrickgrating-good-*",
+                    "count": 9
+                }
+            ]
+        },
+        {
+            "id": "fire-kiln",
+            "pos": [
+                10,
+                4.5
+            ],
+            "requires": "build-kiln",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 16
+                }
+            ],
+            "icon": "game:doorkiln-tier1"
+        }
+    ]
+}

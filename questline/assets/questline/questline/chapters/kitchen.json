@@ -1,0 +1,200 @@
+{
+    "id": "kitchen",
+    "order": 25,
+    "icon": "game:pie-perfect",
+    "quests": [
+        {
+            "id": "roast-meat",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": [
+                "first-hunt",
+                "make-fire"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:poultry-raw"
+                },
+                {
+                    "type": "cook",
+                    "item": "game:poultry-cooked"
+                }
+            ]
+        },
+        {
+            "id": "serve-meal",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "cook-meal",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:bowl-*-meal"
+                }
+            ]
+        },
+        {
+            "id": "make-dough",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": [
+                "grind-flour",
+                "fire-pottery"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:dough-*",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-table",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:table-*"
+                }
+            ]
+        },
+        {
+            "id": "cook-stew",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "serve-meal",
+                "roast-meat"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:poultry-raw",
+                    "count": 2
+                },
+                {
+                    "type": "cook",
+                    "item": "game:claypot-*-cooked"
+                }
+            ]
+        },
+        {
+            "id": "cook-soup",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "serve-meal",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:vegetable-*",
+                    "count": 3
+                },
+                {
+                    "type": "cook",
+                    "item": "game:claypot-*-cooked"
+                }
+            ]
+        },
+        {
+            "id": "cook-porridge",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "serve-meal",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:grain-*",
+                    "count": 4
+                },
+                {
+                    "type": "cook",
+                    "item": "game:claypot-*-cooked"
+                }
+            ]
+        },
+        {
+            "id": "bake-bread",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": [
+                "make-dough",
+                "place-oven"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:bread-*-perfect"
+                }
+            ]
+        },
+        {
+            "id": "bake-pie",
+            "pos": [
+                4,
+                9.0
+            ],
+            "requires": [
+                "bake-bread",
+                "make-table"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:pie-perfect"
+                }
+            ]
+        },
+        {
+            "id": "eat-well",
+            "pos": [
+                6,
+                4.5
+            ],
+            "requires": [
+                "cook-stew",
+                "cook-soup",
+                "cook-porridge",
+                "bake-pie"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fruit-*",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:vegetable-*",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:bread-*-perfect",
+                    "count": 4
+                }
+            ]
+        }
+    ]
+}

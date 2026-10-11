@@ -1,0 +1,244 @@
+{
+    "id": "waterways",
+    "order": 85,
+    "icon": "game:fishingpole-simple-wood",
+    "quests": [
+        {
+            "id": "make-wormgrunter",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:wormgrunter"
+                }
+            ]
+        },
+        {
+            "id": "make-fishing-pole",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:fishingpole-simple-*"
+                }
+            ]
+        },
+        {
+            "id": "bait-pole",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "make-fishing-pole",
+                "make-wormgrunter"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:fishingpole-simple-*"
+                }
+            ]
+        },
+        {
+            "id": "catch-fish",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "bait-pole",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fishraw-*",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "fillet-fish",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "catch-fish",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fish-raw",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "cook-fish",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": "fillet-fish",
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "game:fish-cooked",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-oar",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:oar-crude-*"
+                }
+            ]
+        },
+        {
+            "id": "make-raft",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:boat-raft-*"
+                }
+            ]
+        },
+        {
+            "id": "ride-raft",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": [
+                "make-oar",
+                "make-raft"
+            ],
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "game:boat-raft-*"
+                }
+            ],
+            "icon": "game:boat-raft-oak"
+        },
+        {
+            "id": "make-rollers",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": "chop-wood",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:roller",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "make-plumb-square",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:plumbandsquare",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "build-sailboat",
+            "pos": [
+                4,
+                7.5
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "requires": [
+                "make-rollers",
+                "make-plumb-square",
+                "make-boards",
+                "ride-raft"
+            ],
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "game:boat-sailed-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:rope",
+                    "count": 4
+                }
+            ],
+            "icon": "game:boat-sailed-oak"
+        },
+        {
+            "id": "make-ratlines",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": "build-sailboat",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:ratlines"
+                }
+            ]
+        },
+        {
+            "id": "make-boat-seat",
+            "pos": [
+                6,
+                7.5
+            ],
+            "requires": "build-sailboat",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:boatseat-*"
+                }
+            ]
+        },
+        {
+            "id": "make-anchor",
+            "pos": [
+                6,
+                9.0
+            ],
+            "requires": "build-sailboat",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:anchor-stone"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,123 @@
+{
+    "id": "orchards",
+    "order": 32,
+    "icon": "game:fruit-redapple",
+    "quests": [
+        {
+            "id": "take-bush-cutting",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fruitingbushcutting-*"
+                }
+            ]
+        },
+        {
+            "id": "take-tree-cutting",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-axe",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fruittree-cutting"
+                }
+            ]
+        },
+        {
+            "id": "make-flowerpot",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:flowerpot-*-fired"
+                }
+            ]
+        },
+        {
+            "id": "build-greenhouse",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": "make-glass",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:glass-*",
+                    "count": 12
+                }
+            ]
+        },
+        {
+            "id": "plant-bush-cutting",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "take-bush-cutting",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:fruitingbushcutting-*"
+                }
+            ]
+        },
+        {
+            "id": "plant-tree-cutting",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "take-tree-cutting",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:fruittree-cutting"
+                }
+            ]
+        },
+        {
+            "id": "graft-cutting",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": "plant-tree-cutting",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:fruittree-cutting",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "greenhouse-bonus",
+            "pos": [
+                2,
+                9.0
+            ],
+            "requires": "build-greenhouse",
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:glass-plain"
+        }
+    ]
+}

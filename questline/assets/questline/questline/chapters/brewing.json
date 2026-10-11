@@ -1,0 +1,243 @@
+{
+    "id": "brewing",
+    "order": 78,
+    "icon": "game:fruitpress-ns",
+    "quests": [
+        {
+            "id": "make-metal-rod",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:rod-*"
+                }
+            ]
+        },
+        {
+            "id": "gather-resin",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "chop-wood",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:resin",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-fruit-press",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "make-metal-rod",
+                "gather-resin",
+                "melt-fat",
+                "make-boards"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:fruitpress-*"
+                }
+            ]
+        },
+        {
+            "id": "press-juice",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "make-fruit-press",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:juiceportion-*",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "ferment-drink",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": {
+                "all": [
+                    "make-barrel",
+                    {
+                        "any": [
+                            "press-juice",
+                            "squeeze-honey",
+                            "grind-flour"
+                        ]
+                    }
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ciderportion-*"
+                }
+            ]
+        },
+        {
+            "id": "find-lead",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "make-prospecting-pick",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:nugget-galena",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "make-soldering-iron",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:solderingiron"
+                }
+            ]
+        },
+        {
+            "id": "make-copper-plates",
+            "pos": [
+                4,
+                9.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:metalplate-copper",
+                    "count": 7
+                }
+            ]
+        },
+        {
+            "id": "alloy-solder",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": [
+                "find-lead",
+                "find-tin"
+            ],
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:ingot-leadsolder"
+                }
+            ]
+        },
+        {
+            "id": "cut-solder",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": [
+                "alloy-solder",
+                "make-saw"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:solderbar-tin"
+                }
+            ]
+        },
+        {
+            "id": "make-boiler",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": [
+                "cut-solder",
+                "make-soldering-iron",
+                "make-copper-plates"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:verticalboiler-*"
+                }
+            ]
+        },
+        {
+            "id": "make-condenser",
+            "pos": [
+                6,
+                7.5
+            ],
+            "requires": [
+                "cut-solder",
+                "make-soldering-iron",
+                "make-copper-plates"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:condenser-*"
+                }
+            ]
+        },
+        {
+            "id": "distill-spirit",
+            "pos": [
+                8,
+                4.5
+            ],
+            "requires": [
+                "ferment-drink",
+                "make-boiler",
+                "make-condenser"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:spiritportion-*"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25
+        },
+        {
+            "id": "aqua-vitae",
+            "pos": [
+                10,
+                4.5
+            ],
+            "requires": "distill-spirit",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:alcoholportion"
+                }
+            ]
+        }
+    ]
+}

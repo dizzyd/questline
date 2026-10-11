@@ -9,8 +9,9 @@ using static VsTestkit.Testing.Vs;
 namespace Questline.Tests
 {
     /// <summary>
-    /// The questline Questline ships: stone age to steel. It loads whole, every quest has its
-    /// text, and the recipe graph and the spoiler rule find nothing wrong with it.
+    /// The questline Questline ships: all of vanilla, stone age to steel and sailboats. It loads
+    /// whole, every quest has its text, the recipe graph and the spoiler rule find nothing wrong
+    /// with it, and it links every one of the game's own guides.
     /// </summary>
     [SingleplayerOnly]
     public class VanillaQuestlineTests
@@ -27,9 +28,10 @@ namespace Questline.Tests
             Log($"{chapters.Count} chapters, {chapters.Sum(c => c.Quests.Count)} quests");
 
             Assert.Equal(0, problems.Count, "no problems in the default questline");
-            Assert.Equal(8, chapters.Count, "stone age to steel, and winter");
+            Assert.Equal(24, chapters.Count, "every part of vanilla");
             Assert.True(chapters.All(c => c.Questline == QuestRegistry.DefaultQuestline));
-            Assert.Greater(chapters.Sum(c => c.Quests.Count), 50);
+            Assert.True(chapters.All(c => c.Quests.Count >= 5), "no chapter left a stub");
+            Assert.Greater(chapters.Sum(c => c.Quests.Count), 200);
         }
 
         [VsTest(TimeoutMs = 60000)]
@@ -53,6 +55,85 @@ namespace Questline.Tests
             }
             foreach (var q in quests.Where(q => !reachable.Contains(q.Id))) Log("unreachable: " + q.Id);
             Assert.Equal(quests.Count, reachable.Count, "every quest reachable by doing the ones before it");
+        }
+
+        /// <summary>
+        /// Each chapter reads left to right: a prerequisite in the same chapter sits to the left of
+        /// what it unlocks, no two quests crowd one another, and no line passes behind a quest.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task EveryChapterReadsLeftToRight()
+        {
+            await OnServer();
+            int faults = 0;
+            void Fault(string why) { Log(why); faults++; }
+            foreach (var chapter in Engine.Registry.Chapters.Where(c => c.Id.StartsWith("questline:")))
+            {
+                var quests = chapter.Quests;
+                var byId = quests.ToDictionary(q => q.Id);
+                for (int i = 0; i < quests.Count; i++)
+                {
+                    for (int j = i + 1; j < quests.Count; j++)
+                    {
+                        if (System.Math.Abs(quests[i].Pos[0] - quests[j].Pos[0]) < 2 && System.Math.Abs(quests[i].Pos[1] - quests[j].Pos[1]) < 1.5f) Fault($"{quests[i].Id} and {quests[j].Id} crowd each other");
+                    }
+                }
+                foreach (var quest in quests)
+                {
+                    foreach (string id in quest.Requires?.QuestIds() ?? [])
+                    {
+                        if (!byId.TryGetValue(id, out var before)) continue;
+                        float px = before.Pos[0], py = before.Pos[1], vx = quest.Pos[0] - px, vy = quest.Pos[1] - py;
+                        if (vx <= 0) Fault($"{id} isn't left of {quest.Id}");
+                        foreach (var other in quests.Where(o => o != quest && o != before))
+                        {
+                            float u = ((other.Pos[0] - px) * vx + (other.Pos[1] - py) * vy) / (vx * vx + vy * vy);
+                            if (u <= 0 || u >= 1) continue;
+                            float dx = px + u * vx - other.Pos[0], dy = py + u * vy - other.Pos[1];
+                            if (dx * dx + dy * dy < 0.45f * 0.45f) Fault($"the line {id} → {quest.Id} passes behind {other.Id}");
+                        }
+                    }
+                }
+            }
+            Assert.Equal(0, faults, "every chapter laid out clearly");
+        }
+
+        /// <summary>The game's guides, as the handbook lists them: each one is linked from some quest's text.</summary>
+        [VsTest(TimeoutMs = 60000), RequiresClient]
+        public async Task EveryVanillaGuideIsLinked()
+        {
+            await OnServer();
+            var quests = Engine.Registry.Quests.Values.Where(q => q.Id.StartsWith("questline:")).ToList();
+            await OnClient();
+            var guides = Capi.Assets.GetMany<Vintagestory.GameContent.GuiHandbookTextPage>(Capi.Logger, "config/handbook")
+                .Select(a => a.Value.PageCode)
+                .Where(code => code != null)
+                .ToList();
+            Assert.Greater(guides.Count, 25, "the game's guides found");
+
+            var text = string.Join("\n", quests.Select(q => Vintagestory.API.Config.Lang.Get(q.Id + "-desc")));
+            var missing = guides.Where(code => !text.Contains("handbook://" + code + "\"")).ToList();
+            foreach (string code in missing) Log("not linked: " + code);
+            Assert.Equal(0, missing.Count, "every guide linked from a quest");
+        }
+
+        /// <summary>Photographs every chapter as a new player first sees it, at the test window's 960×600, for review.</summary>
+        [VsTest(TimeoutMs = 300000), RequiresClient]
+        public async Task EveryChapterPhotographed()
+        {
+            await OnServer();
+            var ids = Engine.Registry.Chapters.Where(c => c.Id.StartsWith("questline:")).OrderBy(c => c.Order).Select(c => c.Id).ToList();
+            await OnClient();
+            var book = Capi.ModLoader.GetModSystem<QuestlineModSystem>().Book;
+            foreach (string id in ids)
+            {
+                book.ForgetViews();
+                book.SelectChapter(id);
+                await Gui.WaitFor<questline.Client.GuiDialogQuestBook>();
+                await Frames.Wait(20);
+                Log(await Shot.Take($"questline-chapter-{id[10..]}.png"));
+            }
+            book.TryClose();
         }
     }
 }

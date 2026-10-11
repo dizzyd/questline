@@ -1,0 +1,241 @@
+{
+    "id": "textiles",
+    "order": 52,
+    "icon": "game:flaxtwine",
+    "quests": [
+        {
+            "id": "grow-flax",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "harvest-grain",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:flaxfibers",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "spin-twine",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "grow-flax",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:flaxtwine",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-linen",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "spin-twine",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:linen-*",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-sewing-kit",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "spin-twine",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:sewingkit"
+                }
+            ]
+        },
+        {
+            "id": "make-sack",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": "make-linen",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:linensack"
+                }
+            ]
+        },
+        {
+            "id": "make-cloth",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": "make-linen",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:cloth-plain",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "sew-shirt",
+            "pos": [
+                8,
+                -1.5
+            ],
+            "requires": "make-cloth",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:clothes-upperbody-*"
+                }
+            ]
+        },
+        {
+            "id": "sew-pants",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": "make-cloth",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:clothes-lowerbody-*"
+                }
+            ]
+        },
+        {
+            "id": "make-rope",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:rope"
+                }
+            ]
+        },
+        {
+            "id": "make-woad-dye",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": "make-barrel",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:dye-woad",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "dye-woad",
+            "pos": [
+                8,
+                3.0
+            ],
+            "requires": [
+                "make-woad-dye",
+                "make-cloth"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cloth-blue"
+                }
+            ]
+        },
+        {
+            "id": "crush-alum",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": "make-pulverizer",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:crushed-alum"
+                }
+            ]
+        },
+        {
+            "id": "mordant-cloth",
+            "pos": [
+                8,
+                6.0
+            ],
+            "requires": [
+                "crush-alum",
+                "make-cloth"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cloth-mordant"
+                }
+            ]
+        },
+        {
+            "id": "make-yellow-dye",
+            "pos": [
+                8,
+                7.5
+            ],
+            "requires": "make-barrel",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:dye-yellow",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "dye-cloth",
+            "pos": [
+                10,
+                7.5
+            ],
+            "requires": [
+                "mordant-cloth",
+                "make-yellow-dye"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cloth-yellow"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flaxtwine",
+                    "count": 4
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,199 @@
+{
+    "id": "husbandry",
+    "order": 35,
+    "icon": "game:egg-chicken-raw",
+    "quests": [
+        {
+            "id": "build-pen",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-axe",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:*fence-*",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "make-trough",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:trough-*-small-*"
+                }
+            ]
+        },
+        {
+            "id": "make-bucket",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:woodbucket"
+                }
+            ]
+        },
+        {
+            "id": "make-large-trough",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "make-trough",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:trough-*-large-*"
+                }
+            ]
+        },
+        {
+            "id": "breed-animals",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": [
+                "build-pen",
+                "make-large-trough"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:egg-chicken-raw"
+        },
+        {
+            "id": "milk-animal",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": [
+                "breed-animals",
+                "make-bucket"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:milkportion"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:grain-spelt",
+                    "count": 32
+                }
+            ]
+        },
+        {
+            "id": "make-henbox",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "make-trough",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:henbox*"
+                }
+            ]
+        },
+        {
+            "id": "collect-eggs",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": "make-henbox",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:egg-chicken-raw",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "make-basket-trap",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:baskettrap-*"
+                }
+            ]
+        },
+        {
+            "id": "make-crate-trap",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": [
+                "make-boards",
+                "smith-bronze"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:trapcrate-wood"
+                }
+            ]
+        },
+        {
+            "id": "melt-fat",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": [
+                "first-hunt",
+                "cook-meal"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fat-rendered",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-cleaver",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:cleaver-*"
+                }
+            ]
+        }
+    ]
+}

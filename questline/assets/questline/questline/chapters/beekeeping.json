@@ -1,0 +1,157 @@
+{
+    "id": "beekeeping",
+    "order": 36,
+    "icon": "game:honeycomb",
+    "quests": [
+        {
+            "id": "raid-wild-hive",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "forage",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:honeycomb",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-skep",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": [
+                "find-clay",
+                "make-knife"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:skep-*"
+                }
+            ]
+        },
+        {
+            "id": "plant-flowers",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "forage",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:flower-*",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "populate-skep",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "make-skep",
+                "plant-flowers"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:skep-*-populated-*"
+                }
+            ]
+        },
+        {
+            "id": "harvest-honey",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "populate-skep",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:honeycomb",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "expand-apiary",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": "populate-skep",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:skep-*",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "squeeze-honey",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": {
+                "any": [
+                    "raid-wild-hive",
+                    "harvest-honey"
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:honeyportion"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25
+        },
+        {
+            "id": "collect-beeswax",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": {
+                "any": [
+                    "raid-wild-hive",
+                    "harvest-honey"
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:beeswax",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "make-candle",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": "collect-beeswax",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:candle",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,124 @@
+{
+    "id": "cheesemaking",
+    "order": 77,
+    "icon": "game:cheese-cheddar-4slice",
+    "quests": [
+        {
+            "id": "collect-milk",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "milk-animal",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:milkportion",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "curdle-milk",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "collect-milk",
+                "pickle-vegetables",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:curdledmilkportion"
+                }
+            ]
+        },
+        {
+            "id": "make-cottage-cheese",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": [
+                "curdle-milk",
+                "find-salt"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cottagecheeseportion"
+                }
+            ]
+        },
+        {
+            "id": "press-cheese",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": [
+                "make-cottage-cheese",
+                "make-linen"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:rawcheese-salted"
+        },
+        {
+            "id": "wax-cheese",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": [
+                "press-cheese",
+                "collect-beeswax"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cheese-waxedcheddar-*"
+                }
+            ]
+        },
+        {
+            "id": "age-cheddar",
+            "pos": [
+                10,
+                0.0
+            ],
+            "requires": [
+                "press-cheese",
+                "make-shelf"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cheese-cheddar-*"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25
+        },
+        {
+            "id": "age-blue-cheese",
+            "pos": [
+                12,
+                0.0
+            ],
+            "requires": "age-cheddar",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:cheese-blue-*"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,319 @@
+{
+    "id": "arms-and-armor",
+    "order": 90,
+    "icon": "game:bow-simple",
+    "quests": [
+        {
+            "id": "smith-falx",
+            "pos": [
+                0,
+                -1.5
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:blade-falx-*"
+                }
+            ]
+        },
+        {
+            "id": "knap-arrowheads",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "gather-flint",
+            "tasks": [
+                {
+                    "type": "knap",
+                    "item": "game:arrowhead-flint",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-bow",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bow-*"
+                }
+            ]
+        },
+        {
+            "id": "make-arrows",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "knap-arrowheads",
+                "make-bow"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:arrow-*",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-bowstave",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "make-bow",
+                "make-saw"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bowstave-*-raw"
+                }
+            ]
+        },
+        {
+            "id": "make-longbow",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "make-bowstave",
+                "make-leather"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bow-long"
+                }
+            ]
+        },
+        {
+            "id": "make-sling",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:sling"
+                }
+            ]
+        },
+        {
+            "id": "make-crude-shield",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "gather-sticks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:shield-crude"
+                }
+            ]
+        },
+        {
+            "id": "make-round-shield",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": [
+                "make-crude-shield",
+                "smith-bronze",
+                "make-boards"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:shield-woodmetal"
+                }
+            ]
+        },
+        {
+            "id": "make-improvised-armor",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": [
+                "make-rope",
+                "make-knife"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-improvised-wood"
+                }
+            ]
+        },
+        {
+            "id": "make-wood-lamellar",
+            "pos": [
+                2,
+                6.0
+            ],
+            "requires": [
+                "make-improvised-armor",
+                "make-leather"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-lamellar-wood"
+                }
+            ]
+        },
+        {
+            "id": "make-copper-lamellar",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": [
+                "make-wood-lamellar",
+                "cast-tool"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-lamellar-copper"
+                }
+            ]
+        },
+        {
+            "id": "make-jerkin",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": "make-leather",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-jerkin-leather"
+                }
+            ]
+        },
+        {
+            "id": "make-leather-armor",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "make-jerkin",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-sewn-leather"
+                }
+            ]
+        },
+        {
+            "id": "make-brigandine",
+            "pos": [
+                2,
+                9.0
+            ],
+            "requires": [
+                "make-jerkin",
+                "first-smithing"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-brigandine-*"
+                }
+            ]
+        },
+        {
+            "id": "make-chain-armor",
+            "pos": [
+                4,
+                9.0
+            ],
+            "requires": "make-brigandine",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-chain-*"
+                }
+            ]
+        },
+        {
+            "id": "make-scale-armor",
+            "pos": [
+                6,
+                9.0
+            ],
+            "requires": "make-chain-armor",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-scale-*"
+                }
+            ]
+        },
+        {
+            "id": "make-plate-armor",
+            "pos": [
+                8,
+                9.0
+            ],
+            "requires": "make-scale-armor",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-plate-*"
+                }
+            ]
+        },
+        {
+            "id": "make-steel-plate",
+            "pos": [
+                10,
+                9.0
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "requires": [
+                "make-plate-armor",
+                "smith-steel"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-plate-steel"
+                }
+            ]
+        },
+        {
+            "id": "make-gambeson",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": "make-linen",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-sewn-linen"
+                }
+            ]
+        }
+    ]
+}

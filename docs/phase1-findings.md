@@ -128,3 +128,23 @@ each wildcard matched once, takes well under a second.
 **Labels must scale with the tree.** At a fitted zoom below 1 the fixed-size labels of a real
 chapter overlapped; scaled with the zoom they keep to the gaps, and the opening view never goes
 below the zoom (0.75) where scaled text is still readable.
+
+## All of vanilla
+
+**The guides are the coverage map.** Vanilla's handbook has 32 guides (`config/handbook`);
+assigning each to a chapter, and testing that every one is linked from a quest, turned "all of
+vanilla" into something checkable. 24 chapters, 322 quests.
+
+**Writing it found more graph gaps.** Water was reachable only from slush in a barrel, so every
+barrel recipe that needs water looked impossible until filling a bucket from a water block
+became an edge (`fill`). Charcoal pits, coke ovens, panning, milking and picking up worms were
+added the same way. Casting had offered iron and steel anvils; only metals no hotter than the
+hottest fuel burns are cast now.
+
+**New tasks it needed:** `mount` (rafts, sailboats, elk), `trade` (a patch on the trader's
+sale), and liquids in a carried bucket counting by the litre for `obtain`. A claim still takes
+back only whole stacks, never the liquid.
+
+**What still can't be credited:** taming progress, catching something in a trap, chiseling, a
+prospecting reading, fertilizing and watering, quenching, kiln firing, welding an anvil, and
+which meal a pot holds. Each is a checkbox or folded into a neighbouring quest's text.

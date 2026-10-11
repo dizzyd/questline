@@ -1,0 +1,168 @@
+{
+    "id": "wider-world",
+    "order": 95,
+    "icon": "game:gear-temporal",
+    "quests": [
+        {
+            "id": "find-rusty-gears",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-torch",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "visit-trader",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "find-rusty-gears",
+            "tasks": [
+                {
+                    "type": "trade",
+                    "item": "game:*"
+                }
+            ]
+        },
+        {
+            "id": "mine-stone",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "make-pickaxe",
+            "tasks": [
+                {
+                    "type": "break",
+                    "block": "game:rock-*",
+                    "count": 32
+                }
+            ]
+        },
+        {
+            "id": "find-limestone",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "mine-stone",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:stone-limestone",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "kill-drifter",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-spear",
+            "tasks": [
+                {
+                    "type": "kill",
+                    "entity": "game:drifter-*"
+                }
+            ],
+            "icon": "game:creature-drifter-normal"
+        },
+        {
+            "id": "find-temporal-gear",
+            "pos": [
+                2,
+                3.0
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "requires": "kill-drifter",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:gear-temporal"
+                }
+            ]
+        },
+        {
+            "id": "survive-storm",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "kill-drifter",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:gear-temporal"
+        },
+        {
+            "id": "relight-fire",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "make-torch",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:firestarter"
+        },
+        {
+            "id": "make-poultice",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": "forage",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:poultice-*"
+                }
+            ]
+        },
+        {
+            "id": "make-bandage",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": "make-linen",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bandage-clean",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "soak-bandage",
+            "pos": [
+                2,
+                9.0
+            ],
+            "requires": "make-bandage",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bandage-alcoholed"
+                }
+            ]
+        }
+    ]
+}

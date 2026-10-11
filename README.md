@@ -11,8 +11,9 @@ Every phase of the roadmap, minus the VS Quest importer:
 - Chapters from any mod's `assets/<domain>/questline/chapters/`, merged and checked at load;
   a broken quest is disabled and reported, never its chapter
 - `requires` as a tree of `all`, `any`, `atLeast`, quest ids and mod gates
-- Tasks: obtain, kill, place, break, craft (every shift-click batch), knap, clayform,
-  smith, cook (firepit output), smelt (molds and bloomeries), custom, checkbox
+- Tasks: obtain (liquids in a carried bucket count by the litre), kill, mount (rafts, boats,
+  elk), place, break, craft (every shift-click batch), knap, clayform, smith, cook (firepit
+  output), smelt (molds and bloomeries), trade (bought from a trader), custom, checkbox
 - Rewards: items, pick-one choices and stages, claimed in the book
 - Player history: a quest that unlocks is credited with work done before
   (`CreditEarlierWork` in `ModConfig/questline.json`)
@@ -35,8 +36,10 @@ Every phase of the roadmap, minus the VS Quest importer:
   quests that need it or give it. `.questline handbook off` gives H back to the handbook
 - A recipe graph of every recipe and item property the handbook knows (about 20,600 edges for
   vanilla, built in under 400 ms): `/questline graph <item>` and `/questline graph export`
-- A default questline, stone age to steel and getting ready for winter: 60 quests that teach
-  the game's mechanics and never its story
+- A default questline covering all of vanilla: 322 quests in 24 chapters, from knapping
+  through steel, mechanical power, kilns, farming, husbandry, beekeeping, cheese, brewing,
+  textiles and leather, boats, riding, arms and armor. It links every one of the game's own
+  guides, teaches the mechanics and never the story
 - A goal planner: "Plan how to make this" on an item page works it back through the recipe
   graph to what the player carries. `RevealLevel` in `ModConfig/questline.json` caps what it
   shows: `guide` (every step and recipe), `hints` (the default: what to get next, not how) or

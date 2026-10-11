@@ -4,17 +4,17 @@
     "icon": "game:ingot-steel",
     "quests": [
         {
-            "id": "make-charcoal",
+            "id": "lay-furnace-floor",
             "pos": [
                 0,
                 0.0
             ],
-            "requires": "smith-iron",
+            "requires": "lay-refractory",
             "tasks": [
                 {
-                    "type": "obtain",
-                    "item": "game:charcoal",
-                    "count": 32
+                    "type": "place",
+                    "block": "game:refractorybrickgrating-good-*",
+                    "count": 6
                 }
             ]
         },
@@ -22,9 +22,9 @@
             "id": "build-furnace",
             "pos": [
                 0,
-                3.0
+                1.5
             ],
-            "requires": "smith-iron",
+            "requires": "fuse-anvil",
             "tasks": [
                 {
                     "type": "place",
@@ -33,14 +33,66 @@
             ]
         },
         {
-            "id": "blister-steel",
+            "id": "make-iron-door",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:metaldoor-s*-iron"
+                }
+            ]
+        },
+        {
+            "id": "stock-iron",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "refine-bloom",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ingot-iron",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "wall-furnace",
             "pos": [
                 2,
                 1.5
             ],
             "requires": [
-                "make-charcoal",
-                "build-furnace"
+                "lay-furnace-floor",
+                "build-furnace",
+                "make-iron-door"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:refractorybricks-good-*",
+                    "count": 60
+                },
+                {
+                    "type": "place",
+                    "block": "game:metaldoor-s*-iron"
+                }
+            ]
+        },
+        {
+            "id": "blister-steel",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "wall-furnace",
+                "stock-iron"
             ],
             "tasks": [
                 {
@@ -52,7 +104,7 @@
         {
             "id": "forge-steel",
             "pos": [
-                4,
+                6,
                 1.5
             ],
             "requires": "blister-steel",
@@ -61,12 +113,21 @@
                     "type": "smith",
                     "item": "game:ingot-steel"
                 }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 16
+                }
             ]
         },
         {
             "id": "smith-steel",
             "pos": [
-                6,
+                8,
                 1.5
             ],
             "requires": "forge-steel",
@@ -74,6 +135,56 @@
                 {
                     "type": "smith",
                     "item": "game:*-steel"
+                }
+            ]
+        },
+        {
+            "id": "make-steel-tools",
+            "pos": [
+                10,
+                0.0
+            ],
+            "requires": "smith-steel",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:pickaxe-steel"
+                },
+                {
+                    "type": "craft",
+                    "item": "game:axe-felling-steel"
+                }
+            ]
+        },
+        {
+            "id": "coat-steel-head",
+            "pos": [
+                10,
+                1.5
+            ],
+            "requires": "smith-steel",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:*head-steel"
+                }
+            ]
+        },
+        {
+            "id": "make-steel-anvil",
+            "pos": [
+                10,
+                3.0
+            ],
+            "requires": "smith-steel",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:anvilpart-base-steel"
+                },
+                {
+                    "type": "smith",
+                    "item": "game:anvilpart-top-steel"
                 }
             ]
         }

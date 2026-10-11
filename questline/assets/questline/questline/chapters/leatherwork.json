@@ -1,0 +1,225 @@
+{
+    "id": "leatherwork",
+    "order": 53,
+    "icon": "game:leather-normal-plain",
+    "quests": [
+        {
+            "id": "get-hide",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "first-hunt",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:hide-raw-*",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-limewater",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": [
+                "grind-lime",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:limewaterportion",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "weak-tannin",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-barrel",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:weaktanninportion",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "salt-hide",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": [
+                "get-hide",
+                "find-salt"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hide-salted-*"
+                }
+            ]
+        },
+        {
+            "id": "soak-hide",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "get-hide",
+                "make-limewater"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:hide-soaked-*"
+                }
+            ]
+        },
+        {
+            "id": "strong-tannin",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "weak-tannin",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:strongtanninportion",
+                    "count": 10
+                }
+            ]
+        },
+        {
+            "id": "scrape-hide",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "soak-hide",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hide-scraped-*"
+                }
+            ]
+        },
+        {
+            "id": "prepare-hide",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": [
+                "scrape-hide",
+                "weak-tannin"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:hide-prepared-*"
+                }
+            ]
+        },
+        {
+            "id": "make-leather",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": [
+                "prepare-hide",
+                "strong-tannin"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:leather-normal-plain",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-backpack",
+            "pos": [
+                10,
+                0.0
+            ],
+            "requires": "make-leather",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:backpack-normal"
+                }
+            ]
+        },
+        {
+            "id": "leather-boots",
+            "pos": [
+                10,
+                3.0
+            ],
+            "requires": "make-leather",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:clothes-foot-*leather-boots"
+                }
+            ]
+        },
+        {
+            "id": "oil-hide",
+            "pos": [
+                2,
+                6.0
+            ],
+            "requires": "get-hide",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hide-oiled-*"
+                }
+            ]
+        },
+        {
+            "id": "cure-pelt",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": "oil-hide",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:hide-pelt-*"
+                }
+            ]
+        },
+        {
+            "id": "fur-hat",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": "cure-pelt",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:clothes-head-furhat*"
+                }
+            ]
+        }
+    ]
+}

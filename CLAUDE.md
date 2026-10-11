@@ -12,7 +12,7 @@ and the rendering spike settled.
 | `questline/Model/` | Definitions (chapters, quests, tasks, rewards, page blocks), the `requires` tree and its JSON converter, progress and quest states. Shared by both sides |
 | `questline/Server/` | `QuestLoader` (assets and the editor's working copies → registry, validation), `QuestEngine` (progress, parties, claims, sync, save game), `QuestEditor` (working copies, export), `Trackers` and `StationPatches` (game events → task reports) |
 | `questline/Graph/` | `RecipeGraph` (edges between item codes, saved and loaded as JSON) and `RecipeGraphBuilder` (scans the running game), built on first use on either side |
-| `questline/assets/questline/questline/chapters/` | The default questline: eight chapters, stone age to steel. `VanillaQuestlineTests` holds it to zero problems |
+| `questline/assets/questline/questline/chapters/` | The default questline: 24 chapters, all of vanilla. `VanillaQuestlineTests` holds it to zero problems, every quest reachable, every vanilla guide linked and a clean layout |
 | `tools/packcheck/` | The pack checker: the loader and checks compiled outside the game (PACKCHECK leaves out the builder), run against `/questline snapshot` |
 | `questline/Network/` | The packets. Channel `questline`; message types must be registered in the same order on both sides |
 | `questline/Client/` | `QuestClient` (the client's copy), the book dialog (Quests, Reference, Party and, for editors, Problems tabs; edit mode in `GuiDialogQuestBook.Editor.cs`), the canvas, the chapter rail, the HUD pins. `BookStyle` and `BookLayout` hold the type scale, colours and sizing every panel uses |
@@ -88,3 +88,13 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   a check that treats an ingot as only an ingot gets ordering wrong.
 - **Test runs:** `--filter` is a plain substring, not a pattern. A stuck run is better caught
   with `timeout` around `run.sh` than by waiting.
+- **The client builds its own recipe graph and sees less.** A dedicated client has no server-side
+  entity behaviour config, so butchering drops are server-only, and milking and picking up fall
+  back to the game's own defaults. `MultiplayerTests` holds the two graphs to the same counts.
+- **Some things fire no event to credit.** Putting things in ground storage never calls
+  `DidPlaceBlock`; every pot meal is the same `claypot-*-cooked` (the recipe is an attribute);
+  grafting and planting place the same cutting; quenching, kiln firing and anvil welding change
+  state without a player action the trackers see. The default questline uses checkboxes there.
+- **Edit the default questline with the layout in mind.** Quests sit on columns 2 apart and rows
+  1.5 apart; a quest's in-chapter prerequisites sit to its left; no line may pass behind a quest.
+  Entry quests (prerequisites only in other chapters) sit beside what they unlock, not in column 0.

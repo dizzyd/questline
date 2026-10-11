@@ -4,10 +4,24 @@
     "icon": "game:ingot-iron",
     "quests": [
         {
+            "id": "build-bellows",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": "make-leather",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:bellows-*"
+                }
+            ]
+        },
+        {
             "id": "find-iron",
             "pos": [
-                0,
-                0.0
+                4,
+                1.5
             ],
             "requires": "smith-bronze",
             "tasks": [
@@ -19,12 +33,57 @@
             ]
         },
         {
-            "id": "build-bloomery",
+            "id": "find-borax",
             "pos": [
-                0,
-                3.0
+                12,
+                7.5
+            ],
+            "requires": "make-quern",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:powder-borax",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "find-meteorite",
+            "pos": [
+                14,
+                6.0
             ],
             "requires": "smith-bronze",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:stone-meteorite-iron",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "fire-fireclay-bricks",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "find-fireclay",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:burnedbrick-fire",
+                    "count": 12
+                }
+            ]
+        },
+        {
+            "id": "build-bloomery",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": "fire-fireclay-bricks",
             "tasks": [
                 {
                     "type": "place",
@@ -35,7 +94,7 @@
         {
             "id": "make-bloom",
             "pos": [
-                2,
+                6,
                 1.5
             ],
             "requires": [
@@ -52,10 +111,13 @@
         {
             "id": "refine-bloom",
             "pos": [
-                4,
+                8,
                 1.5
             ],
-            "requires": "make-bloom",
+            "requires": [
+                "make-bloom",
+                "build-bellows"
+            ],
             "tasks": [
                 {
                     "type": "smith",
@@ -66,7 +128,7 @@
         {
             "id": "smith-iron",
             "pos": [
-                6,
+                10,
                 1.5
             ],
             "requires": "refine-bloom",
@@ -74,6 +136,143 @@
                 {
                     "type": "smith",
                     "item": "game:*-iron"
+                }
+            ]
+        },
+        {
+            "id": "smith-tongs",
+            "pos": [
+                12,
+                0.0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:tongsmetal-standard-iron"
+                }
+            ]
+        },
+        {
+            "id": "coat-head",
+            "pos": [
+                12,
+                3.0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:*head-iron"
+                }
+            ]
+        },
+        {
+            "id": "smith-anvil-parts",
+            "pos": [
+                12,
+                4.5
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:anvilpart-base-iron"
+                },
+                {
+                    "type": "smith",
+                    "item": "game:anvilpart-top-iron"
+                }
+            ]
+        },
+        {
+            "id": "build-waterwheel",
+            "pos": [
+                14,
+                0.0
+            ],
+            "requires": [
+                "smith-iron",
+                "connect-power"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:waterwheel-*"
+                }
+            ]
+        },
+        {
+            "id": "build-metal-windmill",
+            "pos": [
+                14,
+                1.5
+            ],
+            "requires": [
+                "smith-iron",
+                "build-windmill"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:windmillrotor-metal-*"
+                }
+            ]
+        },
+        {
+            "id": "quench-head",
+            "pos": [
+                14,
+                3.0
+            ],
+            "requires": "coat-head",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "game:axehead-iron"
+        },
+        {
+            "id": "fuse-anvil",
+            "pos": [
+                14,
+                4.5
+            ],
+            "requires": [
+                "smith-anvil-parts",
+                "find-borax"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:ingot-iron",
+                    "count": 4
+                }
+            ],
+            "icon": "game:anvil-iron"
+        },
+        {
+            "id": "smith-meteoric",
+            "pos": [
+                16,
+                6.0
+            ],
+            "requires": [
+                "fuse-anvil",
+                "find-meteorite"
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-meteoriciron"
                 }
             ]
         }

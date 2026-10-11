@@ -1,0 +1,322 @@
+{
+    "id": "mechanical-power",
+    "order": 55,
+    "icon": "game:windmillrotor-wood-north",
+    "quests": [
+        {
+            "id": "tap-resin",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "chop-wood",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:resin",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-sails",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": [
+                "make-linen",
+                "make-boards"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:sail",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "smith-pulverizer-metal",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "smith-bronze",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:poundercap-*",
+                    "count": 2
+                },
+                {
+                    "type": "smith",
+                    "item": "game:metalplate-*"
+                }
+            ]
+        },
+        {
+            "id": "form-helve-mold",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": [
+                "form-mold",
+                "alloy-bronze"
+            ],
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:toolmold-*-raw-helvehammer"
+                }
+            ]
+        },
+        {
+            "id": "make-rotor",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": [
+                "tap-resin",
+                "melt-fat"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:windmillrotor-wood-*"
+                }
+            ]
+        },
+        {
+            "id": "make-axle",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "melt-fat",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:woodenaxle-*",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-gears",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "tap-resin",
+                "melt-fat"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:angledgears-*",
+                    "count": 2
+                }
+            ],
+            "icon": "game:angledgears-s"
+        },
+        {
+            "id": "cast-helve-head",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "form-helve-mold",
+            "tasks": [
+                {
+                    "type": "smelt",
+                    "item": "game:helvehammerhead-*"
+                }
+            ]
+        },
+        {
+            "id": "build-windmill",
+            "pos": [
+                4,
+                -1.5
+            ],
+            "requires": "make-rotor",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:windmillrotor-wood-*"
+                }
+            ]
+        },
+        {
+            "id": "connect-power",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": [
+                "build-windmill",
+                "make-axle",
+                "make-gears"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:woodenaxle-*",
+                    "count": 4
+                },
+                {
+                    "type": "place",
+                    "block": "game:angledgears-*"
+                }
+            ]
+        },
+        {
+            "id": "make-pulverizer-parts",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": [
+                "smith-pulverizer-metal",
+                "make-axle"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:pounder-*",
+                    "count": 2
+                },
+                {
+                    "type": "craft",
+                    "item": "game:pulverizertoggle-*"
+                }
+            ]
+        },
+        {
+            "id": "make-helve",
+            "pos": [
+                4,
+                7.5
+            ],
+            "requires": "cast-helve-head",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:helvehammer-*"
+                }
+            ]
+        },
+        {
+            "id": "build-grinding-wheel",
+            "pos": [
+                8,
+                -1.5
+            ],
+            "requires": "connect-power",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:grindingwheel-*"
+                }
+            ]
+        },
+        {
+            "id": "power-quern",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": [
+                "connect-power",
+                "make-sails"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:quern-*"
+                }
+            ]
+        },
+        {
+            "id": "build-large-gear",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": "connect-power",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:largegear3"
+                }
+            ],
+            "icon": "game:largegearsection-wood"
+        },
+        {
+            "id": "make-pulverizer",
+            "pos": [
+                8,
+                3.0
+            ],
+            "requires": [
+                "connect-power",
+                "make-pulverizer-parts"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:pulverizerframe-*"
+                }
+            ]
+        },
+        {
+            "id": "build-helve-hammer",
+            "pos": [
+                8,
+                7.5
+            ],
+            "requires": [
+                "make-helve",
+                "connect-power"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "game:helvehammerbase-*"
+                },
+                {
+                    "type": "place",
+                    "block": "game:woodentoggle-*"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:fat-rendered",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "crush-quartz",
+            "pos": [
+                10,
+                3.0
+            ],
+            "requires": "make-pulverizer",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:crushed-quartz",
+                    "count": 4
+                }
+            ]
+        }
+    ]
+}

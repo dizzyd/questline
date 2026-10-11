@@ -4,10 +4,39 @@
     "icon": "game:ingot-copper",
     "quests": [
         {
-            "id": "find-copper",
+            "id": "make-pan",
+            "pos": [
+                0,
+                -1.5
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:pan-wooden"
+                }
+            ]
+        },
+        {
+            "id": "make-charcoal",
             "pos": [
                 0,
                 0.0
+            ],
+            "requires": "chop-wood",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:charcoal",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "find-copper",
+            "pos": [
+                0,
+                1.5
             ],
             "requires": "fire-pottery",
             "tasks": [
@@ -36,7 +65,7 @@
             "id": "form-mold",
             "pos": [
                 0,
-                6.0
+                4.5
             ],
             "requires": "fire-pottery",
             "tasks": [
@@ -47,10 +76,24 @@
             ]
         },
         {
+            "id": "make-tongs",
+            "pos": [
+                0,
+                6.0
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:tongs"
+                }
+            ]
+        },
+        {
             "id": "fire-metalwork",
             "pos": [
                 2,
-                4.5
+                3.0
             ],
             "requires": [
                 "form-crucible",
@@ -67,16 +110,32 @@
             "id": "cast-tool",
             "pos": [
                 4,
-                1.5
+                3.0
             ],
             "requires": [
                 "find-copper",
-                "fire-metalwork"
+                "fire-metalwork",
+                "make-charcoal",
+                "make-tongs"
             ],
             "tasks": [
                 {
                     "type": "smelt",
                     "item": "game:*head-copper"
+                }
+            ]
+        },
+        {
+            "id": "form-ingot-mold",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": "fire-metalwork",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "game:ingotmold-*-raw"
                 }
             ]
         },
@@ -95,16 +154,30 @@
             ]
         },
         {
-            "id": "form-ingot-mold",
+            "id": "cast-axe",
             "pos": [
-                4,
-                4.5
+                6,
+                1.5
             ],
-            "requires": "fire-metalwork",
+            "requires": "cast-tool",
             "tasks": [
                 {
-                    "type": "clayform",
-                    "item": "game:ingotmold-*-raw"
+                    "type": "craft",
+                    "item": "game:axe-felling-copper"
+                }
+            ]
+        },
+        {
+            "id": "make-hammer",
+            "pos": [
+                6,
+                4.5
+            ],
+            "requires": "cast-tool",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hammer-copper"
                 }
             ]
         },
@@ -112,7 +185,7 @@
             "id": "cast-ingot",
             "pos": [
                 6,
-                3.0
+                6.0
             ],
             "requires": [
                 "form-ingot-mold",
@@ -126,10 +199,24 @@
             ]
         },
         {
+            "id": "build-forge",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": "make-pickaxe",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:forge"
+                }
+            ]
+        },
+        {
             "id": "cast-anvil",
             "pos": [
                 8,
-                3.0
+                6.0
             ],
             "requires": "cast-ingot",
             "tasks": [
@@ -140,33 +227,85 @@
             ]
         },
         {
-            "id": "make-hammer",
+            "id": "first-smithing",
             "pos": [
-                8,
-                6.0
+                10,
+                3.0
+            ],
+            "requires": [
+                "build-forge",
+                "make-hammer",
+                "cast-anvil"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:*-copper"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "make-saw",
+            "pos": [
+                12,
+                0.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:saw-*"
+                }
+            ]
+        },
+        {
+            "id": "smith-knife",
+            "pos": [
+                12,
+                1.5
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:knife-generic-copper"
+                }
+            ]
+        },
+        {
+            "id": "make-scythe",
+            "pos": [
+                12,
+                4.5
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:scythe-*"
+                }
+            ]
+        },
+        {
+            "id": "make-shovel",
+            "pos": [
+                6,
+                -1.5
             ],
             "requires": "cast-tool",
             "tasks": [
                 {
                     "type": "craft",
-                    "item": "game:hammer-copper"
-                }
-            ]
-        },
-        {
-            "id": "first-smithing",
-            "pos": [
-                10,
-                4.5
-            ],
-            "requires": [
-                "cast-anvil",
-                "make-hammer"
-            ],
-            "tasks": [
-                {
-                    "type": "smith",
-                    "item": "game:*-copper"
+                    "item": "game:shovel-copper"
                 }
             ]
         }
