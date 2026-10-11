@@ -42,8 +42,8 @@ public partial class GuiDialogQuestBook
         else TryOpen();
     }
 
-    /// <summary>Whether the planner can plan this item: allowed, not a story item, and something makes it.</summary>
-    public bool CanPlan(string code) => client.Reveal != RevealLevel.Discovery && !QuestClient.IsSpoiler(code)
+    /// <summary>Whether the planner can plan this item: allowed, the graph built, not a story item, and something makes it.</summary>
+    public bool CanPlan(string code) => client.Reveal != RevealLevel.Discovery && client.GraphReady && !QuestClient.IsSpoiler(code)
         && client.Graph.MadeBy(code).Any(e => !Planner.FoundKinds.Contains(e.Kind) && !e.Kind.StartsWith("transition-perish"));
 
     string NameOf(string code)

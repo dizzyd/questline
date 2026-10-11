@@ -18,15 +18,35 @@ namespace questline.Graph;
 public class RecipeGraphBuilder(ICoreAPI api)
 {
     readonly RecipeGraph graph = new();
+
+    /// <summary>What the build is doing now, for finding a slow step.</summary>
+    public string Stage { get; private set; } = "";
     readonly Dictionary<string, List<string>> meltsInto = [];
     List<string> cookedPots = [];
 
+    /// <summary>The whole graph at once. On a large pack this takes seconds; <see cref="GraphBuild"/> spreads it over ticks.</summary>
     public RecipeGraph Build()
     {
         var watch = Stopwatch.StartNew();
+        foreach (int _ in Steps()) { }
+        return Finish(watch.Elapsed.TotalMilliseconds, 1);
+    }
+
+    // Small enough that no step costs more than a few milliseconds, even with a big pack's loot tables.
+    const int Chunk = 25;
+
+    /// <summary>
+    /// The build in small pieces: it yields after every few hundred recipes or collectibles, so a
+    /// caller can do a few milliseconds of it each tick on the main thread. It reads the game
+    /// through mods' code (drop tables, handbook hooks), which isn't safe off the main thread.
+    /// </summary>
+    public IEnumerable<int> Steps()
+    {
         var world = api.World;
+        int n = 0;
 
         // What melts into each metal, so casting can take the metal in any form, not just as ingots.
+        Stage = "what melts into each metal";
         foreach (var c in world.Collectibles)
         {
             if (c?.Code == null) continue;
@@ -43,17 +63,22 @@ public class RecipeGraphBuilder(ICoreAPI api)
             {
                 // A collectible whose properties throw is reported when its own edges are scanned.
             }
+            if (++n % Chunk == 0) yield return n;
         }
+        Stage = "cooked pots";
         cookedPots = world.Collectibles.Where(c => c is BlockCookedContainer).Select(c => c.Code.ToString()).ToList();
+        yield return n;
 
-        AddRecipes("grid", world.GridRecipes);
-        AddRecipes("smithing", api.GetSmithingRecipes());
-        AddRecipes("knapping", api.GetKnappingRecipes());
-        AddRecipes("clayforming", api.GetClayformingRecipes());
-        AddRecipes("barrel", api.GetBarrelRecipes());
-        AddCooking();
+        foreach (int _ in AddRecipes("grid", world.GridRecipes)) yield return ++n;
+        foreach (int _ in AddRecipes("smithing", api.GetSmithingRecipes())) yield return ++n;
+        foreach (int _ in AddRecipes("knapping", api.GetKnappingRecipes())) yield return ++n;
+        foreach (int _ in AddRecipes("clayforming", api.GetClayformingRecipes())) yield return ++n;
+        foreach (int _ in AddRecipes("barrel", api.GetBarrelRecipes())) yield return ++n;
+        foreach (int _ in AddCooking()) yield return ++n;
         AddAlloys();
+        yield return ++n;
 
+        Stage = "item properties";
         foreach (var collectible in world.Collectibles)
         {
             if (collectible?.Code == null) continue;
@@ -65,19 +90,34 @@ public class RecipeGraphBuilder(ICoreAPI api)
             {
                 api.Logger.Warning("[questline] recipe graph: skipped the properties of {0}: {1}", collectible.Code, e.Message);
             }
+            // Each collectible on its own: one with a big loot table can take milliseconds.
+            yield return ++n;
         }
-        foreach (var entity in world.EntityTypes) AddEntityDrops(world, entity);
+        Stage = "creature drops";
+        int i = 0;
+        foreach (var entity in world.EntityTypes)
+        {
+            AddEntityDrops(world, entity);
+            if (++i % Chunk == 0) yield return ++n;
+        }
+    }
 
-        graph.BuildMs = watch.Elapsed.TotalMilliseconds;
-        api.Logger.Notification("[questline] recipe graph: {0} edges in {1:0} ms ({2})", graph.Edges.Count, graph.BuildMs,
+    /// <summary>The finished graph, logged with the time spent building it and over how many ticks.</summary>
+    public RecipeGraph Finish(double busyMs, int ticks)
+    {
+        graph.BuildMs = busyMs;
+        api.Logger.Notification("[questline] recipe graph: {0} edges in {1:0} ms over {2} ticks ({3})", graph.Edges.Count, busyMs, ticks,
             string.Join(", ", graph.CountByKind().Select(k => $"{k.Key} {k.Value}")));
         return graph;
     }
 
-    void AddRecipes<T>(string kind, IEnumerable<T> recipes) where T : RecipeBase
+    IEnumerable<int> AddRecipes<T>(string kind, IEnumerable<T> recipes) where T : RecipeBase
     {
+        Stage = kind + " recipes";
+        int n = 0;
         foreach (var recipe in RecipeGraph.Countable(recipes ?? []))
         {
+            if (++n % Chunk == 0) yield return n;
             var edge = new GraphEdge { Kind = kind, Source = recipe.Name?.ToString() ?? $"{kind}#{recipe.RecipeId}" };
             foreach (var ingredient in recipe.RecipeIngredients)
             {
@@ -95,10 +135,13 @@ public class RecipeGraphBuilder(ICoreAPI api)
         }
     }
 
-    void AddCooking()
+    IEnumerable<int> AddCooking()
     {
+        Stage = "cooking recipes";
+        int n = 0;
         foreach (var recipe in api.GetCookingRecipes() ?? [])
         {
+            if (++n % 5 == 0) yield return n;
             if (!recipe.Enabled || recipe.Ingredients == null) continue;
             var edge = new GraphEdge { Kind = "cooking", Source = recipe.Code };
             foreach (var ingredient in recipe.Ingredients)
@@ -371,4 +414,59 @@ public class RecipeGraphBuilder(ICoreAPI api)
         edge.Outputs.Add(new GraphOutput { Code = code, Quantity = Math.Max(1, stack.StackSize) });
     }
 
+}
+
+/// <summary>
+/// A recipe graph built a few milliseconds at a time on the main thread, from a tick listener, so
+/// a large pack's graph (seconds of work) never stalls the game. Anything that needs it sooner
+/// finishes it at once with <see cref="FinishNow"/>.
+/// </summary>
+public class GraphBuild(ICoreAPI api)
+{
+    RecipeGraphBuilder builder = new(api);
+    IEnumerator<int> steps;
+    double busyMs;
+    int ticks, failures;
+
+    public RecipeGraph Result { get; private set; }
+
+    /// <summary>Works for up to the budget; true once the graph is done.</summary>
+    public bool Advance(double budgetMs)
+    {
+        if (Result != null) return true;
+        steps ??= builder.Steps().GetEnumerator();
+        var watch = Stopwatch.StartNew();
+        ticks++;
+        try
+        {
+            while (watch.Elapsed.TotalMilliseconds < budgetMs)
+            {
+                if (steps.MoveNext()) continue;
+                busyMs += watch.Elapsed.TotalMilliseconds;
+                Result = builder.Finish(busyMs, ticks);
+                return true;
+            }
+        }
+        catch (Exception e) when (++failures < 3)
+        {
+            // A mod threw outside the per-item guards: start again from nothing next time.
+            api.Logger.Warning("[questline] recipe graph build interrupted, starting again: {0}", e.Message);
+            builder = new RecipeGraphBuilder(api);
+            steps = null;
+        }
+        catch (Exception e)
+        {
+            api.Logger.Error("[questline] recipe graph build failed three times; going on with an empty graph: {0}", e);
+            Result = new RecipeGraph();
+            return true;
+        }
+        busyMs += watch.Elapsed.TotalMilliseconds;
+        return false;
+    }
+
+    public RecipeGraph FinishNow()
+    {
+        while (!Advance(double.MaxValue)) { }
+        return Result;
+    }
 }

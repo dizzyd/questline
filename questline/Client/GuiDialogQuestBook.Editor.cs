@@ -323,7 +323,8 @@ public partial class GuiDialogQuestBook
         {
             notes.Add(new RichTextComponent(capi, problem[(quest.Id.Length + 2)..] + "\n", Small().WithColor(BookStyle.Problem)));
         }
-        var suggested = SuggestedPrerequisites(quest);
+        // Only once the graph is built in the background: asking sooner would stall the frame for it.
+        var suggested = client.GraphReady ? SuggestedPrerequisites(quest) : [];
         if (suggested.Count > 0)
         {
             notes.Add(new RichTextComponent(capi, Lang.Get("questline:edit-suggested") + "  ", MutedSmall()));

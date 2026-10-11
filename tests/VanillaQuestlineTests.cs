@@ -22,6 +22,7 @@ namespace Questline.Tests
         public async Task TheDefaultQuestlineLoadsCleanly()
         {
             await OnServer();
+            await Until(() => Engine.GraphChecksDone, 1200, "the graph checks, built in the background");
             var chapters = Engine.Registry.Chapters.Where(c => c.Id.StartsWith("questline:")).ToList();
             var problems = Engine.Problems.Where(p => p.StartsWith("questline:")).ToList();
             foreach (var p in problems) Log(p);

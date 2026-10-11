@@ -121,5 +121,11 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   On 1.22.6 two of its mods refuse to load and the client gives up before the world opens.
 - **Tests write `VsTestkit.Testing.Gui` in full.** A pack mod (`gui`) has a top-level `Gui`
   namespace, which hides the testkit's class, and an alias can't share its name.
-- **The graph index is built once per recipe graph** (`GraphIndex`, about 5 s on the whole pack)
-  and reused by every reload, which then takes milliseconds. Don't rebuild it per reload.
+- **Nothing heavy runs in one go on the main thread.** The recipe graph is built a few
+  milliseconds a tick (`GraphBuild`, from a tick listener, on both sides): its builder reads the
+  game through mods' code, which isn't safe off the main thread, so it yields in tiny steps
+  instead (`GraphTests.TheGraphIsBuiltInSmallSteps`). The checks' index and first run are pure
+  work over Questline's own data and go to a worker thread (`GraphIndex`, about 15 s on the whole
+  pack), built once per graph; a reload's checks then take milliseconds. Tests that read
+  graph-check problems wait for `Engine.GraphChecksDone`; the planner waits for
+  `QuestClient.GraphReady`. Asking for `Graph` early still works: it finishes the build at once.

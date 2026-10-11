@@ -84,6 +84,7 @@ namespace Questline.Tests
         {
             await OnClient();
             Assert.Equal(RevealLevel.Hints, Client.Reveal, "the server's hints cap the player's guide");
+            await Until(() => Client.GraphReady, 1200, "the client's graph, built in the background");
             Assert.True(Book.CanPlan(Axe));
             Book.ShowPlan(Axe);
             await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();

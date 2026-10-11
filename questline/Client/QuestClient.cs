@@ -33,9 +33,28 @@ public class QuestClient
 
     public bool CanEdit => Editor != null;
 
-    /// <summary>Every recipe as a graph, from the client's own copy of the recipes; built on first use.</summary>
-    public Graph.RecipeGraph Graph => graph ??= questline.Graph.RecipeGraph.Build(capi);
+    /// <summary>
+    /// Every recipe as a graph, from the client's own copy of the recipes. It's built a few
+    /// milliseconds a frame once the world has loaded; asking for it before then finishes it at once.
+    /// </summary>
+    public Graph.RecipeGraph Graph => graph ??= (graphBuild ??= new questline.Graph.GraphBuild(capi)).FinishNow();
     Graph.RecipeGraph graph;
+    questline.Graph.GraphBuild graphBuild;
+
+    /// <summary>Whether the graph is built: what's offered from it (plans, suggestions) waits for this.</summary>
+    public bool GraphReady => graph != null;
+
+    void StartGraph()
+    {
+        graphBuild ??= new questline.Graph.GraphBuild(capi);
+        long id = 0;
+        id = capi.Event.RegisterGameTickListener(_ =>
+        {
+            if (graph == null && !graphBuild.Advance(3)) return;
+            graph ??= graphBuild.Result;
+            capi.Event.UnregisterGameTickListener(id);
+        }, 20);
+    }
     public bool Ready => Registry != null;
 
     /// <summary>Fires after definitions or states arrive.</summary>
@@ -61,6 +80,7 @@ public class QuestClient
             .SetMessageHandler<DefinitionsPacket>(OnDefinitions)
             .SetMessageHandler<StatePacket>(OnState)
             .SetMessageHandler<PartyPacket>(OnParty);
+        capi.Event.LevelFinalize += StartGraph;
 
         try
         {

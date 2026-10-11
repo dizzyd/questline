@@ -47,9 +47,28 @@ public partial class QuestEngine
     static readonly HashSet<string> HistoryTypes = ["kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "custom"];
     public List<string> Problems { get; private set; } = [];
 
-    /// <summary>Every recipe as a graph, built on first use.</summary>
-    public Graph.RecipeGraph Graph => graph ??= questline.Graph.RecipeGraph.Build(api);
+    /// <summary>
+    /// Every recipe as a graph. It's built in the background once the world runs; asking for it
+    /// before then finishes it at once.
+    /// </summary>
+    public Graph.RecipeGraph Graph
+    {
+        get
+        {
+            if (graph != null) return graph;
+            graphBuild ??= new questline.Graph.GraphBuild(api);
+            graph = graphBuild.FinishNow();
+            OnGraphBuilt();
+            return graph;
+        }
+    }
     Graph.RecipeGraph graph;
+    questline.Graph.GraphBuild graphBuild;
+    long graphTicker;
+
+    /// <summary>Whether the last load's graph checks have run: they wait for the graph and its index.</summary>
+    public bool GraphChecksDone => recipesReady && !checksWanted;
+    bool checksWanted;
 
     /// <summary>The in-game editor's server half: working copies and export.</summary>
     public QuestEditor Editor { get; private set; }
@@ -103,7 +122,8 @@ public partial class QuestEngine
         api.Event.ServerRunPhase(EnumServerRunPhase.RunGame, () =>
         {
             recipesReady = true;
-            RunGraphChecks();
+            checksWanted = true;
+            StartGraph();
         });
         api.Permissions.RegisterPrivilege(QuestEditor.Privilege, "Edit quests in the quest book");
 
@@ -168,28 +188,96 @@ public partial class QuestEngine
         Graph = Graph,
     };
 
-    /// <summary>Adds what the recipe graph says about the quests to <see cref="Problems"/>, and tells editors.</summary>
     // What the checks know of the game, kept across reloads: only the quests change.
     GraphIndex graphIndex;
+    bool indexing;
 
+    /// <summary>Builds the graph a few milliseconds a tick, so a large pack doesn't stall the server.</summary>
+    void StartGraph()
+    {
+        if (graph != null || graphTicker != 0) return;
+        graphBuild ??= new questline.Graph.GraphBuild(api);
+        graphTicker = api.Event.RegisterGameTickListener(_ =>
+        {
+            if (graph == null && !graphBuild.Advance(4)) return;
+            api.Event.UnregisterGameTickListener(graphTicker);
+            if (graph == null)
+            {
+                graph = graphBuild.Result;
+                OnGraphBuilt();
+            }
+        }, 20);
+    }
+
+    /// <summary>
+    /// Indexes the new graph on a worker thread: the index is pure work over the graph and the code
+    /// lists, taken here on the main thread, and takes seconds on a large pack. The checks wait for it.
+    /// </summary>
+    void OnGraphBuilt()
+    {
+        if (indexing) return;
+        indexing = true;
+        var built = graph;
+        var blocks = api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()).ToList();
+        var items = api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()).ToList();
+        var entities = api.World.EntityTypes.Select(e => e.Code.ToString()).ToList();
+        // The registry a load builds is never changed afterwards, only replaced, so the worker can
+        // check this one; if a reload replaces it meanwhile, the main thread checks the new one.
+        var registry = Registry;
+        System.Threading.Tasks.Task.Run(() =>
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            GraphIndex index = null;
+            List<string> found = null;
+            try
+            {
+                index = new GraphIndex(built, blocks, items, entities);
+                found = new GraphChecks(registry, index).Run();
+            }
+            catch (Exception e)
+            {
+                api.Logger.Error("[questline] couldn't index the recipe graph; the graph checks won't run: {0}", e);
+            }
+            double ms = watch.Elapsed.TotalMilliseconds;
+            api.Event.EnqueueMainThreadTask(() =>
+            {
+                indexing = false;
+                if (index == null) return;
+                graphIndex = index;
+                api.Logger.Notification("[questline] graph index and checks: {0} codes can be had, done off the main thread in {1:0} ms", index.Obtainable.Count, ms);
+                if (!checksWanted) return;
+                if (Registry == registry && found != null) ApplyGraphProblems(found, resend: true);
+                else RunGraphChecks();
+            }, "questline-graph-index");
+        });
+    }
+
+    /// <summary>
+    /// Adds what the recipe graph says about the quests to <see cref="Problems"/>, and tells editors.
+    /// Until the graph and its index are ready, this only asks for the checks to run when they are.
+    /// </summary>
     public void RunGraphChecks(bool resend = true)
     {
-        var watch = System.Diagnostics.Stopwatch.StartNew();
-        if (graphIndex?.Graph != Graph)
+        if (graphIndex == null || graphIndex.Graph != graph)
         {
-            graphIndex = new GraphIndex(Graph,
-                api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()),
-                api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()),
-                api.World.EntityTypes.Select(e => e.Code.ToString()));
-            api.Logger.Notification("[questline] graph index: {0} codes can be had, built in {1:0} ms", graphIndex.Obtainable.Count, watch.Elapsed.TotalMilliseconds);
+            checksWanted = true;
+            StartGraph();
+            return;
         }
-        var checks = new GraphChecks(Registry, graphIndex);
-        foreach (var problem in checks.Run())
+        var watch = System.Diagnostics.Stopwatch.StartNew();
+        var found = new GraphChecks(Registry, graphIndex).Run();
+        api.Logger.Notification("[questline] graph checks in {0:0} ms", watch.Elapsed.TotalMilliseconds);
+        ApplyGraphProblems(found, resend);
+    }
+
+    void ApplyGraphProblems(List<string> found, bool resend)
+    {
+        checksWanted = false;
+        foreach (var problem in found)
         {
             Problems.Add(problem);
             api.Logger.Warning("[questline] " + problem);
         }
-        api.Logger.Notification("[questline] graph checks in {0:0} ms", watch.Elapsed.TotalMilliseconds);
         if (!resend) return;
         foreach (IServerPlayer player in api.World.AllOnlinePlayers)
         {

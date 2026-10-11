@@ -35,6 +35,7 @@ namespace Questline.Tests
 
             var (registry, problems) = new PackFacts(snapshot, [fixture.SourcePath]).Check(Sapi.Logger);
             var checker = problems.Where(p => p.StartsWith("qltest:")).OrderBy(p => p).ToList();
+            await Until(() => Engine.GraphChecksDone, 1200, "the graph checks, built in the background");
             var server = Engine.Problems.Where(p => p.StartsWith("qltest:")).OrderBy(p => p).ToList();
 
             foreach (var p in checker.Except(server)) Log("checker only: " + p);

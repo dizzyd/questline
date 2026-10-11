@@ -215,6 +215,7 @@ namespace Questline.Tests
             await OnServer();
             var built = Engine.Registry.ChaptersById[Chapter];
             Assert.Equal(50, built.Quests.Count, "fifty quests in the book");
+            await Until(() => Engine.GraphChecksDone, 1200, "the graph checks after the save");
             var problems = Engine.Problems.Where(p => p.StartsWith(Domain + ":")).ToList();
             foreach (var p in problems) Log(p);
             Assert.Equal(0, problems.Count, "no problems in the new chapter");

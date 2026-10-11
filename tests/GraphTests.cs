@@ -80,6 +80,7 @@ namespace Questline.Tests
         {
             await OnServer();
             var engine = Sapi.ModLoader.GetModSystem<QuestlineModSystem>().Engine;
+            await Until(() => engine.GraphChecksDone, 1200, "the graph checks, built in the background");
             var problems = engine.Problems.Where(p => p.StartsWith("qltest:check-")).ToList();
             foreach (var p in problems) Log(p);
 
@@ -89,6 +90,42 @@ namespace Questline.Tests
             Assert.False(problems.Any(p => p.StartsWith("qltest:check-spoiler-found-first:")), "a story item behind a discovered gate is fine");
             Assert.False(problems.Any(p => p.StartsWith("qltest:check-late-part:")), "the part itself is fine");
             Assert.False(problems.Any(p => p.StartsWith("qltest:check-unchecked:")), "an unchecked task is the author's word");
+        }
+
+        /// <summary>
+        /// The graph is built a few milliseconds a tick, so a large pack never stalls the server for
+        /// it. What the build controls is how finely its work divides: nearly every step must be
+        /// tiny. (Wall-clock spikes from the garbage collector or a busy machine hit any code.)
+        /// </summary>
+        [VsTest(TimeoutMs = 120000)]
+        public async Task TheGraphIsBuiltInSmallSteps()
+        {
+            await OnServer();
+            var builder = new RecipeGraphBuilder(Sapi);
+            var steps = new System.Collections.Generic.List<double>();
+            var watch = new System.Diagnostics.Stopwatch();
+            using (var e = builder.Steps().GetEnumerator())
+            {
+                while (true)
+                {
+                    watch.Restart();
+                    bool more = e.MoveNext();
+                    steps.Add(watch.Elapsed.TotalMilliseconds);
+                    if (!more) break;
+                }
+            }
+            steps.Sort();
+            double p99 = steps[(int)(steps.Count * 0.99)];
+            Log($"{steps.Count} steps, {steps.Sum():0} ms in all: 99% under {p99:0.00} ms, the longest {steps[^1]:0.0} ms");
+            Assert.Greater(steps.Count, 100, "the work comes in many steps");
+            Assert.True(p99 < 2, $"steps stay small (99% under {p99:0.00} ms)");
+
+            // Driven a tick's budget at a time, it makes the same graph as built at once.
+            var build = new GraphBuild(Sapi);
+            int slices = 1;
+            while (!build.Advance(4)) slices++;
+            Log($"{slices} slices of 4 ms");
+            Assert.Equal(Graph.Edges.Count, build.Result.Edges.Count, "the same graph as built at once");
         }
 
         [VsTest(TimeoutMs = 60000)]
