@@ -145,7 +145,7 @@ public class PageBlock
 
 public class TaskDef
 {
-    /// <summary>obtain, kill, place, break, craft, knap, clayform, smith, cook, smelt, custom or checkbox.</summary>
+    /// <summary>obtain, kill, mount, place, break, craft, knap, clayform, smith, cook, smelt, trade, custom or checkbox.</summary>
     public string Type;
     public string Item;
     public string Block;
@@ -158,6 +158,12 @@ public class TaskDef
 
     /// <summary>The code the task matches, whichever field the author used. May carry wildcards.</summary>
     [JsonIgnore] public string Target => Item ?? Block ?? Entity ?? Key;
+
+    /// <summary>Whether the target is a creature or a vehicle rather than an item or a block.</summary>
+    [JsonIgnore] public bool OnEntity => Type is "kill" or "mount";
+
+    /// <summary>Whether the target is an item or a block, one the book can show.</summary>
+    [JsonIgnore] public bool OnCollectible => !OnEntity && Type is not ("custom" or "checkbox");
 }
 
 public class RewardDef

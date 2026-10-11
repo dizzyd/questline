@@ -34,13 +34,14 @@ public class GraphChecks
     static readonly Dictionary<string, string[]> MethodKinds = new()
     {
         ["craft"] = ["grid"],
+        ["trade"] = ["trade"],
         ["smith"] = ["smithing"],
         ["knap"] = ["knapping"],
         ["clayform"] = ["clayforming"],
         ["cook"] = ["heat-cook", "heat-bake", "heat-smelt", "heat-convert", "heat-fire", "cooking"],
         ["smelt"] = ["cast", "heat-smelt"],
     };
-    static readonly HashSet<string> ItemTasks = ["obtain", "craft", "smith", "knap", "clayform", "cook", "smelt"];
+    static readonly HashSet<string> ItemTasks = ["obtain", "craft", "smith", "knap", "clayform", "cook", "smelt", "trade"];
 
     readonly QuestRegistry registry;
     readonly RecipeGraph graph;

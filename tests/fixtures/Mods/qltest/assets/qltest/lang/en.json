@@ -59,5 +59,12 @@
     "item-gizmo-whole": "Gizmo",
     "item-gizmo-part": "Gizmo part",
     "check-part-first-title": "Make a part first",
-    "check-gizmo-after-title": "Then a gizmo"
+    "check-gizmo-after-title": "Then a gizmo",
+    "vehicles-title": "Vehicles and liquids",
+    "carry-milk-title": "Carry milk",
+    "carry-milk-desc": "Two litres of milk in a bucket.",
+    "ride-raft-title": "Ride a raft",
+    "ride-raft-desc": "Get on a raft.",
+    "buy-something-title": "Buy something",
+    "buy-something-desc": "Buy anything from a trader."
 }

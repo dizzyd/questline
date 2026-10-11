@@ -9,6 +9,7 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Datastructures;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
+using Vintagestory.GameContent;
 
 namespace questline.Server;
 
@@ -43,7 +44,7 @@ public partial class QuestEngine
 
     // Task types a player's history records. Obtain follows the inventory instead, and a
     // checkbox has nothing to remember.
-    static readonly HashSet<string> HistoryTypes = ["kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom"];
+    static readonly HashSet<string> HistoryTypes = ["kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "custom"];
     public List<string> Problems { get; private set; } = [];
 
     /// <summary>Every recipe as a graph, built on first use.</summary>
@@ -430,9 +431,21 @@ public partial class QuestEngine
         }
     }
 
-    static int CountCarried(IServerPlayer player, AssetLocation pattern) => CarriedSlots(player)
+    /// <summary>What the player carries that matches: whole stacks, and liquids in their containers, by the litre.</summary>
+    static int CountCarried(IServerPlayer player, AssetLocation pattern) => CountStacks(player, pattern) + CarriedSlots(player).Sum(s => LitresIn(s.Itemstack, pattern));
+
+    /// <summary>Only the stacks a claim can take back; liquids stay in their buckets.</summary>
+    static int CountStacks(IServerPlayer player, AssetLocation pattern) => CarriedSlots(player)
         .Where(s => s.Itemstack?.Collectible?.Code != null && WildcardUtil.Match(pattern, s.Itemstack.Collectible.Code))
         .Sum(s => s.StackSize);
+
+    static int LitresIn(ItemStack container, AssetLocation pattern)
+    {
+        if (container?.Collectible is not ILiquidInterface liquids) return 0;
+        var content = liquids.GetContent(container);
+        if (content?.Collectible?.Code == null || !WildcardUtil.Match(pattern, content.Collectible.Code)) return 0;
+        return (int)liquids.GetCurrentLitres(container);
+    }
 
     #endregion
 
@@ -471,7 +484,7 @@ public partial class QuestEngine
         var givers = OnlineContributors(quest, uid).OrderBy(p => p.PlayerUID == uid ? 0 : 1).ToList();
         foreach (var task in consumed)
         {
-            if (givers.Sum(p => CountCarried(p, Pattern(task))) < task.Count) return Refuse(player, $"{questId}: you no longer carry {task.Count}× {task.Target}");
+            if (givers.Sum(p => CountStacks(p, Pattern(task))) < task.Count) return Refuse(player, $"{questId}: you no longer carry {task.Count}× {task.Target}");
         }
         foreach (var task in consumed)
         {

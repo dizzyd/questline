@@ -1,0 +1,47 @@
+{
+    "id": "vehicles",
+    "order": 80,
+    "icon": "game:woodbucket",
+    "quests": [
+        {
+            "id": "carry-milk",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:milkportion",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "ride-raft",
+            "pos": [
+                0,
+                1.5
+            ],
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "game:boat-raft-*"
+                }
+            ]
+        },
+        {
+            "id": "buy-something",
+            "pos": [
+                0,
+                3
+            ],
+            "tasks": [
+                {
+                    "type": "trade",
+                    "item": "game:*"
+                }
+            ]
+        }
+    ]
+}

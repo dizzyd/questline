@@ -50,7 +50,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
     string TargetName(TaskDef task)
     {
         bool wildcard = task.Target.Contains('*');
-        if (task.Type == "kill")
+        if (task.OnEntity)
         {
             // Creatures are named by their spawn item, item-creature-<code>. A wildcard such as
             // chicken-* is named by what comes before the star: a first match would say "Rooster".

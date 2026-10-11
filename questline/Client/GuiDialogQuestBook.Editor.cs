@@ -25,7 +25,7 @@ public partial class GuiDialogQuestBook
     const int QuestPage = 0, TasksPage = 1, RewardsPage = 2, OptionsPage = 3;
     const double FieldHeight = 28, LabelHeight = 18, RowGap = 6;
 
-    static readonly string[] TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom", "checkbox"];
+    static readonly string[] TaskTypes = ["obtain", "kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "custom", "checkbox"];
     static readonly string[] RewardTypes = ["item", "stage"];
     static readonly string[] SizeValues = ["1", "1.25", "1.5", "2"];
 
@@ -374,18 +374,18 @@ public partial class GuiDialogQuestBook
         {
             var task = quest.Tasks[i];
             int index = i;
-            AddRowTop(composer, $"edit-task-{i}", y, text.StackFor(task.Type is "checkbox" or "custom" ? null : task.Target),
+            AddRowTop(composer, $"edit-task-{i}", y, text.StackFor(task.OnCollectible ? task.Target : null),
                 TaskTypes, Array.IndexOf(TaskTypes, task.Type), task.Count,
                 stack =>
                 {
-                    if (task.Type is "checkbox" or "custom" or "kill") task.Type = "obtain";
+                    if (!task.OnCollectible) task.Type = "obtain";
                     SetTarget(task, stack.Collectible.Code.ToString());
                 },
                 type => { string target = task.Target; task.Type = type; SetTarget(task, target); },
                 count => { task.Count = count; Changed(); },
                 () => { quest.Tasks.RemoveAt(index); SaveDraft(); });
 
-            string placeholder = task.Type switch { "kill" => "game:wolf-*", "custom" => "mymod:caught-fish", _ => "game:flint" };
+            string placeholder = task.Type switch { "kill" => "game:wolf-*", "mount" => "game:boat-*", "custom" => "mymod:caught-fish", _ => "game:flint" };
             if (task.Type != "checkbox")
             {
                 AddInput(composer, $"edit-task-{i}-target", ElementBounds.Fixed(FormX, y + FieldHeight + 4, FormWidth, FieldHeight), task.Target,
@@ -475,7 +475,7 @@ public partial class GuiDialogQuestBook
         switch (task.Type)
         {
             case "checkbox": break;
-            case "kill": task.Entity = target; break;
+            case "kill" or "mount": task.Entity = target; break;
             case "place" or "break": task.Block = target; break;
             case "custom": task.Key = target; break;
             default: task.Item = target; break;
@@ -540,7 +540,7 @@ public partial class GuiDialogQuestBook
         if (draft != null) foreach (var q in draft.Quests) all[q.Id] = q;
 
         var inputs = new HashSet<string>();
-        foreach (var task in quest.Tasks.Where(t => t.Target != null && t.Type is not ("kill" or "custom" or "checkbox")))
+        foreach (var task in quest.Tasks.Where(t => t.Target != null && t.OnCollectible))
         {
             foreach (var code in Candidates(task.Target))
             {
@@ -554,7 +554,7 @@ public partial class GuiDialogQuestBook
 
         return all.Values
             .Where(q => q.Id != quest.Id && !DependsOn(quest, q.Id) && !DependsOn(q, quest.Id))
-            .Where(q => q.Tasks.Any(t => t.Target != null && t.Type is not ("kill" or "custom" or "checkbox") && Candidates(t.Target).Any(inputs.Contains)))
+            .Where(q => q.Tasks.Any(t => t.Target != null && t.OnCollectible && Candidates(t.Target).Any(inputs.Contains)))
             .OrderBy(q => q.Id)
             .Take(6)
             .ToList();

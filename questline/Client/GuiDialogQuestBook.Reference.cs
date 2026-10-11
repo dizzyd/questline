@@ -230,7 +230,7 @@ public partial class GuiDialogQuestBook
 
         bool Matches(string target) => target != null && WildcardUtil.Match(new AssetLocation(target), code);
         var visible = client.Registry.Quests.Values.Where(client.IsVisible).ToList();
-        var needs = visible.Where(q => q.Tasks.Any(t => t.Type is not ("kill" or "custom" or "checkbox") && Matches(t.Target))).ToList();
+        var needs = visible.Where(q => q.Tasks.Any(t => t.OnCollectible && Matches(t.Target))).ToList();
         var gives = visible.Where(q => q.Rewards.Any(r => Matches(r.Item) || r.Options.Any(o => Matches(o.Item)))).ToList();
         if (needs.Count + gives.Count == 0) return comps;
 

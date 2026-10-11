@@ -174,6 +174,22 @@ public static class StationPatches
     }
 
     /// <summary>The bloom comes out of a bloomery only when the bloomery is broken.</summary>
+    // What a player buys from a trader: the buying cart, read before the sale empties it.
+    [HarmonyPatch(typeof(InventoryTrader), "TryBuySell")]
+    static class TraderSale
+    {
+        static void Prefix(InventoryTrader __instance, out List<ItemStack> __state) =>
+            __state = __instance.Api?.Side == EnumAppSide.Server
+                ? Enumerable.Range(0, 4).Select(i => __instance.GetBuyingCartSlot(i).Itemstack?.Clone()).Where(s => s != null).ToList()
+                : null;
+
+        static void Postfix(IPlayer buyingPlayer, EnumTransactionResult __result, List<ItemStack> __state)
+        {
+            if (__result != EnumTransactionResult.Success || __state == null) return;
+            foreach (var bought in __state) Credit(buyingPlayer, "trade", bought);
+        }
+    }
+
     [HarmonyPatch(typeof(BlockEntityBloomery), nameof(BlockEntityBloomery.OnBlockBroken))]
     static class Bloomery
     {

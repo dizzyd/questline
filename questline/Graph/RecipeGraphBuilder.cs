@@ -5,6 +5,7 @@ using System.Linq;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Datastructures;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
 namespace questline.Graph;
@@ -183,6 +184,24 @@ public class RecipeGraphBuilder(ICoreAPI api)
             }
         }
 
+        // Coal burnt in a coke oven: the coal pile turns its stack to coke at this rate.
+        if (attributes?["cokeConversionRate"].AsFloat(0) > 0 && world.GetItem(new AssetLocation("coke")) is { } coke)
+        {
+            Single("coke", code, 1, new ItemStack(coke));
+        }
+        // A charcoal pit is a stack of firewood, buried and lit; BlockEntityCharcoalPit names its output itself.
+        if (code == "game:firewood" && world.GetItem(new AssetLocation("charcoal")) is { } charcoal)
+        {
+            Single("charcoal", code, 1, new ItemStack(charcoal));
+        }
+        if (c is BlockPan pan && attributes?["panningDrops"].Exists == true) AddPanning(world, pan);
+        // A liquid block fills a bucket or a bowl dipped in it: water gives water portions.
+        if (c is Block && attributes?["waterTightContainerProps"]?["whenFilled"]?["stack"].Exists == true)
+        {
+            var filled = attributes["waterTightContainerProps"]["whenFilled"]["stack"].AsObject<JsonItemStack>(null, c.Code.Domain);
+            if (filled?.Resolve(world, "questline recipe graph", false) == true) Single("fill", code, 1, filled.ResolvedItemstack);
+        }
+
         if (c is ItemOre && c.Variant["ore"] is { } ore && world.GetItem(new AssetLocation("nugget-" + ore)) is { } nugget)
         {
             Single("smash", code, 1, new ItemStack(nugget));
@@ -226,7 +245,13 @@ public class RecipeGraphBuilder(ICoreAPI api)
 
     void AddCasting(IWorldAccessor world, Block mold)
     {
-        metals ??= world.Items.Where(i => i?.Code != null && i.Code.Path.StartsWith("ingot-")).Select(i => i.LastCodePart()).Distinct().ToArray();
+        // Only metals a fire can melt are cast: iron and steel melt hotter than any fuel burns.
+        if (metals == null)
+        {
+            float hottest = world.Collectibles.Max(c => c?.CombustibleProps?.BurnTemperature ?? 0);
+            metals = world.Items.Where(i => i?.Code != null && i.Code.Path.StartsWith("ingot-") && (i.CombustibleProps?.MeltingPoint ?? 0) <= hottest)
+                .Select(i => i.LastCodePart()).Distinct().ToArray();
+        }
         var outputs = mold.Attributes["drop"].Exists ? [mold.Attributes["drop"].AsObject<JsonItemStack>(null, mold.Code.Domain)]
             : mold.Attributes["drops"].AsObject<JsonItemStack[]>(null, mold.Code.Domain) ?? [];
         foreach (string metal in metals)
@@ -244,6 +269,30 @@ public class RecipeGraphBuilder(ICoreAPI api)
                 if (stack.Resolve(world, "questline recipe graph", false)) Output(edge, stack.ResolvedItemstack);
             }
             graph.AddEdge(edge);
+        }
+    }
+
+    /// <summary>What a pan washes out of each kind of block: sand and gravel give nuggets, bony soil bones.</summary>
+    void AddPanning(IWorldAccessor world, BlockPan pan)
+    {
+        var bySource = pan.Attributes["panningDrops"].AsObject<Dictionary<string, PanningDrop[]>>(null, pan.Code.Domain) ?? [];
+        foreach (var (source, drops) in bySource)
+        {
+            var from = new AssetLocation(source);
+            var blocks = world.Blocks.Where(b => b?.Code != null && WildcardUtil.Match(from, b.Code)).Select(b => b.Code.ToString()).ToList();
+            if (blocks.Count == 0) continue;
+            var edge = new GraphEdge
+            {
+                Kind = "pan",
+                Source = pan.Code + " " + source,
+                Inputs = [new GraphInput { Codes = blocks }, new GraphInput { Codes = [pan.Code.ToString()], Tool = true }],
+            };
+            foreach (var drop in drops ?? [])
+            {
+                if (drop?.Code == null || drop.Code.Path.Contains('{')) continue;
+                if (drop.Resolve(world, "questline recipe graph", false)) Output(edge, drop.ResolvedItemstack);
+            }
+            if (edge.Outputs.Count > 0) graph.AddEdge(edge);
         }
     }
 
@@ -270,13 +319,33 @@ public class RecipeGraphBuilder(ICoreAPI api)
         var sold = (trade?.Selling?.List ?? []).Where(t => t != null && t.Resolve(world, "questline recipe graph", false)).Select(t => t.ResolvedItemstack).Where(s => s != null).ToArray();
         if (sold.Length > 0) Multi("trade", code, sold);
 
-        // What butchering gives, from the harvestable behaviour's config.
+        // What butchering gives, from the harvestable behaviour's config. Server side only: a
+        // client never sees that config, and the multiplayer test holds both graphs to the same.
         foreach (var behavior in entity.Server?.BehaviorsAsJsonObj ?? [])
         {
             if (behavior?["code"].AsString() != "harvestable" || !behavior["drops"].Exists) continue;
             var harvested = behavior["drops"].AsObject<BlockDropItemStack[]>(null, entity.Code.Domain) ?? [];
             var stacks = harvested.Where(d => d != null && d.Resolve(world, "questline recipe graph", entity.Code)).Select(d => d.ResolvedItemstack).Where(s => s != null).ToArray();
             if (stacks.Length > 0) Multi("butcher", code, stacks);
+        }
+
+        // Milking and picking up, which both sides know: the client's behaviour list has them too,
+        // though without their stacks, so each falls back to what the game itself defaults to.
+        var behaviors = (entity.Server?.BehaviorsAsJsonObj ?? []).Concat(entity.Client?.BehaviorsAsJsonObj ?? []).Where(b => b != null).ToList();
+        if (behaviors.Any(b => b["code"].AsString() == "milkable"))
+        {
+            var config = behaviors.FirstOrDefault(b => b["code"].AsString() == "milkable" && b["liquidStack"].Exists);
+            var milk = config?["liquidStack"].AsObject<JsonItemStack>(null, entity.Code.Domain) ?? new JsonItemStack { Type = EnumItemClass.Item, Code = new AssetLocation("milkportion") };
+            if (milk.Resolve(world, "questline recipe graph", false)) Single("milk", code, 1, milk.ResolvedItemstack);
+        }
+        // Small creatures picked up by hand, such as the worms a grunter brings up: the stack the
+        // server config names, or the creature's own item.
+        if (behaviors.Any(b => b["code"].AsString() == "rightclickpickup"))
+        {
+            var config = behaviors.FirstOrDefault(b => b["code"].AsString() == "rightclickpickup" && b["collectedStack"].Exists);
+            var picked = config?["collectedStack"].AsObject<JsonItemStack>(null, entity.Code.Domain)
+                ?? new JsonItemStack { Type = EnumItemClass.Item, Code = new AssetLocation(entity.Code.Domain, "creature-" + entity.Code.Path) };
+            if (picked.Resolve(world, "questline recipe graph", false)) Single("pickup", code, 1, picked.ResolvedItemstack);
         }
     }
 

@@ -53,7 +53,7 @@ namespace Questline.Tests
                 Assert.True(prefixes <= 1 && postfixes <= 1, $"{method} is patched more than once");
             }
             int methods = attached.Count;
-            Assert.Equal(8, methods, "every station patch attached");
+            Assert.Equal(9, methods, "every station patch attached");
         }
 
         [VsTest(TimeoutMs = 30000)]

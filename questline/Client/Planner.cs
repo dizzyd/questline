@@ -52,9 +52,10 @@ public class Planner(RecipeGraph graph, Func<string, int> have, Func<string, IEn
         ["heat-cook"] = 2, ["heat-bake"] = 3, ["heat-fire"] = 2, ["heat-smelt"] = 3, ["cast"] = 3, ["smithing"] = 4,
         ["grind"] = 3, ["crush"] = 4, ["smash"] = 2, ["barrel"] = 4, ["alloy"] = 4, ["cooking"] = 3, ["juice"] = 4,
         ["transition-dry"] = 3, ["transition-cure"] = 4, ["kiln"] = 4, ["carburize"] = 6, ["distill"] = 5,
+        ["charcoal"] = 4, ["coke"] = 6, ["fill"] = 1,
     };
-    /// <summary>Ways of having something that are finding it, not making it.</summary>
-    public static readonly HashSet<string> FoundKinds = ["drop", "entity-drop", "butcher", "trade"];
+    /// <summary>Ways of having something that are finding it, not making it. Panning is luck too.</summary>
+    public static readonly HashSet<string> FoundKinds = ["drop", "entity-drop", "butcher", "milk", "pickup", "pan", "trade"];
 
     readonly HashSet<string> visiting = [];
 
@@ -69,7 +70,7 @@ public class Planner(RecipeGraph graph, Func<string, int> have, Func<string, IEn
             var ways = graph.MadeBy(code);
             // Loot is luck, not a plan: a vessel or a ruin is the last place to say to look.
             step.Source = ways.Where(e => FoundKinds.Contains(e.Kind))
-                .OrderBy(e => IsLoot(e) ? 2 : e.Kind == "trade" ? 1 : 0).FirstOrDefault();
+                .OrderBy(e => IsLoot(e) || e.Kind == "pan" ? 2 : e.Kind == "trade" ? 1 : 0).FirstOrDefault();
             step.Edge = ways
                 .Where(e => KindCost.ContainsKey(e.Kind) && e.Inputs.All(Usable))
                 .OrderBy(Cost).FirstOrDefault();

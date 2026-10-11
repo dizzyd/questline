@@ -419,7 +419,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         {
             var task = quest.Tasks[i];
             bool done = tasks[i] >= task.Count;
-            AddIconRow(comps, task.Type is "checkbox" or "kill" or "custom" ? null : text.StackFor(task.Target));
+            AddIconRow(comps, task.OnCollectible ? text.StackFor(task.Target) : null);
             comps.Add(new RichTextComponent(capi, text.TaskLine(task), done ? Body().WithColor(Good) : Body()) { VerticalAlign = EnumVerticalAlign.Middle });
 
             if (task.Type == "checkbox")

@@ -18,7 +18,7 @@ namespace questline.Server;
 /// </summary>
 public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = null)
 {
-    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "custom", "checkbox"];
+    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "custom", "checkbox"];
     static readonly HashSet<string> BlockTasks = ["place", "break"];
     static readonly HashSet<string> RewardTypes = ["item", "choice", "stage"];
 
@@ -367,7 +367,7 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
 
     bool TargetExists(TaskDef task)
     {
-        if (task.Type == "kill") return facts.AnyMatches("entity", task.Target);
+        if (task.OnEntity) return facts.AnyMatches("entity", task.Target);
         if (BlockTasks.Contains(task.Type)) return facts.AnyMatches("block", task.Target);
         return facts.AnyMatches("collectible", task.Target);
     }
