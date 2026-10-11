@@ -6,7 +6,7 @@ claimed in the book. The design lives in the Questline design doc.
 
 ## Status
 
-Phases 1 to 4 of the roadmap, minus the VS Quest importer:
+Every phase of the roadmap, minus the VS Quest importer:
 
 - Chapters from any mod's `assets/<domain>/questline/chapters/`, merged and checked at load;
   a broken quest is disabled and reported, never its chapter
@@ -35,10 +35,19 @@ Phases 1 to 4 of the roadmap, minus the VS Quest importer:
   quests that need it or give it. `.questline handbook off` gives H back to the handbook
 - A recipe graph of every recipe and item property the handbook knows (about 20,600 edges for
   vanilla, built in under 400 ms): `/questline graph <item>` and `/questline graph export`
+- A default questline, stone age to steel and getting ready for winter: 60 quests that teach
+  the game's mechanics and never its story
+- A goal planner: "Plan how to make this" on an item page works it back through the recipe
+  graph to what the player carries. `RevealLevel` in `ModConfig/questline.json` caps what it
+  shows: `guide` (every step and recipe), `hints` (the default: what to get next, not how) or
+  `discovery` (off). Players can choose less
+- Checks against the recipe graph: tasks for things nothing makes, the wrong station, items the
+  questline only asks for later, and story items in the default questline without a
+  `{"discovered": ...}` gate. The editor suggests prerequisites from the same graph
 - The book takes 80% of the screen, and opens each chapter on all of it or on twenty quests
   around the player
 - `/questline reload | complete <quest> [player] | unlock <quest> [player] |
-  reset [quest] [player] | resetserver | export | graph <item>|export`
+  reset [quest] [player] | resetserver | export | graph <item> | snapshot`
 
 ## Checking a quest pack
 

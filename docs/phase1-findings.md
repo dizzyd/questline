@@ -107,3 +107,24 @@ anything to go on top is prepended to that rich text's components before composi
 The H keys (`handbook`, `selectionhandbook`) and the `handbook`/`handbooksearch` link protocols
 are replaced at `LevelFinalize`, after the handbook set them; `HotKey.Handler` and
 `capi.LinkProtocols` hand back the originals, so the takeover turns off without a restart.
+
+## Phase 5: the planner, the checks and the default questline
+
+**The validator found real gaps in the graph the first time it ran on real content.** Meals
+were outputs no item matched (now a cooking-pot recipe makes the cooked pot), and casting took
+only ingots, so a quest asking for an ingot after one casting copper looked out of order (now
+casting takes anything that melts into the metal). Both were the graph's fault, not the
+questline's. Loot vessels (through `Block.GetDropsForHandbook`) and trader stock are in the graph,
+so loot-only items aren't flagged as unobtainable.
+
+**Loot is not a plan.** The first planner preferred "find it" to any recipe with missing
+inputs, and since vessels can hold flint axes, it told the player to find an axe. It now uses a
+recipe whenever there is one, and puts loot vessels last among places to look.
+
+**Obtainability needs a worklist.** Re-scanning every unfinished edge each pass, with wildcard
+matching inside, didn't finish in ten minutes on 21,000 edges; a worklist keyed by code, with
+each wildcard matched once, takes well under a second.
+
+**Labels must scale with the tree.** At a fitted zoom below 1 the fixed-size labels of a real
+chapter overlapped; scaled with the zoom they keep to the gaps, and the opening view never goes
+below the zoom (0.75) where scaled text is still readable.

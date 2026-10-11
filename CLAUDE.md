@@ -11,7 +11,9 @@ and the rendering spike settled.
 |---|---|
 | `questline/Model/` | Definitions (chapters, quests, tasks, rewards, page blocks), the `requires` tree and its JSON converter, progress and quest states. Shared by both sides |
 | `questline/Server/` | `QuestLoader` (assets and the editor's working copies → registry, validation), `QuestEngine` (progress, parties, claims, sync, save game), `QuestEditor` (working copies, export), `Trackers` and `StationPatches` (game events → task reports) |
-| `questline/Graph/` | `RecipeGraph`: every recipe and item property as edges between item codes, built on first use on either side |
+| `questline/Graph/` | `RecipeGraph` (edges between item codes, saved and loaded as JSON) and `RecipeGraphBuilder` (scans the running game), built on first use on either side |
+| `questline/assets/questline/questline/chapters/` | The default questline: eight chapters, stone age to steel. `VanillaQuestlineTests` holds it to zero problems |
+| `tools/packcheck/` | The pack checker: the loader and checks compiled outside the game (PACKCHECK leaves out the builder), run against `/questline snapshot` |
 | `questline/Network/` | The packets. Channel `questline`; message types must be registered in the same order on both sides |
 | `questline/Client/` | `QuestClient` (the client's copy), the book dialog (Quests, Reference, Party and, for editors, Problems tabs; edit mode in `GuiDialogQuestBook.Editor.cs`), the canvas, the chapter rail, the HUD pins. `BookStyle` and `BookLayout` hold the type scale, colours and sizing every panel uses |
 | `tests/` | vstestkit suites; `tests/fixtures/Mods/qltest` is a content mod of test chapters, committed (it's ours, not downloaded) |
@@ -77,3 +79,12 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   `MultiplayerTests` checks the client builds the same graph as a dedicated server.
 - **A LinkTextComponent made without the client API can't handle its link.** To follow one in a
   test, call `Capi.LinkProtocols["handbook"](link)` as a click does.
+- **The loader and checks must not touch the running game directly.** They get everything through
+  `IGameFacts` (`ServerFacts` in game, `PackFacts` in the checker); `PackCheckTests` requires
+  both to find the same problems on the fixture.
+- **Look item codes up, don't guess them.** Variant codes differ from the file names: keep a
+  headless session (`run.sh ... --keep`) and ask `bash scripts/vstk eval` what exists.
+- **The graph stands an ingot in for the metal.** Casting takes anything that melts into it;
+  a check that treats an ingot as only an ingot gets ordering wrong.
+- **Test runs:** `--filter` is a plain substring, not a pattern. A stuck run is better caught
+  with `timeout` around `run.sh` than by waiting.
