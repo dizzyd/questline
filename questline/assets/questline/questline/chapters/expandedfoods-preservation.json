@@ -1,0 +1,190 @@
+{
+    "id": "expandedfoods-preservation",
+    "extends": "preservation",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                1,
+                -4.5
+            ],
+            "text": "addon-expandedfoods",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "make-hardtack",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": [
+                "find-salt",
+                "grind-flour"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "expandedfoods:hardtack-*-raw",
+                    "count": 4
+                },
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:hardtack-*-bake1",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "build-meat-rack",
+            "pos": [
+                0,
+                -3.0
+            ],
+            "requires": [
+                "first-smithing",
+                "make-boards"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "aculinaryartillery:meathooks-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "dry-age-meat",
+            "pos": [
+                2,
+                -3.0
+            ],
+            "requires": "build-meat-rack",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:agedmeat-*-normal",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "water-glass-eggs",
+            "pos": [
+                4,
+                -1.5
+            ],
+            "requires": [
+                "cure-meat",
+                "slake-lime",
+                "collect-eggs"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:limeegg-chicken",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "ferment-fish",
+            "pos": [
+                4,
+                -3.0
+            ],
+            "requires": [
+                "cure-meat",
+                "fillet-fish"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:fermentedfish-slop"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:salt",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "press-fish-sauce",
+            "pos": [
+                6,
+                -3.0
+            ],
+            "requires": [
+                "ferment-fish",
+                "make-fruit-press"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:fishsauce",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:salt",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

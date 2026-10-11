@@ -1,0 +1,66 @@
+{
+    "id": "expandedfoods-cheesemaking",
+    "extends": "cheesemaking",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                3,
+                3.0
+            ],
+            "text": "addon-expandedfoods",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "pasteurize-milk",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": [
+                "collect-milk",
+                "roast-meat"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:pasteurizedmilkportion"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-yogurt-starter",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "curdle-milk",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:yogurt-starter"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

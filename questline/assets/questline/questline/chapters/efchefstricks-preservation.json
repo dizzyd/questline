@@ -1,0 +1,66 @@
+{
+    "id": "efchefstricks-preservation",
+    "extends": "preservation",
+    "requiresMod": [
+        "efchefstricks"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                7,
+                -1.5
+            ],
+            "text": "addon-efchefstricks",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "crystallize-salt",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": "make-brine",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "efchefstricks:saltcrystal-damp"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "dry-salt-crystal",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": [
+                "crystallize-salt",
+                "make-quern"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "efchefstricks:saltcrystal-dry"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

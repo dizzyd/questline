@@ -1,0 +1,45 @@
+{
+    "id": "efchefstricks-farming",
+    "extends": "farming",
+    "requiresMod": [
+        "efchefstricks"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                0,
+                10.5
+            ],
+            "text": "addon-efchefstricks",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "wash-eggshells",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": [
+                "crack-egg",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "efchefstricks:washedeggshell"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        }
+    ]
+}

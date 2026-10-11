@@ -1,0 +1,62 @@
+{
+    "id": "wool-winter",
+    "extends": "winter",
+    "requiresMod": [
+        "wool"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                1,
+                6.0
+            ],
+            "text": "addon-wool",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "knit-sweater",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": [
+                "make-kneedles",
+                "spin-wool"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "wool:clothes-upperbodyover-sweater-*"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "wool:twine-wool-plain",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 5
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

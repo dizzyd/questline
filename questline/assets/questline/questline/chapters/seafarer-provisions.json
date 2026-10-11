@@ -1,0 +1,600 @@
+{
+    "id": "provisions",
+    "order": 87,
+    "requiresMod": [
+        "seafarer"
+    ],
+    "icon": "seafarer:tortilla-corn",
+    "quests": [
+        {
+            "id": "make-saltpan",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "seafarer:saltpan-raw-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "harvest-sea-salt",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "make-saltpan",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "seafarer:saltpan-*-empty"
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:salt",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-preptable",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "seafarer:preptable-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "salt-meat",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": [
+                "harvest-sea-salt",
+                "make-preptable"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:saltedmeat-*",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "dry-salted-meat",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": [
+                "salt-meat",
+                "make-dryingframe"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:driedsaltedmeat-*",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "slack-meat",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": "dry-salted-meat",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:slackedmeat-*",
+                    "count": 2,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-dryingframe",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "seafarer:dryingframe-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "grow-sugarcane",
+            "pos": [
+                0,
+                4.5
+            ],
+            "requires": "harvest-grain",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:sugarcane",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "press-cane",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": [
+                "grow-sugarcane",
+                "make-preptable"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:canejuiceportion",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "boil-molasses",
+            "pos": [
+                4,
+                4.5
+            ],
+            "requires": "press-cane",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:molassesportion"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-sugar",
+            "pos": [
+                6,
+                4.5
+            ],
+            "requires": "boil-molasses",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:sugar",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "candy-fruit",
+            "pos": [
+                8,
+                4.5
+            ],
+            "requires": "make-sugar",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:candiedfruit-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "distill-rum",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": [
+                "boil-molasses",
+                "distill-spirit"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:spiritportion-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "form-griddle",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "seafarer:claygriddle-raw-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "build-griddle",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "form-griddle",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:claygriddle-clay"
+                },
+                {
+                    "type": "place",
+                    "block": "seafarer:griddlehearthbase-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "sear-meat",
+            "pos": [
+                4,
+                7.5
+            ],
+            "requires": "build-griddle",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:searedmeat-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "grow-corn",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": "harvest-grain",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:corn",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "dry-corn",
+            "pos": [
+                2,
+                9.0
+            ],
+            "requires": [
+                "grow-corn",
+                "make-dryingframe"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:driedcorn",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-mudrake",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": "gather-sticks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "seafarer:mudrake-wooden"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "burn-shells",
+            "pos": [
+                2,
+                10.5
+            ],
+            "requires": "make-mudrake",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:lime",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "shuck-clams",
+            "pos": [
+                2,
+                12.0
+            ],
+            "requires": "make-mudrake",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:premiumfish-raw",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "nixtamalize-corn",
+            "pos": [
+                4,
+                9.0
+            ],
+            "requires": [
+                "dry-corn",
+                "burn-shells"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:nixtamal",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "grind-masa",
+            "pos": [
+                6,
+                9.0
+            ],
+            "requires": "nixtamalize-corn",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:masa",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-tortilla",
+            "pos": [
+                8,
+                9.0
+            ],
+            "requires": [
+                "grind-masa",
+                "sear-meat"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:tortilla-corn",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "roll-burrito",
+            "pos": [
+                10,
+                9.0
+            ],
+            "requires": "make-tortilla",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:burrito-cooked"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:salt",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 10
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

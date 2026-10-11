@@ -1,0 +1,167 @@
+{
+    "id": "tailorsdelight-textiles",
+    "extends": "textiles",
+    "requiresMod": [
+        "tailorsdelight"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                11,
+                3.0
+            ],
+            "text": "addon-tailorsdelight",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "knap-awl",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": "knap-knife",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "tailorsdelight:awl-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:bone",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-needle",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "knap-awl",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "tailorsdelight:needle-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flaxtwine",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-sewing-kit",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "spin-twine",
+                "make-needle"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:sewingkit"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-sewing-kit-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flaxtwine",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-sack",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": [
+                "make-linen",
+                "make-sewing-kit"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:linensack"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-sack-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "dye-thread",
+            "pos": [
+                10,
+                4.5
+            ],
+            "requires": "make-woad-dye",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "tailorsdelight:twine-blue",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:flaxtwine",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "checkered-cloth",
+            "pos": [
+                12,
+                4.5
+            ],
+            "requires": "dye-thread",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "tailorsdelight:checkeredcloth-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

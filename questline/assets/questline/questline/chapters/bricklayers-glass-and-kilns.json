@@ -1,0 +1,359 @@
+{
+    "id": "bricklayers-glass-and-kilns",
+    "extends": "glass-and-kilns",
+    "requiresMod": [
+        "bricklayers"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                2,
+                10.5
+            ],
+            "text": "addon-bricklayers",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "grind-quartz-powder",
+            "pos": [
+                0,
+                12.0
+            ],
+            "requires": [
+                "crush-quartz",
+                "make-quern"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "em:powdered-ore-quartz",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:lime",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "mix-frit",
+            "pos": [
+                2,
+                12.0
+            ],
+            "requires": [
+                "grind-quartz-powder",
+                "grind-lime"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:frit-mix-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "bake-frit",
+            "pos": [
+                4,
+                12.0
+            ],
+            "requires": "mix-frit",
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "bricklayers:frit-baked-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "grind-frit",
+            "pos": [
+                6,
+                12.0
+            ],
+            "requires": "bake-frit",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:frit-ground-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:ore-quartz",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-colored-glass",
+            "pos": [
+                8,
+                12.0
+            ],
+            "requires": [
+                "grind-frit",
+                "build-bloomery"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:glassbatch-plain-*",
+                    "count": 8
+                },
+                {
+                    "type": "smelt",
+                    "item": "game:@glass-(green|blue|violet|red|yellow|brown|pink)",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "mix-glazing-base",
+            "pos": [
+                2,
+                13.5
+            ],
+            "requires": [
+                "grind-quartz-powder",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:glazingbase-clear",
+                    "count": 6
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:clay-blue",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "mix-glazing",
+            "pos": [
+                8,
+                13.5
+            ],
+            "requires": [
+                "mix-glazing-base",
+                "grind-frit"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:glazing-clear-*",
+                    "count": 6
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "glaze-bowl",
+            "pos": [
+                10,
+                13.5
+            ],
+            "requires": "mix-glazing",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:glazedbowl-burnt-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "glaze-bricks",
+            "pos": [
+                12,
+                12.0
+            ],
+            "requires": [
+                "glaze-bowl",
+                "mix-mortar"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:glazedbricks-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "glaze-planter",
+            "pos": [
+                12,
+                13.5
+            ],
+            "requires": [
+                "glaze-bowl",
+                "make-planter"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:glazedplanter-burnt-*"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ore-quartz",
+                            "count": 16
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 8
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "gather-porcelain-powders",
+            "pos": [
+                0,
+                15.0
+            ],
+            "requires": [
+                "make-pulverizer",
+                "make-quern"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "em:powdered-ore-boneash",
+                    "count": 12
+                },
+                {
+                    "type": "obtain",
+                    "item": "em:powdered-stone-granite",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:powdered-ceramic-light",
+                    "count": 7
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "mix-porcelain",
+            "pos": [
+                2,
+                15.0
+            ],
+            "requires": "gather-porcelain-powders",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:clay-white"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 12
+                }
+            ]
+        },
+        {
+            "id": "fire-porcelain",
+            "pos": [
+                4,
+                15.0
+            ],
+            "requires": "mix-porcelain",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:porcelainbowl-burnt-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        }
+    ]
+}

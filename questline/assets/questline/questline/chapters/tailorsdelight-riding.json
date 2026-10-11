@@ -1,0 +1,128 @@
+{
+    "id": "tailorsdelight-riding",
+    "extends": "riding",
+    "requiresMod": [
+        "tailorsdelight"
+    ],
+    "quests": [
+        {
+            "id": "make-saddle",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": [
+                "smith-nails",
+                "make-leather",
+                "knap-awl",
+                "strong-tannin"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-middleback-saddle1"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-saddle-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-bridle",
+            "pos": [
+                4,
+                3.0
+            ],
+            "requires": [
+                "make-saddle",
+                "leather-strips"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-head-bridle*"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-bridle-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-saddlebags",
+            "pos": [
+                10,
+                0.0
+            ],
+            "requires": "ride-elk",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-lowerbackside-saddlebags1"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-saddlebags-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-pillion",
+            "pos": [
+                10,
+                3.0
+            ],
+            "requires": [
+                "ride-elk",
+                "leather-strips"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:hoovedwearables-lowerbackside-pillion-leather"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-pillion-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

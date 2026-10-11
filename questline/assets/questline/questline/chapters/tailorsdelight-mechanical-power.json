@@ -1,0 +1,41 @@
+{
+    "id": "tailorsdelight-mechanical-power",
+    "extends": "mechanical-power",
+    "requiresMod": [
+        "tailorsdelight"
+    ],
+    "quests": [
+        {
+            "id": "make-sails",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": [
+                "make-linen",
+                "make-boards",
+                "make-needle"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:sail",
+                    "count": 4
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-sails-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

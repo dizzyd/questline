@@ -1,0 +1,67 @@
+{
+    "id": "wool-husbandry",
+    "extends": "husbandry",
+    "requiresMod": [
+        "wool"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                7,
+                3.0
+            ],
+            "text": "addon-wool",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "shear-animal",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "breed-animals",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "wool:fleece-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-shears",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": [
+                "shear-animal",
+                "first-smithing"
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:shears-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

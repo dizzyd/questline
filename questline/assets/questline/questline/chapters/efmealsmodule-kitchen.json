@@ -1,0 +1,25 @@
+{
+    "id": "efmealsmodule-kitchen",
+    "extends": "kitchen",
+    "requiresMod": [
+        "efmealsmodule"
+    ],
+    "quests": [
+        {
+            "id": "mix-salad",
+            "pos": [
+                4,
+                -1.5
+            ],
+            "requires": [
+                "make-mixing-bowl",
+                "cut-nuggets"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ]
+        }
+    ]
+}

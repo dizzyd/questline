@@ -1,0 +1,102 @@
+{
+    "id": "hexsmech-mechanical-power",
+    "extends": "mechanical-power",
+    "requiresMod": [
+        "hexsmech"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                0,
+                9.0
+            ],
+            "text": "addon-hexsmech",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "crank-by-hand",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": "make-axle",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:handcrank-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-castiron-axles",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": "hull-castiron",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:castironaxle-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "build-dog-clutch",
+            "pos": [
+                2,
+                10.5
+            ],
+            "requires": "make-castiron-axles",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:castirondogclutch-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "run-belt-drive",
+            "pos": [
+                2,
+                12.0
+            ],
+            "requires": [
+                "make-castiron-axles",
+                "make-leather"
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "icon": "hexsmech:beltdrive-leather"
+        }
+    ]
+}

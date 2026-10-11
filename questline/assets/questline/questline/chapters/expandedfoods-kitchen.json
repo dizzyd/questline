@@ -1,0 +1,363 @@
+{
+    "id": "expandedfoods-kitchen",
+    "extends": "kitchen",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                1,
+                -7.5
+            ],
+            "text": "addon-expandedfoods",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "roast-meat",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": [
+                "first-hunt",
+                "make-fire",
+                "fire-pottery"
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "roast-meat-expandedfoods"
+                }
+            ],
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "aculinaryartillery:saucepan-*-raw"
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:@(redmeat|bushmeat|poultry)-cooked",
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "crack-egg",
+            "pos": [
+                0,
+                -1.5
+            ],
+            "requires": "collect-eggs",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "aculinaryartillery:eggshell",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "tap-tree",
+            "pos": [
+                0,
+                -6.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "aculinaryartillery:spile-*"
+                },
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:*sapportion",
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-mixing-bowl",
+            "pos": [
+                2,
+                -1.5
+            ],
+            "requires": "roast-meat",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "aculinaryartillery:mixingbowl-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "cut-nuggets",
+            "pos": [
+                2,
+                -3.0
+            ],
+            "requires": "roast-meat",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "expandedfoods:meatnugget-*-raw",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "render-lard",
+            "pos": [
+                2,
+                -4.5
+            ],
+            "requires": [
+                "roast-meat",
+                "melt-fat"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:lard",
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "boil-tree-syrup",
+            "pos": [
+                2,
+                -6.0
+            ],
+            "requires": "tap-tree",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:treesyrupportion-*",
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "knead-pasta",
+            "pos": [
+                4,
+                -3.0
+            ],
+            "requires": [
+                "make-mixing-bowl",
+                "crack-egg"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:pasta-cut",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "knead-sausage",
+            "pos": [
+                4,
+                -4.5
+            ],
+            "requires": [
+                "make-mixing-bowl",
+                "cut-nuggets",
+                "render-lard"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:sausage-*-raw",
+                    "count": 2,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "cast-cauldron",
+            "pos": [
+                4,
+                -6.0
+            ],
+            "requires": [
+                "boil-tree-syrup",
+                "cast-tool"
+            ],
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "aculinaryartillery:cauldronminimold-*-raw"
+                },
+                {
+                    "type": "smelt",
+                    "item": "aculinaryartillery:cauldronmini-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "power-mixing-bowl",
+            "pos": [
+                6,
+                -3.0
+            ],
+            "requires": [
+                "knead-pasta",
+                "knead-sausage",
+                "connect-power"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "aculinaryartillery:poweredmixingbowl-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:grain-spelt",
+                            "count": 16
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "roast-grain",
+            "pos": [
+                4,
+                6.0
+            ],
+            "requires": "bake-bread",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:roastedgrain-*",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-breadcrumbs",
+            "pos": [
+                4,
+                7.5
+            ],
+            "requires": "bake-bread",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:breadcrumbs-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

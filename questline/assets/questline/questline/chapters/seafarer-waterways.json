@@ -1,0 +1,250 @@
+{
+    "id": "seafarer-waterways",
+    "extends": "waterways",
+    "requiresMod": [
+        "seafarer"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                0,
+                10.75
+            ],
+            "text": "addon-seafarer",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "make-logbarge",
+            "pos": [
+                0,
+                12.0
+            ],
+            "requires": "make-rope",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "seafarer:boat-logbarge-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "ride-logbarge",
+            "pos": [
+                2,
+                12.0
+            ],
+            "requires": "make-logbarge",
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "seafarer:boat-logbarge-*"
+                }
+            ],
+            "icon": "seafarer:boat-logbarge-oak",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-raftsail",
+            "pos": [
+                4,
+                12.0
+            ],
+            "requires": [
+                "ride-logbarge",
+                "make-linen"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "seafarer:raftsail"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "season-planks",
+            "pos": [
+                0,
+                13.5
+            ],
+            "requires": [
+                "make-boards",
+                "make-preptable"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:plank-seasoned",
+                    "count": 16
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "cook-varnish",
+            "pos": [
+                0,
+                15.0
+            ],
+            "requires": [
+                "cook-meal",
+                "gather-resin"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:varnishportion-marine"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "varnish-planks",
+            "pos": [
+                2,
+                15.0
+            ],
+            "requires": [
+                "cook-varnish",
+                "season-planks"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:plank-varnished",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "oil-canvas",
+            "pos": [
+                0,
+                16.5
+            ],
+            "requires": [
+                "make-linen",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "seafarer:oiled-canvas",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "sew-sail",
+            "pos": [
+                2,
+                16.5
+            ],
+            "requires": "oil-canvas",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "seafarer:oiled-canvas-sail"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "build-outrigger",
+            "pos": [
+                4,
+                15.0
+            ],
+            "requires": [
+                "varnish-planks",
+                "sew-sail"
+            ],
+            "tasks": [
+                {
+                    "type": "mount",
+                    "entity": "seafarer:boat-outrigger-*"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "icon": "seafarer:boat-outrigger-rollers",
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:rope",
+                            "count": 10
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 48
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 12
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,188 @@
+{
+    "id": "charcoalkiln-copper-age",
+    "extends": "copper-age",
+    "requiresMod": [
+        "charcoalkiln"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                14,
+                7.5
+            ],
+            "text": "addon-charcoalkiln",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "smith-draft-shutter",
+            "pos": [
+                12,
+                9.0
+            ],
+            "requires": "first-smithing",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "charcoalkiln:draftshutter-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-kiln-parts",
+            "pos": [
+                14,
+                9.0
+            ],
+            "requires": [
+                "smith-draft-shutter",
+                "make-nails",
+                "make-bricks",
+                "mix-mortar"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "charcoalkiln:kilndoor-*"
+                },
+                {
+                    "type": "craft",
+                    "item": "charcoalkiln:chimney-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "build-charcoal-kiln",
+            "pos": [
+                16,
+                9.0
+            ],
+            "requires": "make-kiln-parts",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "charcoalkiln:kilndoor-*"
+                },
+                {
+                    "type": "place",
+                    "block": "charcoalkiln:chimney-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 32
+                }
+            ]
+        },
+        {
+            "id": "fire-charcoal-kiln",
+            "pos": [
+                18,
+                9.0
+            ],
+            "requires": "build-charcoal-kiln",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 64
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:charcoal",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "upgrade-charcoal-kiln",
+            "pos": [
+                20,
+                9.0
+            ],
+            "requires": [
+                "fire-charcoal-kiln",
+                "smith-iron"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "charcoalkiln:kilnliningkit-*"
+                },
+                {
+                    "type": "craft",
+                    "item": "charcoalkiln:heatingkit-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "build-industrial-kiln",
+            "pos": [
+                22,
+                9.0
+            ],
+            "requires": "upgrade-charcoal-kiln",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "charcoalkiln:retortdoor-*"
+                },
+                {
+                    "type": "place",
+                    "block": "charcoalkiln:retorthearth-*",
+                    "count": 7
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        }
+    ]
+}

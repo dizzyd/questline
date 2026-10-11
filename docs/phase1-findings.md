@@ -148,3 +148,19 @@ back only whole stacks, never the liquid.
 **What still can't be credited:** taming progress, catching something in a trap, chiseling, a
 prospecting reading, fertilizing and watering, quenching, kiln firing, welding an anvil, and
 which meal a pot holds. Each is a checkbox or folded into a neighbouring quest's text.
+
+## Addons for other mods
+
+**Melding needs extension and replacement.** A mod's quests belong beside the base quests they
+build on, so a chapter file can `extend` a base chapter; and a mod that changes a mechanic makes
+the base quest teaching it wrong (with Expanded Foods a firepit chars meat, so "Roast some meat"
+can't be done as written), so an extension can replace a base quest of the same id. Of the
+pack's mods, Expanded Foods broke two base quests outright and Tailor's Delight changed the
+recipes behind twelve more without breaking them; only reading the mods' patches found those.
+
+**Run the base checks with the mods in first.** The modded snapshot found the broken base
+quests before anyone wrote an addon quest.
+
+**Mods' own machines are invisible to the graph,** so their outputs read as "nothing makes
+this". Authors turned real tasks into checkboxes to get past that; `"unchecked": true` turned
+them back. Teaching the graph builder each mod's recipe type would be better, mod by mod.

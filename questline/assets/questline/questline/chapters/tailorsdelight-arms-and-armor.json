@@ -1,0 +1,130 @@
+{
+    "id": "tailorsdelight-arms-and-armor",
+    "extends": "arms-and-armor",
+    "requiresMod": [
+        "tailorsdelight"
+    ],
+    "quests": [
+        {
+            "id": "make-longbow",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "make-bowstave",
+                "make-leather",
+                "leather-strips"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:bow-long"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-longbow-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-jerkin",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": [
+                "make-leather",
+                "leather-strips",
+                "knap-awl",
+                "dye-thread"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-jerkin-leather"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-jerkin-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "make-leather-armor",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "make-jerkin",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-sewn-leather"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-leather-armor-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-gambeson",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": [
+                "make-linen",
+                "make-buttons",
+                "strong-tannin"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:armor-body-sewn-linen"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-gambeson-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

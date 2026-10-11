@@ -1,0 +1,935 @@
+{
+    "id": "industry",
+    "order": 66,
+    "requiresMod": [
+        "hexsmech"
+    ],
+    "icon": "hexsmech:reverberatoryhearth-north",
+    "quests": [
+        {
+            "id": "make-iron-pipes",
+            "pos": [
+                0,
+                0
+            ],
+            "requires": "smith-iron",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "hexsmech:pipe-iron",
+                    "count": 6
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "craft-hearth",
+            "pos": [
+                0,
+                1.5
+            ],
+            "requires": [
+                "lay-refractory",
+                "smith-hatch",
+                "build-bellows"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "hexsmech:reverberatoryhearth-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "form-casting-bed",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "form-mold",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "hexsmech:cast-bulkingot-*-raw",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:clay-fire",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-bellows-input",
+            "pos": [
+                2,
+                0
+            ],
+            "requires": [
+                "make-iron-pipes",
+                "craft-hearth"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "hexsmech:bellowsinput-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "build-casting-chamber",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": [
+                "make-iron-pipes",
+                "form-casting-bed"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:castingbed-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "build-reverb",
+            "pos": [
+                4,
+                1.5
+            ],
+            "requires": [
+                "craft-hearth",
+                "make-bellows-input"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:reverberatoryhearth-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:bellowsinput-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:coveredpipe-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:charcoal",
+                    "count": 24
+                }
+            ]
+        },
+        {
+            "id": "power-bellows",
+            "pos": [
+                6,
+                0
+            ],
+            "requires": [
+                "build-reverb",
+                "connect-power"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:linkage-heavy-*"
+                },
+                {
+                    "type": "place",
+                    "block": "game:bellows-large-*"
+                },
+                {
+                    "type": "place",
+                    "block": "game:axlearm-wood-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "hull-castiron",
+            "pos": [
+                6,
+                3.0
+            ],
+            "requires": [
+                "build-reverb",
+                "build-casting-chamber"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ingot-castiron",
+                    "count": 8,
+                    "unchecked": true
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:castironwall",
+                    "count": 4
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:coke",
+                            "count": 16
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-iron",
+                            "count": 4
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "mix-fettling",
+            "pos": [
+                6,
+                4.5
+            ],
+            "requires": "build-reverb",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "hexsmech:fettling-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "smith-rabble",
+            "pos": [
+                6,
+                6.0
+            ],
+            "requires": "build-reverb",
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "hexsmech:rabble-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "build-finery",
+            "pos": [
+                8,
+                4.5
+            ],
+            "requires": [
+                "hull-castiron",
+                "make-gratings"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:finerybasin-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:feedstockinput-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:foundrydoor-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:fireboxdoor-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:coke",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "puddle-iron",
+            "pos": [
+                10,
+                6.0
+            ],
+            "requires": [
+                "build-finery",
+                "mix-fettling",
+                "smith-rabble",
+                "smith-tongs"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "hexsmech:ironbloom-wrought",
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "build-vat",
+            "pos": [
+                8,
+                7.5
+            ],
+            "requires": "hull-castiron",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:vataccess-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:castiron-firebox",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "brew-sulfuric-acid",
+            "pos": [
+                10,
+                7.5
+            ],
+            "requires": "build-vat",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:acid-full-sulfuric",
+                    "count": 10
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:powder-sulfur",
+                    "count": 16
+                }
+            ]
+        },
+        {
+            "id": "build-retort",
+            "pos": [
+                10,
+                9.0
+            ],
+            "requires": [
+                "build-vat",
+                "smith-steel"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:retortaccess-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:retortbuffer-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "reduce-aluminium",
+            "pos": [
+                12,
+                7.5
+            ],
+            "requires": [
+                "puddle-iron",
+                "brew-sulfuric-acid",
+                "build-retort"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ingot-aluminium",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 10
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:coke",
+                            "count": 24
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-steel",
+                            "count": 2
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "build-boiler",
+            "pos": [
+                10,
+                10.5
+            ],
+            "requires": "build-vat",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:pump-iron"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:boileraccess-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:fluidtank",
+                    "count": 12
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "build-engine",
+            "pos": [
+                12,
+                10.5
+            ],
+            "requires": "build-boiler",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:engineaccess-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:castironflywheel-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:castironcylinder-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "make-seep-pick",
+            "pos": [
+                12,
+                12.0
+            ],
+            "requires": "build-boiler",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "hexsmech:seeppick-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "build-pumpjack",
+            "pos": [
+                14,
+                10.5
+            ],
+            "requires": [
+                "build-engine",
+                "make-seep-pick"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:pumpjackaccess-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:pumpjackwellhead"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-slitting-mill",
+            "pos": [
+                14,
+                9.0
+            ],
+            "requires": [
+                "build-engine",
+                "reduce-aluminium"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:slittingmill-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "build-distillation",
+            "pos": [
+                16,
+                9.0
+            ],
+            "requires": [
+                "build-pumpjack",
+                "reduce-aluminium"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:distillationtoweraccess-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-cracker",
+            "pos": [
+                18,
+                9.0
+            ],
+            "requires": "build-distillation",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:crackeraccess-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-combustion",
+            "pos": [
+                18,
+                10.5
+            ],
+            "requires": "build-distillation",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:castironcombustionchamber-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-reaction-chamber",
+            "pos": [
+                20,
+                7.5
+            ],
+            "requires": "build-cracker",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:reactionchamberaccess-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "draw-wire",
+            "pos": [
+                14,
+                13.5
+            ],
+            "requires": [
+                "build-engine",
+                "smith-steel"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:drawplate-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:spooler-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": "build-dynamo",
+            "pos": [
+                16,
+                13.5
+            ],
+            "requires": "draw-wire",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:dynamo-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "string-power-line",
+            "pos": [
+                20,
+                12.0
+            ],
+            "requires": [
+                "build-dynamo",
+                "build-cracker"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:connector-lv-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-battery-box",
+            "pos": [
+                22,
+                13.5
+            ],
+            "requires": "string-power-line",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:batterybox"
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 12
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-copper",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-lead",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "run-heat-box",
+            "pos": [
+                22,
+                12.0
+            ],
+            "requires": "string-power-line",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:heatbox-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-extruder",
+            "pos": [
+                22,
+                10.5
+            ],
+            "requires": "string-power-line",
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:extruder-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "build-arc-furnace",
+            "pos": [
+                24,
+                9.0
+            ],
+            "requires": [
+                "build-reaction-chamber",
+                "build-extruder",
+                "build-battery-box"
+            ],
+            "tasks": [
+                {
+                    "type": "place",
+                    "block": "hexsmech:arcfurnaceaccess-*"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:electrodereceptacle"
+                },
+                {
+                    "type": "place",
+                    "block": "hexsmech:steelwall",
+                    "count": 15
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "make-titanium",
+            "pos": [
+                26,
+                7.5
+            ],
+            "requires": "build-arc-furnace",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ingot-titanium",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "pour-stainless",
+            "pos": [
+                26,
+                10.5
+            ],
+            "requires": "build-arc-furnace",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:ingot-stainlesssteel",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 16
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:ingot-steel",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:coke",
+                            "count": 32
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

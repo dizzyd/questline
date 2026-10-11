@@ -1,0 +1,39 @@
+{
+    "id": "expandedfoods-stone-age",
+    "extends": "stone-age",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "quests": [
+        {
+            "id": "cook-roots",
+            "pos": [
+                12,
+                3.0
+            ],
+            "requires": [
+                "gather-reeds",
+                "make-fire"
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "cook-roots-expandedfoods"
+                }
+            ],
+            "tasks": [
+                {
+                    "type": "cook",
+                    "item": "expandedfoods:cookedveggie-cattailroot-charred"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        }
+    ]
+}

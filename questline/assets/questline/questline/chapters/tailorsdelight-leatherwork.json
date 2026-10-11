@@ -1,0 +1,164 @@
+{
+    "id": "tailorsdelight-leatherwork",
+    "extends": "leatherwork",
+    "requiresMod": [
+        "tailorsdelight"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                1,
+                7.5
+            ],
+            "text": "addon-tailorsdelight",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "make-buttons",
+            "pos": [
+                10,
+                -1.5
+            ],
+            "requires": "knap-awl",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "tailorsdelight:buttons-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:bone",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "leather-strips",
+            "pos": [
+                10,
+                1.5
+            ],
+            "requires": "make-leather",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "tailorsdelight:leatherstrips-plain"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "make-backpack",
+            "pos": [
+                12,
+                0.0
+            ],
+            "requires": [
+                "make-leather",
+                "leather-strips",
+                "make-buttons"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:backpack-normal"
+                }
+            ],
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "make-backpack-tailorsdelight"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "dark-leather",
+            "pos": [
+                10,
+                4.5
+            ],
+            "requires": "make-leather",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "tailorsdelight:leather-darkbrown"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "smith-awl",
+            "pos": [
+                0,
+                9.0
+            ],
+            "requires": [
+                "first-smithing",
+                "knap-awl"
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "tailorsdelight:awlthorn-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "cast-buttons",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": "cast-tool",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "tailorsdelight:mold-raw-buttons"
+                },
+                {
+                    "type": "smelt",
+                    "item": "tailorsdelight:buttons-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

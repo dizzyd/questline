@@ -13,6 +13,7 @@ and the rendering spike settled.
 | `questline/Server/` | `QuestLoader` (assets and the editor's working copies → registry, validation), `QuestEngine` (progress, parties, claims, sync, save game), `QuestEditor` (working copies, export), `Trackers` and `StationPatches` (game events → task reports) |
 | `questline/Graph/` | `RecipeGraph` (edges between item codes, saved and loaded as JSON) and `RecipeGraphBuilder` (scans the running game), built on first use on either side |
 | `questline/assets/questline/questline/chapters/` | The default questline: 24 chapters, all of vanilla. `VanillaQuestlineTests` holds it to zero problems, every quest reachable, every vanilla guide linked and a clean layout |
+| `…/chapters/<modid>-<chapter>.json` | Addons for other mods: each `extends` a base chapter (or, for Hex's Mech's industry and Seafarer's provisions, is a chapter of its own) and loads only with its `requiresMod`. A quest with a base quest's id replaces it, its text in a page block keyed `<id>-<modid>` |
 | `tools/packcheck/` | The pack checker: the loader and checks compiled outside the game (PACKCHECK leaves out the builder), run against `/questline snapshot` |
 | `questline/Network/` | The packets. Channel `questline`; message types must be registered in the same order on both sides |
 | `questline/Client/` | `QuestClient` (the client's copy), the book dialog (Quests, Reference, Party and, for editors, Problems tabs; edit mode in `GuiDialogQuestBook.Editor.cs`), the canvas, the chapter rail, the HUD pins. `BookStyle` and `BookLayout` hold the type scale, colours and sizing every panel uses |
@@ -98,3 +99,12 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 - **Edit the default questline with the layout in mind.** Quests sit on columns 2 apart and rows
   1.5 apart; a quest's in-chapter prerequisites sit to its left; no line may pass behind a quest.
   Entry quests (prerequisites only in other chapters) sit beside what they unlock, not in column 0.
+- **Addons are tested against the real mods.** The box keeps them in `~/questline-addon-mods`
+  (the pack's zips plus their libraries); pass that as `--mods` instead of the fixtures to run the
+  questline tests with every addon loaded. Take a snapshot there too (`/questline snapshot`) for
+  the pack checker. Without the mods the addons must load to nothing, quietly.
+- **The graph can't see a mod's own machines** (Hex's Mech's furnaces, Expanded Foods' mixing
+  bowl, Seafarer's prep table). A task for their output carries `"unchecked": true`, which skips
+  the "how is it made" checks; the code must still exist. Use it only for that.
+- **A target can be a regular expression,** as the game's matcher allows: `game:@(redmeat|poultry)-cooked`.
+  Use it where a wildcard would take in things the quest doesn't mean.

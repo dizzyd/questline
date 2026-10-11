@@ -1,0 +1,108 @@
+{
+    "id": "bricklayers-clay-and-fire",
+    "extends": "clay-and-fire",
+    "requiresMod": [
+        "bricklayers"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                11,
+                -6.0
+            ],
+            "text": "addon-bricklayers",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "make-mudbricks",
+            "pos": [
+                10,
+                -4.5
+            ],
+            "requires": "make-bricks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:mudbrick-*",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:drygrass",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "lay-mudbricks",
+            "pos": [
+                12,
+                -4.5
+            ],
+            "requires": "make-mudbricks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:mudbricks-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "form-clay-tiles",
+            "pos": [
+                10,
+                -1.5
+            ],
+            "requires": "fire-pottery",
+            "tasks": [
+                {
+                    "type": "clayform",
+                    "item": "bricklayers:clayrawtile-raw-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "fire-clay-tiles",
+            "pos": [
+                12,
+                -1.5
+            ],
+            "requires": "form-clay-tiles",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "bricklayers:clayrawtile-burnt-*",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

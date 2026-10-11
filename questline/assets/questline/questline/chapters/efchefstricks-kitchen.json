@@ -1,0 +1,31 @@
+{
+    "id": "efchefstricks-kitchen",
+    "extends": "kitchen",
+    "requiresMod": [
+        "efchefstricks"
+    ],
+    "quests": [
+        {
+            "id": "make-crumb-feed",
+            "pos": [
+                6,
+                7.5
+            ],
+            "requires": "make-breadcrumbs",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "efchefstricks:breadcrumbfeed",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        }
+    ]
+}

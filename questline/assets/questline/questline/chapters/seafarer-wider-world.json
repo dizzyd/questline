@@ -1,0 +1,42 @@
+{
+    "id": "seafarer-wider-world",
+    "extends": "wider-world",
+    "requiresMod": [
+        "seafarer"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                4,
+                -1.0
+            ],
+            "text": "addon-seafarer",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "visit-port",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": "visit-trader",
+            "tasks": [
+                {
+                    "type": "trade",
+                    "item": "seafarer:*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

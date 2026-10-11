@@ -1,0 +1,134 @@
+{
+    "id": "wool-textiles",
+    "extends": "textiles",
+    "requiresMod": [
+        "wool"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                1,
+                9.0
+            ],
+            "text": "addon-wool",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "wash-fleece",
+            "pos": [
+                0,
+                10.5
+            ],
+            "requires": [
+                "shear-animal",
+                "make-limewater"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "wool:fibers-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:lime",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "spin-wool",
+            "pos": [
+                2,
+                10.5
+            ],
+            "requires": "wash-fleece",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "wool:twine-wool-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "weave-wool",
+            "pos": [
+                4,
+                10.5
+            ],
+            "requires": "spin-wool",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "wool:cloth-wool-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:stick",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-kneedles",
+            "pos": [
+                4,
+                12.0
+            ],
+            "requires": "spin-wool",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "wool:kneedle-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "dye-wool",
+            "pos": [
+                8,
+                10.5
+            ],
+            "requires": [
+                "weave-wool",
+                "make-woad-dye"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "wool:cloth-wool-blue"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

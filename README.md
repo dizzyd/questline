@@ -40,6 +40,10 @@ Every phase of the roadmap, minus the VS Quest importer:
   through steel, mechanical power, kilns, farming, husbandry, beekeeping, cheese, brewing,
   textiles and leather, boats, riding, arms and armor. It links every one of the game's own
   guides, teaches the mechanics and never the story
+- Quests for popular mods, melded into the base chapters when the mod is installed: Expanded
+  Foods (with A Culinary Artillery and its modules), Hex's Mech, Seafarer, Bricklayers, Charcoal
+  Kiln, Wool, Tailor's Delight and From Golden Combs. 172 quests in all; a chapter file can
+  `extend` a base chapter and replace a base quest whose mechanic the mod changes
 - A goal planner: "Plan how to make this" on an item page works it back through the recipe
   graph to what the player carries. `RevealLevel` in `ModConfig/questline.json` caps what it
   shows: `guide` (every step and recipe), `hints` (the default: what to get next, not how) or

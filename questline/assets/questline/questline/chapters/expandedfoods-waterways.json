@@ -1,0 +1,37 @@
+{
+    "id": "expandedfoods-waterways",
+    "extends": "waterways",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "quests": [
+        {
+            "id": "cook-fish",
+            "pos": [
+                8,
+                1.5
+            ],
+            "requires": "fillet-fish",
+            "page": [
+                {
+                    "type": "text",
+                    "lang": "cook-fish-expandedfoods"
+                }
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fish-cooked",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

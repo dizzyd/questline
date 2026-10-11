@@ -1,0 +1,206 @@
+{
+    "id": "expandedfoods-farming",
+    "extends": "farming",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                1,
+                6.0
+            ],
+            "text": "addon-expandedfoods",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "press-oil",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": [
+                "grow-flax",
+                "make-fruit-press"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:foodoilportion-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "grow-soybeans",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "gather-seeds",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:legume-soybean",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "soak-soybeans",
+            "pos": [
+                4,
+                7.5
+            ],
+            "requires": [
+                "grow-soybeans",
+                "make-barrel"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:soyprep-soaked",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "grind-soybeans",
+            "pos": [
+                8,
+                7.5
+            ],
+            "requires": [
+                "soak-soybeans",
+                "make-quern"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:soyprep-powdered",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "culture-soybeans",
+            "pos": [
+                10,
+                7.5
+            ],
+            "requires": "grind-soybeans",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "expandedfoods:soyprep-cultured",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "brew-soy-sauce",
+            "pos": [
+                12,
+                7.5
+            ],
+            "requires": [
+                "culture-soybeans",
+                "make-brine",
+                "make-fruit-press"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:soysauce"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:seeds-soybean",
+                            "count": 8
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:firewood",
+                            "count": 32
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "make-soy-milk",
+            "pos": [
+                10,
+                9.0
+            ],
+            "requires": [
+                "grind-soybeans",
+                "make-fruit-press",
+                "roast-meat"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:soymilk-edible"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}

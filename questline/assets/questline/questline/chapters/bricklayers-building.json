@@ -1,0 +1,178 @@
+{
+    "id": "bricklayers-building",
+    "extends": "building",
+    "requiresMod": [
+        "bricklayers"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                13,
+                6.0
+            ],
+            "text": "addon-bricklayers",
+            "scale": 0.9,
+            "color": "#c8a46e"
+        }
+    ],
+    "quests": [
+        {
+            "id": "cut-small-bricks",
+            "pos": [
+                10,
+                7.5
+            ],
+            "requires": "lay-stone-bricks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:smallstonebrick-*",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "lay-small-bricks",
+            "pos": [
+                12,
+                7.5
+            ],
+            "requires": "cut-small-bricks",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:smallstonebricks-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:mortar",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "mix-tile-cement",
+            "pos": [
+                10,
+                9.0
+            ],
+            "requires": "mix-mortar",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:cement-tile",
+                    "count": 8
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "lay-clay-tiles",
+            "pos": [
+                12,
+                9.0
+            ],
+            "requires": [
+                "mix-tile-cement",
+                "fire-clay-tiles"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:claytiles-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 2
+                }
+            ]
+        },
+        {
+            "id": "lay-stone-tiles",
+            "pos": [
+                12,
+                10.5
+            ],
+            "requires": "mix-tile-cement",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:stonetiles-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:lime",
+                    "count": 4
+                }
+            ]
+        },
+        {
+            "id": "make-polishing-set",
+            "pos": [
+                14,
+                10.5
+            ],
+            "requires": [
+                "lay-stone-tiles",
+                "make-leather"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:polishingset-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        },
+        {
+            "id": "polish-tiles",
+            "pos": [
+                16,
+                10.5
+            ],
+            "requires": "make-polishing-set",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "bricklayers:stonerawtileshiny-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 3
+                }
+            ]
+        }
+    ]
+}
