@@ -49,12 +49,18 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
 
     string TargetName(TaskDef task)
     {
-        bool wildcard = task.Target.Contains('*');
+        bool wildcard = TaskDef.IsPattern(task.Target);
         if (task.OnEntity)
         {
             // Creatures are named by their spawn item, item-creature-<code>. A wildcard such as
             // chicken-* is named by what comes before the star: a first match would say "Rooster".
             var loc = new AssetLocation(task.Target);
+            if (wildcard && !loc.Path.Contains('*'))
+            {
+                // A regular expression: named by the first creature it matches.
+                var first = capi.World.EntityTypes.FirstOrDefault(e => WildcardUtil.Match(loc, e.Code));
+                return first == null ? task.Target : Lang.Get("questline:any-of", Lang.Get(first.Code.Domain + ":item-creature-" + first.Code.Path));
+            }
             if (wildcard)
             {
                 string prefix = loc.Path[..loc.Path.IndexOf('*')].TrimEnd('-');

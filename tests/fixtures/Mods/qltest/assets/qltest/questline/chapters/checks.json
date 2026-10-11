@@ -97,6 +97,20 @@
                     "item": "qltest:gizmo-whole"
                 }
             ]
+        },
+        {
+            "id": "check-unchecked",
+            "pos": [
+                4,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "smith",
+                    "item": "game:flint",
+                    "unchecked": true
+                }
+            ]
         }
     ]
 }

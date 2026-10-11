@@ -68,7 +68,7 @@ public class GraphChecks
         var later = LaterTargets();
         foreach (var quest in registry.Quests.Values)
         {
-            foreach (var task in quest.Tasks.Where(t => ItemTasks.Contains(t.Type) && t.Target != null))
+            foreach (var task in quest.Tasks.Where(t => ItemTasks.Contains(t.Type) && t.Target != null && !t.Unchecked))
             {
                 var matches = Candidates(task.Target).ToList();
                 if (matches.Count == 0) continue;   // the loader already said it matches nothing
@@ -154,7 +154,7 @@ public class GraphChecks
 
     string[] Candidates(string pattern)
     {
-        if (!matchCache.TryGetValue(pattern, out var codes)) matchCache[pattern] = codes = pattern.Contains('*') ? Matching(pattern).ToArray() : [pattern.Contains(':') ? pattern : "game:" + pattern];
+        if (!matchCache.TryGetValue(pattern, out var codes)) matchCache[pattern] = codes = TaskDef.IsPattern(pattern) ? Matching(pattern).ToArray() : [pattern.Contains(':') ? pattern : "game:" + pattern];
         return codes;
     }
 
@@ -165,6 +165,13 @@ public class GraphChecks
     IEnumerable<string> Matching(string pattern)
     {
         if (!pattern.Contains(':')) pattern = "game:" + pattern;
+        // A regular expression has no prefix to search by: try every code.
+        if (pattern.Contains(":@"))
+        {
+            var regex = new AssetLocation(pattern);
+            foreach (string code in allCodes.Where(c => WildcardUtil.Match(regex, new AssetLocation(c)))) yield return code;
+            yield break;
+        }
         int star = pattern.IndexOf('*');
         if (star < 0)
         {
@@ -196,7 +203,7 @@ public class GraphChecks
         var byCode = new Dictionary<string, List<QuestDef>>();
         foreach (var quest in registry.Quests.Values)
         {
-            foreach (var task in quest.Tasks.Where(t => ItemTasks.Contains(t.Type) && t.Target != null && !t.Target.Contains('*')))
+            foreach (var task in quest.Tasks.Where(t => ItemTasks.Contains(t.Type) && t.Target != null && !TaskDef.IsPattern(t.Target)))
             {
                 if (!byCode.TryGetValue(task.Target, out var list)) byCode[task.Target] = list = [];
                 list.Add(quest);

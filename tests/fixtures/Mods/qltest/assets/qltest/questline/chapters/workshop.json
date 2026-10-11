@@ -1,0 +1,19 @@
+{
+    "id": "workshop",
+    "order": 90,
+    "icon": "game:hammer-copper",
+    "quests": [
+        {
+            "id": "workshop-start",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ]
+        }
+    ]
+}

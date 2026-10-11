@@ -39,6 +39,7 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
         var active = registry.Questlines.Select(q => q.Id).ToHashSet();
 
         var chapters = new List<ChapterDef>();
+        var extensions = new List<ChapterDef>();
         foreach (var (domain, name, json) in facts.Chapters())
         {
             string where = $"{domain}:questline/chapters/{name}.json";
@@ -54,6 +55,12 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
             }
 
             Qualify(chapter, domain, name);
+            if (chapter.Extends != null)
+            {
+                chapter.Extends = Requirement.QualifyId(chapter.Extends, domain);
+                extensions.Add(chapter);
+                continue;
+            }
             if (chapters.Any(c => c.Id == chapter.Id))
             {
                 Problem($"{where}: chapter {chapter.Id} is already defined; this copy is ignored");
@@ -76,6 +83,35 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
             if (!active.Contains(chapter.Questline)) continue;
             RawChapters[chapter.Id] = JsonConvert.SerializeObject(chapter);
             registry.Chapters.Add(chapter);
+        }
+
+        // Extensions join their chapter after the editor's copies are in, so an edited chapter
+        // keeps its mods' quests; the editor itself sees only the chapter's own file.
+        var replaced = new HashSet<string>();
+        foreach (var extension in extensions)
+        {
+            if (!extension.RequiresMod.All(facts.IsModLoaded)) continue;
+            var target = registry.Chapters.FirstOrDefault(c => c.Id == extension.Extends);
+            if (target == null)
+            {
+                if (chapters.Any(c => c.Id == extension.Extends)) continue;   // its chapter is off, so it is too
+                Problem($"{extension.Id}: extends {extension.Extends}, which no questline has");
+                continue;
+            }
+            // A quest with the id of one already in the chapter replaces it: how a mod that
+            // changes a mechanic rewrites the base quest teaching it.
+            foreach (var quest in extension.Quests)
+            {
+                int at = target.Quests.FindIndex(q => q.Id == quest.Id);
+                if (at < 0)
+                {
+                    target.Quests.Add(quest);
+                    continue;
+                }
+                if (!replaced.Add(quest.Id)) Problem($"{extension.Id}: {quest.Id} is replaced by more than one extension; the last one loaded wins");
+                target.Quests[at] = quest;
+            }
+            target.Art.AddRange(extension.Art);
         }
 
         var seen = new HashSet<string>();
@@ -138,6 +174,7 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
     {
         chapter.Id = Requirement.QualifyId(chapter.Id ?? fileName, domain);
         chapter.Questline = chapter.Questline == null ? QuestRegistry.DefaultQuestline : Requirement.QualifyId(chapter.Questline, domain);
+        foreach (var art in chapter.Art.Where(a => a.Text != null)) art.Text = Requirement.QualifyId(art.Text, domain);
         chapter.Aliases = chapter.Aliases.ToDictionary(a => Requirement.QualifyId(a.Key, domain), a => Requirement.QualifyId(a.Value, domain));
 
         foreach (var quest in chapter.Quests.ToList())
@@ -150,6 +187,12 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
             }
             quest.Id = Requirement.QualifyId(quest.Id, domain);
             quest.Requires?.Qualify(domain);
+            // Text keys are the domain's own, as quest ids are, unless they name another.
+            foreach (var block in quest.Page)
+            {
+                if (block.Lang != null) block.Lang = Requirement.QualifyId(block.Lang, domain);
+                if (block.Caption != null) block.Caption = Requirement.QualifyId(block.Caption, domain);
+            }
             foreach (var reward in quest.Rewards.Where(r => r.Stage != null)) reward.Stage = Requirement.QualifyId(reward.Stage, domain);
         }
     }

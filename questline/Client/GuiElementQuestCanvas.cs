@@ -555,6 +555,8 @@ public class GuiElementQuestCanvas : GuiElement
         // Measured here: the game's own max-width overload rounds the width down and then wraps every word.
         string title = nodes[index].Title;
         int max = (int)(CellSize * 1.8f * RuntimeEnv.GUIScale);
+        // A word can't wrap, so the label is at least as wide as its longest one.
+        max = Math.Max(max, (int)Math.Ceiling(title.Split(' ').Max(w => labelFont.GetTextExtents(w).Width)));
         int width = (int)Math.Ceiling(Math.Min(max, labelFont.GetTextExtents(title).Width)) + 4;
         var draw = new TextDrawUtil();
         double height = draw.GetMultilineTextHeight(labelFont, title, width);

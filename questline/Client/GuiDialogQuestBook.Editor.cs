@@ -565,7 +565,7 @@ public partial class GuiDialogQuestBook
     /// <summary>The item codes a task target names: itself, or every code its wildcard matches.</summary>
     string[] Candidates(string target)
     {
-        if (!target.Contains('*')) return [target.Contains(':') ? target : "game:" + target];
+        if (!TaskDef.IsPattern(target)) return [target.Contains(':') ? target : "game:" + target];
         if (!candidates.TryGetValue(target, out var codes))
         {
             var loc = new AssetLocation(target);

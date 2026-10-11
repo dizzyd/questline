@@ -1,0 +1,21 @@
+{
+    "id": "workshop-with-nothing",
+    "extends": "workshop",
+    "requiresMod": [
+        "nosuchmod"
+    ],
+    "quests": [
+        {
+            "id": "workshop-absent",
+            "pos": [
+                4,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ]
+        }
+    ]
+}

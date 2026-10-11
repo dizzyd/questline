@@ -28,7 +28,7 @@ namespace Questline.Tests
             Log($"{chapters.Count} chapters, {chapters.Sum(c => c.Quests.Count)} quests");
 
             Assert.Equal(0, problems.Count, "no problems in the default questline");
-            Assert.Equal(24, chapters.Count, "every part of vanilla");
+            Assert.Equal(24, chapters.Count(c => c.RequiresMod.Length == 0), "every part of vanilla, beside any chapters for installed mods");
             Assert.True(chapters.All(c => c.Questline == QuestRegistry.DefaultQuestline));
             Assert.True(chapters.All(c => c.Quests.Count >= 5), "no chapter left a stub");
             Assert.Greater(chapters.Sum(c => c.Quests.Count), 200);
@@ -105,8 +105,11 @@ namespace Questline.Tests
             await OnServer();
             var quests = Engine.Registry.Quests.Values.Where(q => q.Id.StartsWith("questline:")).ToList();
             await OnClient();
-            var guides = Capi.Assets.GetMany<Vintagestory.GameContent.GuiHandbookTextPage>(Capi.Logger, "config/handbook")
-                .Select(a => a.Value.PageCode)
+            // The game's own guides only: mods' guides (Expanded Foods ships several) are theirs to teach.
+            string vanilla = System.IO.Path.GetFullPath(Vintagestory.API.Config.GamePaths.AssetsPath);
+            var guides = Capi.Assets.GetMany("config/handbook")
+                .Where(a => a.Origin?.OriginPath != null && System.IO.Path.GetFullPath(a.Origin.OriginPath).StartsWith(vanilla))
+                .Select(a => a.ToObject<Vintagestory.GameContent.GuiHandbookTextPage>()?.PageCode)
                 .Where(code => code != null)
                 .ToList();
             Assert.Greater(guides.Count, 25, "the game's guides found");

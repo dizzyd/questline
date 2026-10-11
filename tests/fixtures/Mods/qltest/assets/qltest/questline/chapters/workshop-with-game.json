@@ -1,0 +1,46 @@
+{
+    "id": "workshop-with-game",
+    "extends": "workshop",
+    "requiresMod": [
+        "game"
+    ],
+    "art": [
+        {
+            "type": "text",
+            "pos": [
+                2,
+                1.5
+            ],
+            "text": "workshop-addon-label"
+        }
+    ],
+    "quests": [
+        {
+            "id": "workshop-addon",
+            "pos": [
+                2,
+                0
+            ],
+            "requires": "workshop-start",
+            "tasks": [
+                {
+                    "type": "checkbox"
+                }
+            ]
+        },
+        {
+            "id": "workshop-start",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:stick",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

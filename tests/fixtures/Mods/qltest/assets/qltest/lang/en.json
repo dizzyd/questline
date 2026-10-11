@@ -66,5 +66,15 @@
     "ride-raft-title": "Ride a raft",
     "ride-raft-desc": "Get on a raft.",
     "buy-something-title": "Buy something",
-    "buy-something-desc": "Buy anything from a trader."
+    "buy-something-desc": "Buy anything from a trader.",
+    "workshop-title": "Workshop",
+    "workshop-start-title": "Start the workshop",
+    "workshop-start-desc": "Tick it.",
+    "workshop-addon-title": "An addon quest",
+    "workshop-addon-desc": "Added by another file when its mod is installed.",
+    "workshop-absent-title": "Never here",
+    "workshop-absent-desc": "Its mod isn't installed.",
+    "workshop-addon-label": "With the addon",
+    "check-unchecked-title": "Trust the author",
+    "check-unchecked-desc": "The same wrong method, marked unchecked: the graph checks skip it."
 }

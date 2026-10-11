@@ -88,6 +88,7 @@ namespace Questline.Tests
             Assert.True(problems.Any(p => p.StartsWith("qltest:check-spoiler:") && p.Contains("story item")), "a story item in the default questline");
             Assert.False(problems.Any(p => p.StartsWith("qltest:check-spoiler-found-first:")), "a story item behind a discovered gate is fine");
             Assert.False(problems.Any(p => p.StartsWith("qltest:check-late-part:")), "the part itself is fine");
+            Assert.False(problems.Any(p => p.StartsWith("qltest:check-unchecked:")), "an unchecked task is the author's word");
         }
 
         [VsTest(TimeoutMs = 60000)]

@@ -87,6 +87,13 @@ public class ChapterDef
     /// <summary>Images, labels and arrows placed on the chapter's grid, behind the quests.</summary>
     public List<ArtDef> Art = [];
     public List<QuestDef> Quests = [];
+    /// <summary>
+    /// Another chapter this file adds to, e.g. questline:kitchen: its quests and art join that
+    /// chapter when <see cref="RequiresMod"/> is met, so a mod's quests sit beside the ones they
+    /// build on rather than in a chapter of their own. A quest with the id of one already in the
+    /// chapter replaces it, for a mod that changes how the base quest's mechanic works.
+    /// </summary>
+    public string Extends;
     /// <summary>Old quest id to new, so a rename in a pack update keeps players' progress.</summary>
     public Dictionary<string, string> Aliases = [];
 }
@@ -155,9 +162,20 @@ public class TaskDef
     public int Count = 1;
     /// <summary>obtain only: take the items when the reward is claimed.</summary>
     public bool Consume;
+    /// <summary>
+    /// The recipe graph can't see how the target is made (a mod's own machines, say), so the
+    /// checks that ask how it's made skip this task. The target must still exist.
+    /// </summary>
+    public bool Unchecked;
 
     /// <summary>The code the task matches, whichever field the author used. May carry wildcards.</summary>
     [JsonIgnore] public string Target => Item ?? Block ?? Entity ?? Key;
+
+    /// <summary>
+    /// Whether a code stands for many: a wildcard (game:saw-*) or, as the game's own matcher
+    /// allows, a regular expression after an @ (game:@(redmeat|poultry)-cooked).
+    /// </summary>
+    public static bool IsPattern(string code) => code != null && (code.Contains('*') || code.Contains(":@") || code.StartsWith('@'));
 
     /// <summary>Whether the target is a creature or a vehicle rather than an item or a block.</summary>
     [JsonIgnore] public bool OnEntity => Type is "kill" or "mount";

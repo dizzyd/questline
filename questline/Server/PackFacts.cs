@@ -138,7 +138,7 @@ public class PackFacts : IGameFacts
     public bool AnyMatches(string kind, string pattern)
     {
         var set = kind switch { "entity" => entities, "block" => blocks, _ => collectibles };
-        if (!pattern.Contains('*')) return set.Contains(Qualified(pattern));
+        if (!TaskDef.IsPattern(pattern)) return set.Contains(Qualified(pattern));
         var loc = new AssetLocation(pattern);
         return set.Any(c => WildcardUtil.Match(loc, new AssetLocation(c)));
     }
