@@ -158,16 +158,47 @@ public class GuiElementQuestCanvas : GuiElement
         return (xs.Min() * CellSize, ys.Min() * CellSize, xs.Max() * CellSize, ys.Max() * CellSize);
     }
 
-    /// <summary>Centres the tree, zoomed out just enough to show all of it, but never past half size or above full size.</summary>
+    /// <summary>How far an opening view may zoom in, so a small chapter fills the canvas.</summary>
+    const float FitMaxZoom = 2f;
+    /// <summary>When the whole chapter won't fit readably, the opening view shows this many quests around the player.</summary>
+    public const int FocusCount = 20;
+
+    /// <summary>
+    /// The opening view. The whole chapter, zoomed to fill the canvas, if it can be shown with
+    /// its labels readable; otherwise the <see cref="FocusCount"/> quests nearest where the
+    /// player is: the selected quest, else the first one they can work on, else the first.
+    /// </summary>
     void FitView()
     {
-        var (minX, minY, maxX, maxY) = Extent();
-        float width = maxX - minX + CellSize * 2, height = maxY - minY + CellSize * 2;
+        var all = Extent();
+        if (ZoomToFit(all) >= LabelMinZoom || nodes.Count <= FocusCount)
+        {
+            LookAt(all, Math.Max(MinZoom, ZoomToFit(all)));
+            return;
+        }
+
+        int anchor = SelectedIndex >= 0 ? SelectedIndex
+            : nodes.FindIndex(n => n.State is QuestState.Available or QuestState.InProgress or QuestState.Claimable);
+        var a = nodes[Math.Max(0, anchor)];
+        var near = nodes.OrderBy(n => (n.X - a.X) * (n.X - a.X) + (n.Y - a.Y) * (n.Y - a.Y)).Take(FocusCount).ToList();
+        var focus = (near.Min(n => n.X) * CellSize, near.Min(n => n.Y) * CellSize, near.Max(n => n.X) * CellSize, near.Max(n => n.Y) * CellSize);
+        LookAt(focus, Math.Max(LabelMinZoom, ZoomToFit(focus)));
+    }
+
+    /// <summary>The zoom at which a canvas-unit rectangle, with a cell of margin, fills the canvas; never above <see cref="FitMaxZoom"/>.</summary>
+    float ZoomToFit((float MinX, float MinY, float MaxX, float MaxY) r)
+    {
+        float width = r.MaxX - r.MinX + CellSize * 2, height = r.MaxY - r.MinY + CellSize * 2;
         float gs = RuntimeEnv.GUIScale;
-        zoom = GameMath.Clamp(Math.Min((float)Bounds.InnerWidth / (width * gs), (float)Bounds.InnerHeight / (height * gs)), 0.5f, 1f);
+        return Math.Min(FitMaxZoom, Math.Min((float)Bounds.InnerWidth / (width * gs), (float)Bounds.InnerHeight / (height * gs)));
+    }
+
+    void LookAt((float MinX, float MinY, float MaxX, float MaxY) r, float atZoom)
+    {
+        zoom = atZoom;
         float s = ViewScale;
-        panX = (minX + maxX) / 2 - (float)Bounds.InnerWidth / s / 2;
-        panY = (minY + maxY) / 2 - (float)Bounds.InnerHeight / s / 2;
+        panX = (r.MinX + r.MaxX) / 2 - (float)Bounds.InnerWidth / s / 2;
+        panY = (r.MinY + r.MaxY) / 2 - (float)Bounds.InnerHeight / s / 2;
     }
 
     #region Textures
@@ -466,10 +497,11 @@ public class GuiElementQuestCanvas : GuiElement
                 api.Render.RenderItemstackToGui(n.Icon, sx, sy, 200, size * 0.55f * s, ColorUtil.WhiteArgb, true, false, false);
             }
 
+            // Below where the selection ring reaches, so selecting a quest never hides its name.
             if (showLabels && GetLabel(i, ref labelBudget) is { } tex)
             {
                 api.Render.Render2DTexturePremultipliedAlpha(tex.TextureId,
-                    (float)(sx - tex.Width / 2.0), (float)(sy + size / 2 * s + 2), tex.Width, tex.Height, 250);
+                    (float)(sx - tex.Width / 2.0), (float)(sy + size * 0.65f * s + 2), tex.Width, tex.Height, 250);
             }
         }
 

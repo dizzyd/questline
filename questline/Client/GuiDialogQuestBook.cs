@@ -274,6 +274,13 @@ public partial class GuiDialogQuestBook : GuiDialog
         }
     }
 
+    /// <summary>Forgets where each chapter was panned and zoomed to, so each opens on its fitted view again.</summary>
+    public void ForgetViews()
+    {
+        views.Clear();
+        canvasChapter = null;
+    }
+
     public void SelectChapter(string id)
     {
         chapterId = id;

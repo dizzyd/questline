@@ -127,6 +127,31 @@ namespace Questline.Tests
             Assert.Greater(small.Width + pad, screenW * 0.79, "at least 80% of the window");
         }
 
+        /// <summary>
+        /// A chapter opens fitted to the canvas when it can be read that way; a big one opens on
+        /// the twenty quests nearest the player instead of shrinking past legibility.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task OpeningViewShowsTheChapterOrTwentyQuests()
+        {
+            await OnClient();
+            Book.ForgetViews();
+            Book.SelectChapter("qltest:basics");
+            await Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+            Log($"basics: {Book.Canvas.VisibleNodes} of {Book.Canvas.Nodes.Count} in view at zoom {Book.Canvas.Zoom:0.00}");
+            Assert.Equal(Book.Canvas.Nodes.Count, Book.Canvas.VisibleNodes, "the whole small chapter");
+            Assert.Greater(Book.Canvas.Zoom, 0.99f, "zoomed in to fill the canvas, not left small");
+
+            Book.ShowBenchmarkTree();
+            await Frames.Wait(10);
+            Log($"benchmark: {Book.Canvas.VisibleNodes} of {Book.Canvas.Nodes.Count} in view at zoom {Book.Canvas.Zoom:0.00}");
+            Assert.True(Book.Canvas.VisibleNodes >= GuiElementQuestCanvas.FocusCount, "at least twenty quests in view");
+            Assert.True(Book.Canvas.Zoom >= 0.6f, "still readable");
+            Book.LeaveBenchmarkTree();
+            Book.TryClose();
+        }
+
         /// <summary>Photographs the book's screens in the states a layout has to cope with, for review.</summary>
         [VsTest(TimeoutMs = 60000)]
         public async Task Screens()
