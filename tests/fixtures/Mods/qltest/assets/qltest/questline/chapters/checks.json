@@ -82,7 +82,8 @@
                     "type": "craft",
                     "item": "qltest:gizmo-part"
                 }
-            ]
+            ],
+            "requires": "check-early-gizmo"
         },
         {
             "id": "check-gizmo-after",
