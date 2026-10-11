@@ -86,4 +86,4 @@ The zip lands in `Releases/`.
 
 ## License
 
-MIT License
+MIT; see [LICENSE](LICENSE).
