@@ -73,10 +73,37 @@ public partial class GuiDialogQuestBook : GuiDialog
         if (editing && !dirty) draft = null;
     }
 
+    /// <summary>
+    /// The handbook's layer, which chests, barrels and firepits share, so the book can come up
+    /// over them; at the default it would always draw underneath.
+    /// </summary>
+    public override double DrawOrder => 0.2;
+
+    /// <summary>The width of the A− and A+ buttons beside the tabs.</summary>
+    const double TextSizeButton = 34;
+
+    /// <summary>The front-most open dialog, the one a click or key goes to first.</summary>
+    public bool OnTop => IsOpened() && capi.Gui.OpenedGuis.FirstOrDefault(d => d.DialogType == EnumDialogType.Dialog) == this;
+
+    /// <summary>Shows the book as it now stands, opening it or, if it's open behind other windows, bringing it to the front.</summary>
+    void Show()
+    {
+        if (IsOpened()) Compose();
+        // Already open, this only brings the book to the front.
+        TryOpen();
+    }
+
     public override void OnGuiOpened()
     {
         base.OnGuiOpened();
         Compose();
+    }
+
+    public override void OnGuiClosed()
+    {
+        base.OnGuiClosed();
+        // The editor's 100% ends with the book; the pinned quests go on at the player's size.
+        BookStyle.TextScale = client.Settings.TextSize / 100.0;
     }
 
     void OnClientChanged()
@@ -88,6 +115,8 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void Compose()
     {
+        // The editor's forms are laid out for the game's own sizes; reading uses the player's.
+        BookStyle.TextScale = editing ? 1 : client.Settings.TextSize / 100.0;
         // Saved under the chapter the canvas was showing, which may not be the one about to be shown.
         if (canvas != null && canvasChapter != null) views[canvasChapter] = canvas.View;
         canvasChapter = null;
@@ -116,8 +145,14 @@ public partial class GuiDialogQuestBook : GuiDialog
             .AddShadedDialogBG(bg)
             .AddDialogTitleBar(Lang.Get("questline:book-title"), () => TryClose())
             .BeginChildElements(bg)
-            .AddHorizontalTabs(tabs, ElementBounds.Fixed(0, TabsY, Width, TabsHeight), OnTabClicked,
+            .AddHorizontalTabs(tabs, ElementBounds.Fixed(0, TabsY, Width - 2 * TextSizeButton - 4, TabsHeight), OnTabClicked,
                 CairoFont.WhiteSmallText(), CairoFont.WhiteSmallText().WithWeight(Cairo.FontWeight.Bold), "tabs");
+        // Text size, at the right end of the tab row; not while editing, which keeps the game's sizes.
+        if (!editing)
+        {
+            composer.AddSmallButton("A−", () => client.StepTextSize(-1), ElementBounds.Fixed(Width - 2 * TextSizeButton - 4, TabsY, TextSizeButton, TabsHeight), EnumButtonStyle.Small, "text-smaller");
+            composer.AddSmallButton("A+", () => client.StepTextSize(1), ElementBounds.Fixed(Width - TextSizeButton, TabsY, TextSizeButton, TabsHeight), EnumButtonStyle.Small, "text-larger");
+        }
         // The tabs are measured in the regular weight; room for the bold one on the active tab.
         composer.GetHorizontalTabs("tabs").unscaledTabPadding = 12;
 
@@ -154,8 +189,7 @@ public partial class GuiDialogQuestBook : GuiDialog
     public void SelectTab(int index)
     {
         tab = index;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     #region Quests tab
@@ -332,8 +366,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         chapterId = id;
         questId = null;
         tab = QuestsTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     public void SelectQuest(string id)
@@ -341,8 +374,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         questId = id;
         if (client.Registry?.Get(id) is { } quest) chapterId = quest.ChapterId;
         tab = QuestsTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     #endregion
@@ -419,21 +451,19 @@ public partial class GuiDialogQuestBook : GuiDialog
         {
             var task = quest.Tasks[i];
             bool done = tasks[i] >= task.Count;
-            AddIconRow(comps, task.OnCollectible ? text.StackFor(task.Target) : null);
-            comps.Add(new RichTextComponent(capi, text.TaskLine(task), done ? Body().WithColor(Good) : Body()) { VerticalAlign = EnumVerticalAlign.Middle });
-
             if (task.Type == "checkbox")
             {
+                // The box stands where an item's icon would, and ticking it is the task.
                 int taskIndex = i;
-                if (done) comps.Add(new RichTextComponent(capi, "  ✓", Body().WithColor(Good)) { VerticalAlign = EnumVerticalAlign.Middle });
-                else if (state is QuestState.Available or QuestState.InProgress)
-                {
-                    comps.Add(new LinkTextComponent(capi, "   " + Lang.Get("questline:mark-done"), Link(), _ => client.Check(quest.Id, taskIndex)) { VerticalAlign = EnumVerticalAlign.Middle });
-                }
+                bool open = state is QuestState.Available or QuestState.InProgress;
+                comps.Add(new TickBoxComponent(capi, IconRowSize, 8, done, open ? () => client.Check(quest.Id, taskIndex) : null) { VerticalAlign = EnumVerticalAlign.Middle });
+                comps.Add(new RichTextComponent(capi, text.TaskLine(task), done ? Body().WithColor(Good) : Body()) { VerticalAlign = EnumVerticalAlign.Middle });
             }
             else
             {
-                comps.Add(new RichTextComponent(capi, $"   {tasks[i]} / {task.Count}", done ? Small().WithColor(Good) : MutedSmall()) { VerticalAlign = EnumVerticalAlign.Middle });
+                AddIconRow(comps, task.OnCollectible ? text.StackFor(task.Target) : null);
+                comps.Add(new RichTextComponent(capi, text.TaskLine(task), done ? Body().WithColor(Good) : Body()) { VerticalAlign = EnumVerticalAlign.Middle });
+                comps.Add(new RichTextComponent(capi, $"   {tasks[i]}\u00a0/\u00a0{task.Count}", done ? Small().WithColor(Good) : MutedSmall()) { VerticalAlign = EnumVerticalAlign.Middle });
             }
             comps.Add(new ClearFloatTextComponent(capi, 4));
         }
@@ -571,8 +601,7 @@ public partial class GuiDialogQuestBook : GuiDialog
     {
         spikeNodes ??= SpikeTree.Build(capi);
         tab = QuestsTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     /// <summary>Runs the benchmark tour on the canvas. Call after <see cref="ShowBenchmarkTree"/>.</summary>

@@ -64,7 +64,7 @@ public class GuiElementQuestCanvas : GuiElement
     readonly Matrixf mvMat = new();
     readonly Dictionary<int, LoadedTexture> labels = new();
     readonly ElementBounds iconCell;
-    readonly CairoFont labelFont = CairoFont.WhiteDetailText();
+    readonly CairoFont labelFont = BookStyle.Small();
 
     MeshRef edgeMesh, frameMesh, linkMesh;
     LoadedTexture frameAtlas, backgroundTexture;
@@ -116,7 +116,11 @@ public class GuiElementQuestCanvas : GuiElement
     }
 
     /// <summary>Moves the view now, where <see cref="View"/> waits for the next compose.</summary>
-    public void SetView(CanvasView view) => (panX, panY, zoom) = (view.PanX, view.PanY, GameMath.Clamp(view.Zoom, MinZoom, MaxZoom));
+    public void SetView(CanvasView view)
+    {
+        (panX, panY, zoom) = (view.PanX, view.PanY, GameMath.Clamp(view.Zoom, MinZoom, MaxZoom));
+        KeepWholeTreeAtFloor();
+    }
 
     float ViewScale => zoom * RuntimeEnv.GUIScale;
 
@@ -145,6 +149,7 @@ public class GuiElementQuestCanvas : GuiElement
         if (initialView is { } view)
         {
             (panX, panY, zoom) = (view.PanX, view.PanY, view.Zoom);
+            KeepWholeTreeAtFloor();
         }
         else
         {
@@ -216,6 +221,20 @@ public class GuiElementQuestCanvas : GuiElement
         float width = r.MaxX - r.MinX + CellSize * 3, height = r.MaxY - r.MinY + CellSize * 3;
         float gs = RuntimeEnv.GUIScale;
         return Math.Min(FitMaxZoom, Math.Min((float)Bounds.InnerWidth / (width * gs), (float)Bounds.InnerHeight / (height * gs)));
+    }
+
+    /// <summary>
+    /// The least zoom allowed: where the whole chapter fits, since zooming out further only shrinks
+    /// it. Editors keep the full range, to lay out quests in the empty space around the tree.
+    /// </summary>
+    float FloorZoom => EditMode ? MinZoom : Math.Max(MinZoom, ZoomToFit(Extent()));
+
+    /// <summary>A view zoomed out past the floor (one saved at a smaller window, say) shows the whole tree instead.</summary>
+    void KeepWholeTreeAtFloor()
+    {
+        if (EditMode) return;
+        float floor = FloorZoom;
+        if (zoom < floor) LookAt(Extent(), floor);
     }
 
     void LookAt((float MinX, float MinY, float MaxX, float MaxY) r, float atZoom)
@@ -713,7 +732,14 @@ public class GuiElementQuestCanvas : GuiElement
         float s = ViewScale;
         float cx = panX + (float)viewX / s, cy = panY + (float)viewY / s;
 
-        zoom = GameMath.Clamp(zoom * factor, MinZoom, MaxZoom);
+        float floor = FloorZoom;
+        if (zoom * factor <= floor)
+        {
+            // All the way out: the whole tree, centred, rather than wherever the mouse was.
+            LookAt(Extent(), floor);
+            return;
+        }
+        zoom = Math.Min(zoom * factor, MaxZoom);
 
         s = ViewScale;
         panX = cx - (float)viewX / s;

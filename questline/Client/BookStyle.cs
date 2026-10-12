@@ -22,20 +22,25 @@ public static class BookStyle
     /// <summary>Something an author needs to fix.</summary>
     public static readonly double[] Problem = [0.95, 0.45, 0.38, 1];
 
+    /// <summary>The player's text size (<see cref="ClientSettings.TextSize"/>) as a factor on the game's font sizes.</summary>
+    public static double TextScale = 1.15;
+
+    static CairoFont Sized(CairoFont font, double size) => font.WithFontSize((float)(size * TextScale));
+
     /// <summary>A quest's name at the top of the detail panel.</summary>
-    public static CairoFont Title() => CairoFont.WhiteSmallishText().WithWeight(Cairo.FontWeight.Bold);
+    public static CairoFont Title() => Sized(CairoFont.WhiteSmallishText(), GuiStyle.SmallishFontSize).WithWeight(Cairo.FontWeight.Bold);
 
-    public static CairoFont Body() => CairoFont.WhiteSmallText();
+    public static CairoFont Body() => Sized(CairoFont.WhiteSmallText(), GuiStyle.SmallFontSize);
 
-    public static CairoFont Small() => CairoFont.WhiteDetailText();
+    public static CairoFont Small() => Sized(CairoFont.WhiteDetailText(), GuiStyle.DetailFontSize);
 
-    public static CairoFont MutedSmall() => CairoFont.WhiteDetailText().WithColor(Muted);
+    public static CairoFont MutedSmall() => Small().WithColor(Muted);
 
     /// <summary>TASKS, REWARDS and the like.</summary>
-    public static CairoFont Heading() => CairoFont.WhiteDetailText().WithFontSize(13).WithWeight(Cairo.FontWeight.Bold).WithColor(Muted);
+    public static CairoFont Heading() => Sized(CairoFont.WhiteDetailText(), 13).WithWeight(Cairo.FontWeight.Bold).WithColor(Muted);
 
     /// <summary>An action in running text, in the game's button-text accent.</summary>
-    public static CairoFont Link() => CairoFont.WhiteDetailText().WithColor(Accent);
+    public static CairoFont Link() => Small().WithColor(Accent);
 
     public static double[] StateColor(QuestState state) => state switch
     {

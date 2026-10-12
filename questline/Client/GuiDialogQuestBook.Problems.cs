@@ -57,7 +57,6 @@ public partial class GuiDialogQuestBook
         questId = quest;
         editPage = 0;
         tab = QuestsTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 }

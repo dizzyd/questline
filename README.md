@@ -25,6 +25,8 @@ Every phase of the roadmap, minus the VS Quest importer:
   (pooled; `"claim": "first"` lets the first claim take it). Parties are made in the book's
   Party tab and turned off with `"Parties": false`
 - Up to three quests pinned under the minimap; `.questline toasts on|off` per player
+- Text size per player: A− and A+ beside the book's tabs, or `.questline textsize <percent>`
+  (90, 100, 115 (the default), 130 or 150)
 - Chapter art: a background, images, labels and arrows; quests as squares, circles, hexagons
   or gears, at any size
 - The in-game editor, for players with `questline.edit` (admins have it): add, move and link

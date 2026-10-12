@@ -83,6 +83,15 @@ public class QuestlineModSystem : ModSystem
                     return TextCommandResult.Success(on ? "H opens the quest book's Reference tab" : "H opens the vanilla handbook");
                 })
             .EndSubCommand()
+            .BeginSubCommand("textsize")
+                .WithDescription("Set the quest book's text size, in percent: " + string.Join(", ", ClientSettings.TextSizes))
+                .WithArgs(api.ChatCommands.Parsers.Int("percent"))
+                .HandleWith(args =>
+                {
+                    Client.SetTextSize((int)args[0]);
+                    return TextCommandResult.Success($"Quest book text at {Client.Settings.TextSize}%");
+                })
+            .EndSubCommand()
             .BeginSubCommand("toasts")
                 .WithDescription("Turn the quest-complete toasts on or off")
                 .WithArgs(api.ChatCommands.Parsers.Bool("on or off"))
@@ -96,7 +105,8 @@ public class QuestlineModSystem : ModSystem
         api.Input.RegisterHotKey("questline", "Open the quest book", GlKeys.L, HotkeyType.GUIOrOtherControls);
         api.Input.SetHotKeyHandler("questline", _ =>
         {
-            if (Book.IsOpened()) Book.TryClose();
+            // A book buried under other windows comes to the front rather than closing unseen.
+            if (Book.OnTop) Book.TryClose();
             else Book.TryOpen();
             return true;
         });

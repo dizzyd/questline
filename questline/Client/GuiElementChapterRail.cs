@@ -15,7 +15,8 @@ namespace questline.Client;
 /// </summary>
 public class GuiElementChapterRail : GuiElement
 {
-    public const double RowHeight = 34;
+    /// <summary>A row's height: room for the title at the player's text size, never less than the original 34.</summary>
+    public static double RowHeight => Math.Round(34 * Math.Max(1, BookStyle.TextScale));
     const double IconSize = 22;
 
     public record Row(string Id, string Title, ItemSlot Icon, int Done, int Total)

@@ -90,6 +90,7 @@ public class QuestClient
         {
             capi.Logger.Error("[questline] can't read ModConfig/{0}, using defaults: {1}", ClientSettings.FileName, e.Message);
         }
+        BookStyle.TextScale = (Settings?.TextSize ?? 115) / 100.0;
     }
 
     public void SaveSettings() => capi.StoreModConfig(Settings, ClientSettings.FileName);
@@ -117,6 +118,26 @@ public class QuestClient
         if (!Settings.Pins.TryGetValue(capi.World.SavegameIdentifier, out var pins) || !pins.Remove(questId)) return;
         SaveSettings();
         Changed?.Invoke();
+    }
+
+    /// <summary>Sets the book's text size to the nearest of <see cref="ClientSettings.TextSizes"/>, and saves it.</summary>
+    public void SetTextSize(int percent)
+    {
+        Settings.TextSize = ClientSettings.TextSizes.OrderBy(s => Math.Abs(s - percent)).First();
+        BookStyle.TextScale = Settings.TextSize / 100.0;
+        SaveSettings();
+        Changed?.Invoke();
+    }
+
+    /// <summary>One step of <see cref="ClientSettings.TextSizes"/> up or down; false at either end.</summary>
+    public bool StepTextSize(int direction)
+    {
+        int i = Array.IndexOf(ClientSettings.TextSizes, Settings.TextSize);
+        if (i < 0) i = Array.IndexOf(ClientSettings.TextSizes, 115);
+        int next = Math.Clamp(i + direction, 0, ClientSettings.TextSizes.Length - 1);
+        if (next == i) return false;
+        SetTextSize(ClientSettings.TextSizes[next]);
+        return true;
     }
 
     public void SetToasts(bool on)

@@ -38,8 +38,7 @@ public partial class GuiDialogQuestBook
         planId = code;
         planStep = null;
         tab = QuestsTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     /// <summary>Whether the planner can plan this item: allowed, the graph built, not a story item, and something makes it.</summary>

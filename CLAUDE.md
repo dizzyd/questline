@@ -121,6 +121,12 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   On 1.22.6 two of its mods refuse to load and the client gives up before the world opens.
 - **Tests write `VsTestkit.Testing.Gui` in full.** A pack mod (`gui`) has a top-level `Gui`
   namespace, which hides the testkit's class, and an alias can't share its name.
+- **The book draws in the handbook's layer** (`DrawOrder` 0.2, with chests, barrels and firepits),
+  so it can come up over them, and every way of showing it brings it to the front (`Show()`).
+  L and H close it only when it's on top (`OnTop`); a buried book comes forward instead.
+- **Text sizes come from `BookStyle.TextScale`**, the player's `TextSize` setting. The editor sets it
+  back to 1 while editing, because its forms are laid out for the game's own sizes; check new layout
+  at 150% as well as 115%.
 - **Nothing heavy runs in one go on the main thread.** The recipe graph is built a few
   milliseconds a tick (`GraphBuild`, from a tick listener, on both sides): its builder reads the
   game through mods' code, which isn't safe off the main thread, so it yields in tiny steps

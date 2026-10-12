@@ -50,8 +50,7 @@ public partial class GuiDialogQuestBook
         editing = on && client.CanEdit;
         draft = null;
         tab = QuestsTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     /// <summary>Shows a page of the quest form: 0 quest, 1 tasks, 2 rewards, 3 options.</summary>

@@ -50,14 +50,14 @@ public class HandbookTakeover(ICoreClientAPI capi, Func<GuiDialogQuestBook> book
     }
 
     /// <summary>
-    /// As the handbook's own key does: closes the book if it's open on Reference, else opens it
+    /// As the handbook's own key does: closes the book if it's in front on Reference, else shows it
     /// at the page of the item under the mouse (or with shift, the block looked at), or on the
     /// Reference tab.
     /// </summary>
     bool OnKey(KeyCombination key)
     {
         var dialog = book();
-        if (dialog.IsOpened() && dialog.OnReferenceTab)
+        if (dialog.OnTop && dialog.OnReferenceTab)
         {
             dialog.TryClose();
             return true;

@@ -255,13 +255,12 @@ public partial class GuiDialogQuestBook
     /// <summary>Opens a page by its full name, remembering where the book was.</summary>
     void OpenRef(string page)
     {
-        if (page == refPage && tab == ReferenceTab) return;
+        if (page == refPage && tab == ReferenceTab) { TryOpen(); return; }
         if (tab == ReferenceTab && refPage != null) back.Push(refPage);
         forward.Clear();
         refPage = page;
         tab = ReferenceTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     /// <summary>
@@ -292,8 +291,7 @@ public partial class GuiDialogQuestBook
     {
         search = query ?? "";
         tab = ReferenceTab;
-        if (IsOpened()) Compose();
-        else TryOpen();
+        Show();
     }
 
     void OnStackClicked(ItemStack stack) => ShowReference(stack);

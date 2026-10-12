@@ -19,6 +19,8 @@ public readonly record struct BookLayout(double Width, double ContentHeight, dou
     public const double MinWidth = 900, MinHeight = 560;
     /// <summary>Kept clear around the dialog, so it never touches the screen edge.</summary>
     const double Margin = 20;
+    /// <summary>The least of the book's width the tree canvas keeps when large text widens the side columns.</summary>
+    const double MinCanvasShare = 0.35;
 
     /// <param name="frameWidth">The window in pixels.</param>
     /// <param name="frameHeight">The window in pixels.</param>
@@ -34,8 +36,17 @@ public readonly record struct BookLayout(double Width, double ContentHeight, dou
         double height = Math.Clamp(screenH * ScreenShare - pad - GuiStyle.TitleBarHeight, Math.Min(MinHeight, roomH), roomH);
 
         double gap = BookStyle.Gap;
-        double rail = Math.Clamp(width * 0.17, 170, 260);
-        double detail = Math.Clamp(width * 0.28, 260, 440);
+        // Larger text gets wider side columns, as long as the tree keeps at least a third of the book.
+        double text = Math.Max(1, BookStyle.TextScale);
+        double rail = Math.Clamp(width * 0.17, 170, 260) * text;
+        double detail = Math.Clamp(width * 0.28, 260, 440) * text;
+        double sides = width - 2 * gap - width * MinCanvasShare;
+        if (rail + detail > sides)
+        {
+            double fit = sides / (rail + detail);
+            rail *= fit;
+            detail *= fit;
+        }
         double canvas = width - rail - detail - 2 * gap;
         return new BookLayout(width, height - chromeHeight, rail, detail, canvas);
     }

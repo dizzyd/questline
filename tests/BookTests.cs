@@ -101,6 +101,121 @@ namespace Questline.Tests
         }
 
         /// <summary>
+        /// The book comes up over a chest, as the handbook does; and with the book open behind the
+        /// chest, H and L bring it to the front rather than closing it unseen.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task TheBookComesUpOverAChest()
+        {
+            await OnServer();
+            World.SetBlock("game:chest-east", P(3, 1, 3));
+            await Ticks(2);
+            await Player.StandNear(P(3, 1, 3), 2.5);
+            await Player.Hold("game:stick", 1);
+            await OnClient();
+            await Interact.UseBlock(P(3, 1, 3));
+            var chest = await VsTestkit.Testing.Gui.WaitFor<GuiDialogBlockEntityInventory>();
+
+            Assert.True(await Input.Hotkey("handbook"), "H handled");
+            await Until(() => Book.OnTop, 60, "the book over the chest");
+            Assert.True(chest.IsOpened(), "the chest stays open behind it");
+            Log(await Shot.Take("questline-book-over-chest.png"));
+
+            chest.TryOpen();   // a click on the chest brings it forward
+            await Frames.Wait(2);
+            Assert.False(Book.OnTop, "the chest in front");
+            Assert.True(await Input.Hotkey("handbook"), "H again");
+            await Frames.Wait(2);
+            Assert.True(Book.OnTop, "H brings the buried book forward instead of closing it");
+            Assert.True(await Input.Hotkey("handbook"), "H once more");
+            await Until(() => !Book.IsOpened(), 30, "H closes the book once it's in front");
+
+            Assert.True(await Input.Hotkey("questline"), "L handled");
+            await Until(() => Book.OnTop, 60, "L opens the book over the chest");
+            chest.TryOpen();
+            await Frames.Wait(2);
+            Assert.True(await Input.Hotkey("questline"), "L again");
+            await Frames.Wait(2);
+            Assert.True(Book.OnTop, "L brings it forward too");
+
+            Book.TryClose();
+            chest.TryClose();
+        }
+
+        /// <summary>
+        /// A− and A+ step the book's text through its sizes, and the page follows; photographed at
+        /// each size at the test window's 960×600, where the book is at its minimum.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task TextSizeStepsAndTheBookFollows()
+        {
+            await OnClient();
+            var client = ClientSystem.Client;
+            try
+            {
+                client.SetTextSize(90);
+                Book.ForgetViews();
+                Book.SelectQuest("questline:make-spear");
+                await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+                float BodySize() => Book.SingleComposer.GetRichtext("detail").Components.OfType<RichTextComponent>()
+                    .Max(c => c.Font?.UnscaledFontsize ?? 0) is var max ? (float)max : 0;
+                float smallest = BodySize();
+                Log(await Shot.Take("questline-text-90.png"));
+
+                var larger = Book.SingleComposer.GetButton("text-larger");
+                Assert.NotNull(larger, "an A+ button beside the tabs");
+                await ClickAt((int)(larger.Bounds.absX + larger.Bounds.OuterWidth / 2), (int)(larger.Bounds.absY + larger.Bounds.OuterHeight / 2));
+                await Until(() => client.Settings.TextSize == 100, 30, "A+ to step up to 100%");
+                await Frames.Wait(5);
+                Assert.Greater(BodySize(), smallest, "the page's text grew");
+
+                foreach (int size in new[] { 115, 130, 150 })
+                {
+                    Assert.True(client.StepTextSize(1), $"a step up to {size}");
+                    Assert.Equal(size, client.Settings.TextSize);
+                    await Frames.Wait(10);
+                    Log(await Shot.Take($"questline-text-{size}.png"));
+                }
+                Assert.False(client.StepTextSize(1), "150% is the largest");
+                Assert.Greater(BodySize(), smallest * 1.5f, "half as big again as at 90%");
+            }
+            finally
+            {
+                client.SetTextSize(115);
+                Book.TryClose();
+            }
+        }
+
+        /// <summary>A checkbox task is a box on the quest's page; clicking it ticks the task.</summary>
+        [VsTest(TimeoutMs = 30000)]
+        public async Task ClickingTheBoxTicksACheckboxTask()
+        {
+            const string Quest = "questline:ground-storage";
+            await OnServer();
+            Engine.Unlock(Me.PlayerUID, Quest);
+            await OnClient();
+            await Until(() => ClientSystem.Client.StateOf(Quest) == QuestState.Available, 60, "the quest open on the client");
+            Book.SelectQuest(Quest);
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+
+            var detail = Book.SingleComposer.GetRichtext("detail");
+            var box = detail.Components.OfType<TickBoxComponent>().SingleOrDefault();
+            Assert.NotNull(box, "a box to tick");
+            Assert.False(box.Ticked);
+            Log(await Shot.Take("questline-book-tickbox.png"));
+
+            var b = box.BoundsPerLine[0];
+            await ClickAt((int)(detail.Bounds.absX + b.X + GuiElement.scaled(13)), (int)(detail.Bounds.absY + b.Y + b.Height / 2));
+            await Until(() => ClientSystem.Client.StateOf(Quest) is QuestState.Claimable or QuestState.Done, 60, "the tick to reach the server and back");
+            await Frames.Wait(10);
+            box = Book.SingleComposer.GetRichtext("detail").Components.OfType<TickBoxComponent>().Single();
+            Assert.True(box.Ticked, "the box shows ticked");
+            Log(await Shot.Take("questline-book-tickbox-ticked.png"));
+            Book.TryClose();
+        }
+
+        /// <summary>
         /// The book is 80% of the screen each way on ordinary monitors, and on a small window
         /// it grows towards the whole screen rather than below its minimum, but never off it.
         /// </summary>
@@ -149,6 +264,37 @@ namespace Questline.Tests
             Assert.True(Book.Canvas.VisibleNodes >= GuiElementQuestCanvas.FocusCount, "at least twenty quests in view");
             Assert.True(Book.Canvas.Zoom >= 0.75f, "still readable");
             Book.LeaveBenchmarkTree();
+            Book.TryClose();
+        }
+
+        /// <summary>
+        /// Zooming out stops once the whole chapter is in view, and the tree is centred there
+        /// rather than left wherever the mouse was. Editors keep the full range.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task ZoomingOutStopsAtTheWholeChapter()
+        {
+            await OnClient();
+            Book.ForgetViews();
+            Book.SelectChapter("qltest:basics");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+            var canvas = Book.Canvas;
+            var fitted = canvas.View;
+
+            canvas.ZoomAt(0, 0, 3f);
+            canvas.ZoomAt(0, 0, 3f);
+            Assert.Greater(canvas.Zoom, fitted.Zoom, "zoomed in");
+            for (int i = 0; i < 20; i++) canvas.ZoomAt(0, 0, 1 / 1.15f);
+            await Frames.Wait(5);
+            Log($"zoomed out: {canvas.VisibleNodes} of {canvas.Nodes.Count} in view at zoom {canvas.Zoom:0.00} (fitted {fitted.Zoom:0.00})");
+            Assert.True(System.Math.Abs(canvas.Zoom - fitted.Zoom) < 0.001f, "stops where the chapter fits");
+            Assert.Equal(canvas.Nodes.Count, canvas.VisibleNodes, "the whole chapter in view");
+            Assert.True(System.Math.Abs(canvas.View.PanX - fitted.PanX) < 0.5f && System.Math.Abs(canvas.View.PanY - fitted.PanY) < 0.5f, "centred, as it opened");
+
+            // A view saved further out than the floor comes back as the whole tree.
+            canvas.SetView(new CanvasView(-5000, -5000, 0.2f));
+            Assert.True(System.Math.Abs(canvas.Zoom - fitted.Zoom) < 0.001f, "a saved view can't get past the floor either");
             Book.TryClose();
         }
 

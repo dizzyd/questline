@@ -74,7 +74,7 @@ public class HudQuestPins : HudElement
                 var task = quest.Tasks[i];
                 bool done = tasks[i] >= task.Count;
                 var font = done ? BookStyle.Small().WithColor(BookStyle.Good) : BookStyle.Small();
-                comps.Add(new RichTextComponent(capi, (done ? "✓ " : "• ") + text.TaskLine(task), font));
+                comps.Add(new RichTextComponent(capi, (done ? "✓ " : "• ") + (task.Type == "checkbox" ? Lang.Get("questline:task-checkbox-hud") : text.TaskLine(task)), font));
                 if (task.Type != "checkbox") comps.Add(new RichTextComponent(capi, $"  {tasks[i]}/{task.Count}", done ? font : BookStyle.MutedSmall()));
                 comps.Add(new RichTextComponent(capi, "\n", font));
             }

@@ -8,6 +8,12 @@ public class ClientSettings
     public const string FileName = "questline-client.json";
     public const int MaxPins = 3;
 
+    /// <summary>The book's text size, in percent of the game's own: one of <see cref="TextSizes"/>.</summary>
+    public int TextSize = 115;
+
+    /// <summary>The steps A− and A+ move through.</summary>
+    public static readonly int[] TextSizes = [90, 100, 115, 130, 150];
+
     /// <summary>Show a toast when a quest is completed.</summary>
     public bool Toasts = true;
 
