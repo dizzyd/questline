@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using questline.Model;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -19,6 +20,7 @@ namespace questline.Client;
 /// a summary with a way back to the quest. Back and Forward walk the pages visited.
 ///
 /// Pages are named "item:&lt;handbook page code&gt;", "guide:&lt;page code&gt;" or "quest:&lt;quest id&gt;".
+/// A "mod:&lt;mod id&gt;" row in the results isn't a page: it searches for that mod's items.
 /// </summary>
 public partial class GuiDialogQuestBook
 {
@@ -26,7 +28,7 @@ public partial class GuiDialogQuestBook
 
     readonly Stack<string> back = new(), forward = new();
     Dictionary<string, ItemStack> stackByPageCode;
-    List<(ItemStack Stack, string PageCode, string Name)> items;
+    List<RefItem> items;
     List<GuiHandbookTextPage> guides;
     List<GuiHandbookPage> customPages;
     string refPage, search = "";
@@ -55,7 +57,8 @@ public partial class GuiDialogQuestBook
             {
                 string code = GuiHandbookItemStackPage.PageCodeForStack(stack);
                 if (!stackByPageCode.TryAdd(code, stack)) continue;
-                items.Add((stack, code, stack.GetName().ToSearchFriendly().ToLowerInvariant()));
+                string name = stack.GetName();
+                items.Add(new(stack, code, name, SearchKey(name), SearchKey(BaseName(name)), stack.Collectible.Code.Domain));
             }
         }
 
@@ -93,7 +96,11 @@ public partial class GuiDialogQuestBook
             input.SetPlaceHolderText(Lang.Get("questline:ref-search"));
         });
         Results = new GuiElementChapterRail(capi, ElementBounds.Fixed(0, ContentY + FieldHeight + Gap / 2, ResultsWidth, ContentHeight - FieldHeight - Gap / 2),
-            ResultRows(), refPage, OpenRef);
+            ResultRows(), refPage, id =>
+            {
+                if (id.StartsWith("mod:")) SearchReference("@" + id[4..]);
+                else OpenRef(id);
+            });
         composer.AddInteractiveElement(Results, "ref-results");
 
         double x = ResultsWidth + Gap, width = Width - x;
@@ -121,13 +128,17 @@ public partial class GuiDialogQuestBook
         Results?.SetRows(ResultRows(), refPage);
     }
 
-    /// <summary>The results for the search: quests, then guides, then items. With no search, every guide.</summary>
+    /// <summary>
+    /// The results for the search: quests, then guides, then items. With no search, every guide,
+    /// then every mod with items of its own; "@mod" lists that mod's items.
+    /// </summary>
     List<GuiElementChapterRail.Row> ResultRows()
     {
         var rows = new List<GuiElementChapterRail.Row>();
-        string q = search?.Trim().ToSearchFriendly().ToLowerInvariant() ?? "";
-        string questNote = Lang.Get("questline:ref-kind-quest"), guideNote = Lang.Get("questline:ref-kind-guide");
+        string q = SearchKey(search ?? "");
+        if (q.StartsWith('@')) return ModRows(q[1..]);
 
+        string questNote = Lang.Get("questline:ref-kind-quest"), guideNote = Lang.Get("questline:ref-kind-guide");
         if (q.Length == 0)
         {
             // Guides are titled "Crafting Mechanic: Armor" and the like, so they're grouped under the
@@ -137,7 +148,8 @@ public partial class GuiDialogQuestBook
                 if (group.Key != "") rows.Add(new("#" + group.Key, group.Key, null, 0, 0) { Heading = true });
                 rows.AddRange(group.OrderBy(g => g.Parts.Name).Select(g => new GuiElementChapterRail.Row("guide:" + g.Guide.PageCode, g.Parts.Name, null, 0, 0) { Note = "" }));
             }
-            return rows;
+            rows.AddRange(ModListRows());
+            return Capped(rows);
         }
 
         if (client.Ready)
@@ -145,7 +157,7 @@ public partial class GuiDialogQuestBook
             foreach (var quest in client.Registry.Quests.Values.Where(client.IsVisible))
             {
                 string title = text.Title(quest.Id);
-                if (!title.ToSearchFriendly().ToLowerInvariant().Contains(q)) continue;
+                if (!SearchKey(title).Contains(q)) continue;
                 var icon = text.StackFor(quest.Icon ?? quest.Tasks.FirstOrDefault()?.Target);
                 rows.Add(new("quest:" + quest.Id, title, icon == null ? null : new DummySlot(icon), 0, 0) { Note = questNote });
             }
@@ -153,14 +165,118 @@ public partial class GuiDialogQuestBook
         foreach (var guide in AllGuides())
         {
             string title = TitleOf(guide);
-            if (title.ToSearchFriendly().ToLowerInvariant().Contains(q)) rows.Add(new("guide:" + guide.PageCode, title, null, 0, 0) { Note = guideNote });
+            if (SearchKey(title).Contains(q)) rows.Add(new("guide:" + guide.PageCode, title, null, 0, 0) { Note = guideNote });
         }
         // Items whose name starts with the search first, then the rest that contain it.
-        foreach (var item in (items ?? []).Where(i => i.Name.Contains(q)).OrderBy(i => i.Name.StartsWith(q) ? 0 : 1).ThenBy(i => i.Name.Length).Take(Math.Max(0, MaxResults - rows.Count)))
-        {
-            rows.Add(new("item:" + item.PageCode, item.Stack.GetName(), new DummySlot(item.Stack), 0, 0) { Note = "" });
-        }
+        var found = Collapse((items ?? []).Where(i => i.Key.Contains(q)), q);
+        rows.AddRange(found.OrderBy(f => f.Key.StartsWith(q) ? 0 : 1).ThenBy(f => f.Key.Length).Take(Math.Max(0, MaxResults - rows.Count)).Select(f => f.Row));
         return rows.Take(MaxResults).ToList();
+    }
+
+    /// <summary>"Items by mod": a row for every mod with items of its own, with how many there are (as listed, variants together).</summary>
+    List<GuiElementChapterRail.Row> ModListRows()
+    {
+        var counts = (items ?? []).GroupBy(i => i.Domain).ToDictionary(g => g.Key, g => g.Select(i => i.FamilyKey).Distinct().Count());
+        var mods = capi.ModLoader.Mods.Where(m => m.Info?.ModID is { } id && id != "game" && counts.ContainsKey(id)).OrderBy(m => m.Info.Name).ToList();
+        if (mods.Count == 0) return [];
+        return [new("#mods", Lang.Get("questline:ref-mods"), null, 0, 0) { Heading = true },
+            .. mods.Select(m => new GuiElementChapterRail.Row("mod:" + m.Info.ModID, m.Info.Name, null, 0, 0) { Note = counts[m.Info.ModID].ToString() })];
+    }
+
+    /// <summary>
+    /// "@foodshelves", or "@" and part of a mod's name: every item that mod adds, by name. A
+    /// mod's guide pages rarely link everything it has, so this is the way to see the rest.
+    /// Words after the mod ("@game anvil") search within it; "@" alone lists the mods.
+    /// </summary>
+    List<GuiElementChapterRail.Row> ModRows(string q)
+    {
+        int space = q.IndexOf(' ');
+        string mod = space < 0 ? q : q[..space], words = space < 0 ? "" : q[(space + 1)..];
+        if (mod.Length == 0) return ModListRows();
+
+        var domains = ModDomains(mod);
+        var found = Collapse((items ?? []).Where(i => domains.Contains(i.Domain) && i.Key.Contains(words)), words).OrderBy(f => f.Key).ToList();
+        var rows = found.Select(f => f.Row).ToList();
+        return Capped(rows, more: true);
+    }
+
+    /// <summary>
+    /// The rows the rail can draw: it draws them all into one texture, which some graphics cards
+    /// cap at 8192 pixels tall. The rest is left out, with a note saying so when there is one.
+    /// </summary>
+    static List<GuiElementChapterRail.Row> Capped(List<GuiElementChapterRail.Row> rows, bool more = false)
+    {
+        int max = (int)(8192 / GuiElement.scaled(GuiElementChapterRail.RowHeight)) - 1;
+        if (rows.Count <= max) return rows;
+        var capped = rows.Take(max).ToList();
+        if (more) capped.Add(new("#more", Lang.Get("questline:ref-more", rows.Count - max), null, 0, 0) { Heading = true });
+        return capped;
+    }
+
+    /// <summary>
+    /// The mods "@q" names: by id, or by a prefix of the id or part of the name. The game's own
+    /// mods put everything in "game", so "@survival" and "@creative" mean that.
+    /// </summary>
+    HashSet<string> ModDomains(string q)
+    {
+        if (q is "survival" or "creative") q = "game";
+        var mods = capi.ModLoader.Mods.Where(m => m.Info?.ModID != null).ToList();
+        var exact = mods.Where(m => m.Info.ModID == q).Select(m => m.Info.ModID).ToHashSet();
+        if (exact.Count > 0) return exact;
+        return mods.Where(m => m.Info.ModID.StartsWith(q) || SearchKey(m.Info.Name ?? "").Contains(q)).Select(m => m.Info.ModID).ToHashSet();
+    }
+
+    /// <summary>
+    /// Variants share a row ("Egg basket", 12 kinds) while the search matches their common name;
+    /// a search for the variant itself ("walnut") lists each one. Each row comes with the key it
+    /// sorts by.
+    /// </summary>
+    static IEnumerable<(string Key, GuiElementChapterRail.Row Row)> Collapse(IEnumerable<RefItem> found, string q)
+    {
+        // A null key: the search names the variant, not the family, so these are listed one by one.
+        foreach (var family in found.GroupBy(i => i.FamilyKey.Contains(q) ? i.FamilyKey : null))
+        {
+            if (family.Key == null)
+            {
+                foreach (var i in family) yield return (i.Key, ItemRow(i, i.Name, 1));
+                continue;
+            }
+            // Each family of the same name in its own mod
+            foreach (var mod in family.GroupBy(i => i.Domain))
+            {
+                var list = mod.ToList();
+                var shown = list.FirstOrDefault(i => i.Key == family.Key) ?? list[0];
+                yield return (family.Key, ItemRow(shown, list.Count > 1 ? BaseName(shown.Name) : shown.Name, list.Count));
+            }
+        }
+    }
+
+    static GuiElementChapterRail.Row ItemRow(RefItem item, string title, int kinds) =>
+        new("item:" + item.PageCode, title.Trim(), new DummySlot(item.Stack), 0, 0) { Note = kinds > 1 ? Lang.Get("questline:ref-kinds", kinds) : "" };
+
+    /// <summary>
+    /// One item page: its name, that name as searched, the search key of the name without its
+    /// variant (shared by the family), and the mod it's from.
+    /// </summary>
+    record RefItem(ItemStack Stack, string PageCode, string Name, string Key, string FamilyKey, string Domain);
+
+    /// <summary>
+    /// A name as the search compares it: no accents, lower case. The game's own helper turns
+    /// brackets into spaces, so runs of spaces are closed up, and "egg basket walnut" finds
+    /// "Egg basket (walnut)".
+    /// </summary>
+    static string SearchKey(string name) => Spaces.Replace(name.ToSearchFriendly().ToLowerInvariant(), " ").Trim();
+
+    static readonly Regex Spaces = new(@"\s+");
+
+    static readonly Regex VariantSuffix = new(@"\s*\([^()]*\)\s*$");
+
+    /// <summary>"Egg basket (walnut)" as "Egg basket". Names that are nothing but a bracket stay whole.</summary>
+    static string BaseName(string name)
+    {
+        string stripped = name;
+        while (VariantSuffix.Match(stripped) is { Success: true } m && m.Index > 0) stripped = stripped[..m.Index];
+        return stripped;
     }
 
     /// <summary>"Crafting Mechanic: Armor" as its group and name; a title without a colon has no group.</summary>
@@ -174,7 +290,7 @@ public partial class GuiDialogQuestBook
     {
         if (refPage?.StartsWith("item:") == true && stackByPageCode != null && stackByPageCode.TryGetValue(refPage[5..], out var stack))
         {
-            ComposeHosted(composer, x, width, new GuiHandbookItemStackPage(capi, stack), QuestLinks(stack));
+            ComposeHosted(composer, x, width, new GuiHandbookItemStackPage(capi, stack), [.. QuestLinks(stack), .. VariantLinks(refPage[5..])]);
             return;
         }
 
@@ -248,6 +364,27 @@ public partial class GuiDialogQuestBook
         }
         Line(Lang.Get("questline:ref-needed-by"), needs);
         Line(Lang.Get("questline:ref-given-by"), gives);
+        comps.Add(new RuleTextComponent(capi));
+        return comps;
+    }
+
+    /// <summary>
+    /// A Variants section for an item page whose item shares its row in the results with others
+    /// ("Egg basket", 13 kinds): every one of them, each opening its own page.
+    /// </summary>
+    List<RichTextComponentBase> VariantLinks(string pageCode)
+    {
+        var item = items?.FirstOrDefault(i => i.PageCode == pageCode);
+        if (item == null) return [];
+        var family = items.Where(i => i.Domain == item.Domain && i.FamilyKey == item.FamilyKey).ToList();
+        if (family.Count < 2) return [];
+
+        List<RichTextComponentBase> comps = [new RichTextComponent(capi, Lang.Get("questline:ref-variants").ToUpperInvariant() + "\n", Heading())];
+        foreach (var i in family)
+        {
+            comps.Add(new ItemstackTextComponent(capi, i.Stack, 36, 4, EnumFloat.Inline, OnStackClicked) { ShowStacksize = false });
+        }
+        comps.Add(new RichTextComponent(capi, "\n", Small()));
         comps.Add(new RuleTextComponent(capi));
         return comps;
     }

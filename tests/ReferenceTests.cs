@@ -4,6 +4,7 @@ using questline;
 using questline.Client;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 using VsTestkit.Testing;
 using static VsTestkit.Testing.Vs;
@@ -78,7 +79,7 @@ namespace Questline.Tests
             Book.SearchReference("");
             await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
             await Frames.Wait(10);
-            Assert.True(Book.Results.Rows.Count > 0 && Book.Results.Rows.Where(r => !r.Heading).All(r => r.Id.StartsWith("guide:")), "with no search, the guides");
+            Assert.True(Book.Results.Rows.Count > 0 && Book.Results.Rows.Where(r => !r.Heading).All(r => r.Id.StartsWith("guide:") || r.Id.StartsWith("mod:")), "with no search, the guides (and the mods)");
             Assert.True(Book.Results.Rows.Any(r => r.Heading), "grouped under headings");
             Log(await Shot.Take("questline-reference-guides.png"));
 
@@ -93,6 +94,97 @@ namespace Questline.Tests
             Assert.True(ids.Any(i => i.StartsWith("item:") && i.Contains("flint")), "flint items");
             Assert.Equal("quest:qltest:gather-flint", ids.First(), "quests come first");
             Log(await Shot.Take("questline-reference-search.png"));
+        }
+
+        [VsTest(TimeoutMs = 30000)]
+        public async Task VariantsShareARowUntilTheSearchNamesOne()
+        {
+            await OnClient();
+            // A family of variants from the handbook's own list: "Chest (oak)", "Chest (pine)", ...
+            var stacks = ObjectCacheUtil.TryGet<ItemStack[]>(Capi, "handbookallstacks");
+            // Grouped within one mod, as the book does: two mods' families of the same name are two rows.
+            var family = stacks.Select(s => (Name: s.GetName(), s.Collectible.Code.Domain)).Distinct()
+                .Select(n => (n.Name, n.Domain, Open: n.Name.LastIndexOf(" (")))
+                .Where(n => n.Open > 0 && n.Name.EndsWith(")") && n.Name.IndexOf('(') == n.Open + 1)
+                .GroupBy(n => n.Name[..n.Open])
+                .First(g => g.Count() >= 3 && g.Select(n => n.Domain).Distinct().Count() == 1);
+            string variant = family.First().Name;
+            Log($"{family.Key}: {family.Count()} kinds, e.g. {variant}");
+
+            Book.SearchReference(family.Key);
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+            var rows = Book.Results.Rows.Where(r => r.Id.StartsWith("item:")).ToList();
+            Log(string.Join(", ", rows.Take(12).Select(r => $"{r.Title} [{r.Note}]")));
+            Assert.Equal(1, rows.Count(r => r.Title == family.Key), "one row for the family");
+            Assert.False(rows.Any(r => r.Title.StartsWith(family.Key + " (")), "no variants listed");
+            Log(await Shot.Take("questline-reference-variants.png"));
+
+            Book.SingleComposer.GetTextInput("ref-search").SetValue(variant);
+            await Frames.Wait(5);
+            Assert.True(Book.Results.Rows.Any(r => r.Title == variant), "the variant, when the search names it");
+
+            // Without the brackets, as people type it
+            Book.SingleComposer.GetTextInput("ref-search").SetValue(variant.Replace("(", "").Replace(")", ""));
+            await Frames.Wait(5);
+            Assert.True(Book.Results.Rows.Any(r => r.Title == variant), "the variant, searched without brackets");
+
+            // The family's page lists every variant
+            var row = Book.Results.Rows.First(r => r.Title == variant);
+            Book.Results.Pick(row.Id);
+            await Until(() => Book.PageCode == row.Id, 60, "the variant's page");
+            await Frames.Wait(10);
+            // The component keeps its stack to itself, so this counts them after the heading.
+            var comps = Book.SingleComposer.GetRichtext("richtext").Components.ToList();
+            int heading = comps.FindIndex(c => c is RichTextComponent t && t.DisplayText.Trim() == "VARIANTS");
+            Assert.True(heading >= 0, "a Variants section");
+            int shown = comps.Skip(heading + 1).TakeWhile(c => c is ItemstackTextComponent).Count();
+            Assert.True(shown >= family.Count(), $"every variant on the page: {shown} of {family.Count()}");
+            Log(await Shot.Take("questline-reference-variant-page.png"));
+        }
+
+        [VsTest(TimeoutMs = 30000)]
+        public async Task AtAModListsEverythingItAdds()
+        {
+            await OnClient();
+            // The game's own domain is the one every run has: far more than a list holds, so it ends
+            // with a note to narrow the search.
+            Book.SearchReference("@game");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+            var rows = Book.Results.Rows;
+            Log($"{rows.Count} rows: " + string.Join(", ", rows.Take(8).Select(r => $"{r.Title} [{r.Note}]")));
+            Assert.True(rows.Count > 100 && rows.Take(rows.Count - 1).All(r => r.Id.StartsWith("item:")), "the game's items");
+            Assert.True(rows[^1].Heading && rows[^1].Id == "#more", "a note that there's more");
+            Assert.True(rows.Any(r => r.Note.EndsWith("kinds")), "variants share a row");
+            Log(await Shot.Take("questline-reference-mod.png"));
+
+            // Words after the mod search within it
+            var input = Book.SingleComposer.GetTextInput("ref-search");
+            input.SetValue("@game anvil");
+            await Frames.Wait(5);
+            Log(string.Join(", ", Book.Results.Rows.Select(r => r.Title)));
+            Assert.True(Book.Results.Rows.Count > 0 && Book.Results.Rows.All(r => r.Title.ToLowerInvariant().Contains("anvil")), "the game's anvils");
+
+            // The vanilla mods keep their items in "game"
+            input.SetValue("@survival anvil");
+            await Frames.Wait(5);
+            Assert.True(Book.Results.Rows.Count > 0, "@survival means the game's items");
+
+            // "@" alone lists the mods
+            input.SetValue("@");
+            await Frames.Wait(5);
+            Assert.True(Book.Results.Rows.All(r => r.Heading || r.Id.StartsWith("mod:")), "the mods, while the name is typed");
+
+            // A mod in the list with no search opens the same list for it
+            Book.SearchReference("");
+            await Frames.Wait(5);
+            var mod = Book.Results.Rows.FirstOrDefault(r => r.Id.StartsWith("mod:"));
+            if (mod == null) { Log("no mod with items of its own is loaded"); return; }
+            Book.Results.Pick(mod.Id);
+            await Frames.Wait(5);
+            Assert.True(Book.Results.Rows.Count > 0 && Book.Results.Rows.All(r => r.Id.StartsWith("item:") || r.Heading), $"{mod.Title}'s items");
+            Assert.Equal("@" + mod.Id[4..], Book.SingleComposer.GetTextInput("ref-search").GetText(), "the search box says what it shows");
         }
 
         [VsTest(TimeoutMs = 30000)]

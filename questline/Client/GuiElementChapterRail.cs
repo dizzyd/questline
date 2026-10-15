@@ -104,6 +104,9 @@ public class GuiElementChapterRail : GuiElement
 
     public IReadOnlyList<Row> Rows => rows;
 
+    /// <summary>Picks a row as a click would, for tests; it may be scrolled out of sight.</summary>
+    public void Pick(string id) => onSelect(id);
+
     void DrawRow(Context ctx, Row row, double y, int width)
     {
         double h = S(RowHeight), pad = S(8);

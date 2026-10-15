@@ -34,8 +34,10 @@ Every phase of the roadmap, minus the VS Quest importer:
   Working copies live in `ModConfig/questline/working/`, never in installed mods. A Problems
   tab lists what the last load found
 - The Reference tab replaces the handbook (H, and handbook links): one search across quests,
-  guides and items; the game's own item and guide pages, with each item page listing the
-  quests that need it or give it. `.questline handbook off` gives H back to the handbook
+  guides and items, with an item's variants (every wood, every colour) in one row; `@modid`
+  lists every item a mod adds (`@modid words` searches within it), and an item page lists its
+  variants. The game's own item and guide pages, with each item page listing
+  the quests that need it or give it. `.questline handbook off` gives H back to the handbook
 - A recipe graph of every recipe and item property the handbook knows (about 20,600 edges for
   vanilla, built in under 400 ms): `/questline graph <item>` and `/questline graph export`
 - A default questline covering all of vanilla: 322 quests in 24 chapters, from knapping
