@@ -32,6 +32,9 @@ namespace Questline.Tests
         [BeforeEach]
         public async Task SomeProgress()
         {
+            // The setup's completions would each pop up "Quest complete" over the pictures.
+            await OnClient();
+            Client.SetToasts(false);
             await OnServer();
             await World.SetCalendarTo(500 * 24 + 12);
             Engine.Reset(Me);
@@ -45,11 +48,15 @@ namespace Questline.Tests
             foreach (var id in Client.Pins.ToList()) Client.Unpin(id);
             foreach (var plan in Client.Plans.ToList()) Client.RemovePlan(plan);
             await Until(() => Client.StateOf("questline:chop-wood") == questline.Model.QuestState.Done, 120, "the progress on the client");
+            Client.SetToasts(true);
         }
 
         static async Task Snap(string name, bool minimap = false)
         {
             // The mouse off to the side, so no tooltip; the minimap only where the pins hang from it.
+            // Opening a dialog warps the cursor to the middle of the screen, and the warp's event
+            // can land after a move made straight away; so it's let land first, then moved.
+            await Frames.Wait(10);
             await Input.MouseMove(Capi.Render.FrameWidth - 4, Capi.Render.FrameHeight / 2);
             foreach (var map in Capi.Gui.OpenedGuis.OfType<Vintagestory.GameContent.GuiDialogWorldMap>().ToList())
             {
@@ -60,6 +67,8 @@ namespace Questline.Tests
                 Capi.ModLoader.GetModSystem<Vintagestory.GameContent.WorldMapManager>().ToggleMap(EnumDialogType.HUD);
             }
             await Frames.Wait(30);
+            // With no dialog open the game holds the mouse in the middle, to look around with.
+            if (Book.IsOpened()) Assert.True(Capi.Input.MouseX > Capi.Render.FrameWidth - 10, $"the mouse off to the side, not at {Capi.Input.MouseX},{Capi.Input.MouseY}");
             Log(await Shot.Take($"questline-gallery-{name}.png"));
         }
 
@@ -86,6 +95,22 @@ namespace Questline.Tests
             Book.TryClose();
         }
 
+        /// <summary>
+        /// Farming with the quern picked: the late branch's Copper age badges, the quests it needs
+        /// from other chapters beside it, and the page's Needs and Start with.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task FindingTheWay()
+        {
+            await OnClient();
+            Book.ForgetViews();
+            Book.SelectChapter("questline:farming");
+            Book.SelectQuest("questline:make-quern");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Snap("3-finding-the-way");
+            Book.TryClose();
+        }
+
         [VsTest(TimeoutMs = 60000)]
         public async Task Milestone()
         {
@@ -94,7 +119,7 @@ namespace Questline.Tests
             Book.SelectChapter("questline:bronze-age");
             Book.SelectQuest("questline:smith-bronze");
             await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
-            await Snap("3-milestone");
+            await Snap("4-milestone");
             Book.TryClose();
         }
 
@@ -104,7 +129,7 @@ namespace Questline.Tests
             await OnClient();
             Assert.True(Book.ShowReference(new ItemStack(Capi.World.GetItem(new AssetLocation("game:ingot-copper")))));
             await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
-            await Snap("4-reference");
+            await Snap("5-reference");
             Book.TryClose();
         }
 
@@ -119,7 +144,7 @@ namespace Questline.Tests
             await Until(() => Client.GraphReady && Client.Reveal == RevealLevel.Guide, 1200, "the graph, at guide");
             Book.ShowPlan("game:pickaxe-copper");
             await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
-            await Snap("5-plan");
+            await Snap("6-plan");
             Book.TryClose();
             await OnServer();
             Engine.Config.RevealLevel = "hints";
@@ -135,7 +160,7 @@ namespace Questline.Tests
             Client.Pin("questline:cut-grass");
             Client.Pin("questline:make-club");
             await Until(() => ClientSystem.Pins.IsOpened(), 60, "the HUD to open");
-            await Snap("6-pins", minimap: true);
+            await Snap("7-pins", minimap: true);
             foreach (var id in Client.Pins.ToList()) Client.Unpin(id);
         }
 
@@ -150,7 +175,7 @@ namespace Questline.Tests
             Book.SelectChapter("questline:kitchen");
             Book.SelectQuest("questline:make-mixing-bowl");
             await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
-            await Snap("7-expanded-foods");
+            await Snap("8-expanded-foods");
             Book.TryClose();
         }
     }
