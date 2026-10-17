@@ -1,0 +1,11 @@
+{
+    "id": "crossroads",
+    "order": 95,
+    "icon": "game:stick",
+    "quests": [
+        { "id": "cross-hunt", "pos": [2, 0], "icon": "game:flint", "requires": ["hunt", "shape-square"], "tasks": [{ "type": "checkbox" }] },
+        { "id": "cross-follow", "pos": [4, 0], "icon": "game:stick", "requires": ["cross-hunt", "lay-cobble"], "tasks": [{ "type": "checkbox" }] },
+        { "id": "cross-either", "pos": [4, 1.5], "icon": "game:clay-blue", "requires": { "any": ["cross-follow", "read-the-book"] }, "tasks": [{ "type": "checkbox" }] },
+        { "id": "cross-early", "pos": [2, 3], "icon": "game:flint", "requires": "gather-flint", "tasks": [{ "type": "checkbox" }] }
+    ]
+}

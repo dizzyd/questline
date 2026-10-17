@@ -2,6 +2,7 @@
     "id": "stone-age",
     "order": 10,
     "icon": "game:flint",
+    "age": true,
     "quests": [
         {
             "id": "gather-flint",
@@ -359,11 +360,6 @@
                     "type": "item",
                     "item": "game:drygrass",
                     "count": 4
-                },
-                {
-                    "type": "item",
-                    "item": "game:gear-rusty",
-                    "count": 1
                 }
             ]
         },
@@ -532,6 +528,27 @@
                             "count": 3
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "id": "make-rope",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": "make-knife",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:rope"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:cattailtops",
+                    "count": 6
                 }
             ]
         }

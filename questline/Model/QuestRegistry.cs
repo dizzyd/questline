@@ -29,6 +29,59 @@ public class QuestRegistry
 
     public QuestDef Get(string questId) => questId != null && Quests.TryGetValue(questId, out var q) ? q : null;
 
+    /// <summary>
+    /// Multiplies every reward of <paramref name="item"/>, choice options included, rounding to
+    /// whole items; one scaled to nothing is dropped. The server's own taste in a pack's rewards:
+    /// fewer rusty gears, say. Players see the scaled amounts, since the client gets this registry.
+    /// </summary>
+    public void ScaleRewards(string item, double factor)
+    {
+        if (factor == 1) return;
+        foreach (var quest in Quests.Values) Scale(quest.Rewards);
+
+        void Scale(List<RewardDef> rewards)
+        {
+            foreach (var r in rewards)
+            {
+                if (r.Type == "choice") Scale(r.Options);
+                else if (r.Type == "item" && r.Item == item) r.Count = (int)System.Math.Round(r.Count * factor, System.MidpointRounding.AwayFromZero);
+            }
+            rewards.RemoveAll(r => (r.Type == "item" && r.Count <= 0) || (r.Type == "choice" && r.Options.Count == 0));
+        }
+    }
+
+    readonly Dictionary<string, ChapterDef> ages = [];
+
+    /// <summary>
+    /// The age a quest belongs to: its own chapter if that's an <see cref="ChapterDef.Age"/>, else
+    /// the latest age its prerequisites lead back to, taking the earliest way through an "any" or
+    /// "at least". Null when nothing it needs is in an age.
+    /// </summary>
+    public ChapterDef AgeOf(QuestDef quest) => AgeOf(quest.Id, []);
+
+    ChapterDef AgeOf(string questId, HashSet<string> visiting)
+    {
+        if (ages.TryGetValue(questId, out var known)) return known;
+        // A cycle is disabled by the loader; it has no age rather than no end.
+        if (Get(questId) is not { } quest || !visiting.Add(questId)) return null;
+        var chapter = ChaptersById[quest.ChapterId];
+        var age = chapter.Age ? chapter : AgeOf(quest.Requires, visiting);
+        visiting.Remove(questId);
+        return ages[questId] = age;
+    }
+
+    ChapterDef AgeOf(Requirement r, HashSet<string> visiting) => r switch
+    {
+        QuestRequirement q => AgeOf(q.QuestId, visiting),
+        AllRequirement all => all.Of.Select(x => AgeOf(x, visiting)).MaxBy(AgeRank),
+        AnyRequirement any => any.Of.Select(x => AgeOf(x, visiting)).MinBy(AgeRank),
+        AtLeastRequirement least => least.Of.Select(x => AgeOf(x, visiting)).OrderBy(AgeRank).ElementAtOrDefault(least.N - 1),
+        _ => null,
+    };
+
+    /// <summary>Ages in chapter order, with no age at all before the first.</summary>
+    static int AgeRank(ChapterDef age) => age?.Order ?? int.MinValue;
+
     /// <summary>Rebuilds the lookups from <see cref="Chapters"/>. Call after any change to them.</summary>
     public void Index()
     {
@@ -38,6 +91,7 @@ public class QuestRegistry
         Quests = [];
         Aliases = [];
         Dependents = [];
+        ages.Clear();
 
         foreach (var chapter in Chapters)
         {

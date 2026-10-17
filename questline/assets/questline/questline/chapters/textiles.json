@@ -65,7 +65,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -107,7 +107,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -129,7 +129,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -150,7 +150,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -171,28 +171,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
-                }
-            ]
-        },
-        {
-            "id": "make-rope",
-            "pos": [
-                0,
-                3.0
-            ],
-            "requires": "make-knife",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:rope"
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:cattailtops",
-                    "count": 6
+                    "count": 1
                 }
             ]
         },
@@ -214,7 +193,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -238,7 +217,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -259,7 +238,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -283,7 +262,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -305,7 +284,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },

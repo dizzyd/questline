@@ -1,6 +1,6 @@
 {
-    "id": "efchefstricks-kitchen",
-    "extends": "kitchen",
+    "id": "efchefstricks-baking",
+    "extends": "baking",
     "requiresMod": [
         "efchefstricks"
     ],
@@ -8,8 +8,8 @@
         {
             "id": "make-crumb-feed",
             "pos": [
-                6,
-                7.5
+                8,
+                1.5
             ],
             "requires": "make-breadcrumbs",
             "tasks": [

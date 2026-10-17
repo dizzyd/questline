@@ -12,7 +12,7 @@ and the rendering spike settled.
 | `questline/Model/` | Definitions (chapters, quests, tasks, rewards, page blocks), the `requires` tree and its JSON converter, progress and quest states. Shared by both sides |
 | `questline/Server/` | `QuestLoader` (assets and the editor's working copies → registry, validation), `QuestEngine` (progress, parties, claims, sync, save game), `QuestEditor` (working copies, export), `Trackers` and `StationPatches` (game events → task reports) |
 | `questline/Graph/` | `RecipeGraph` (edges between item codes, saved and loaded as JSON) and `RecipeGraphBuilder` (scans the running game), built on first use on either side |
-| `questline/assets/questline/questline/chapters/` | The default questline: 24 chapters, all of vanilla. `VanillaQuestlineTests` holds it to zero problems, every quest reachable, every vanilla guide linked and a clean layout |
+| `questline/assets/questline/questline/chapters/` | The default questline: 25 chapters, all of vanilla. `VanillaQuestlineTests` holds it to zero problems, every quest reachable, every vanilla guide linked and a clean layout |
 | `…/chapters/<modid>-<chapter>.json` | Addons for other mods: each `extends` a base chapter (or, for Hex's Mech's industry and Seafarer's provisions, is a chapter of its own) and loads only with its `requiresMod`. A quest with a base quest's id replaces it, its text in a page block keyed `<id>-<modid>` |
 | `tools/packcheck/` | The pack checker: the loader and checks compiled outside the game (PACKCHECK leaves out the builder), run against `/questline snapshot` |
 | `questline/Network/` | The packets. Channel `questline`; message types must be registered in the same order on both sides |
@@ -96,6 +96,15 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   `DidPlaceBlock`; every pot meal is the same `claypot-*-cooked` (the recipe is an attribute);
   grafting and planting place the same cutting; quenching, kiln firing and anvil welding change
   state without a player action the trackers see. The default questline uses checkboxes there.
+- **The canvas holds more nodes than the chapter has quests.** In reading mode, each unmet
+  prerequisite from another chapter is a stub (`QuestCanvasNode.Stub`) appended after the chapter's
+  quests, so a node index past `canvasQuests.Count` is a stub, not a quest. The editor and plans have none.
+- **The back key is a hotkey with no handler.** `questline-back` (Backspace) is registered so
+  players can rebind it, but the book reads it in its own `OnKeyDown`, after `base.OnKeyDown` has
+  given a focused text field the key. A handler would fire while typing in chat or a form.
+- **Gear rewards are scaled on the server's registry, not in the files.** `GearRewards` multiplies
+  them after loading, so claims and the book agree; the editor's raw chapters keep the pack's amounts.
+  An ordinary quest gives one gear at most (`GearRewardsAreSparingAndScale`); milestones offer more.
 - **Edit the default questline with the layout in mind.** Quests sit on columns 2 apart and rows
   1.5 apart; a quest's in-chapter prerequisites sit to its left; no line may pass behind a quest.
   Entry quests (prerequisites only in other chapters) sit beside what they unlock, not in column 0.

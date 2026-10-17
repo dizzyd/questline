@@ -110,6 +110,8 @@ public class QuestlineModSystem : ModSystem
             else Book.TryOpen();
             return true;
         });
+        // No handler: the book reads it in its own key handling, after any text field it has focused.
+        api.Input.RegisterHotKey(GuiDialogQuestBook.BackHotkey, "Quest book: back", GlKeys.BackSpace, HotkeyType.GUIOrOtherControls);
     }
 
     void RegisterCommands(ICoreServerAPI api)

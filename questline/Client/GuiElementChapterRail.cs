@@ -27,6 +27,8 @@ public class GuiElementChapterRail : GuiElement
         public bool Warn { get; init; }
         /// <summary>A heading over the rows after it, not a row to pick.</summary>
         public bool Heading { get; init; }
+        /// <summary>Nothing in the chapter is open yet; its title is muted.</summary>
+        public bool Closed { get; init; }
     }
 
     List<Row> rows;
@@ -135,7 +137,7 @@ public class GuiElementChapterRail : GuiElement
         new TextDrawUtil().DrawTextLine(ctx, countFont, count, width - pad - countWidth, y + (h - countFont.GetFontExtents().Height) / 2);
 
         double textX = pad + S(IconSize) + S(8);
-        var titleFont = BookStyle.Body();
+        var titleFont = row.Closed ? BookStyle.Body().WithColor(BookStyle.Muted) : BookStyle.Body();
         if (isSelected) titleFont = titleFont.WithWeight(FontWeight.Bold);
         titleFont.SetupContext(ctx);
         string title = Fit(titleFont, row.Title, width - textX - countWidth - pad * 2);

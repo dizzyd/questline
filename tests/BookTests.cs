@@ -394,6 +394,222 @@ namespace Questline.Tests
             await Player.Hold("game:stick", 1);
         }
 
+        static string Title(string questId) => ClientSystem.Client.TextOf(questId + "-title");
+
+        /// <summary>
+        /// A locked quest lists each prerequisite on its own row, naming the chapter of one that's
+        /// elsewhere; under them, the open quests that lead there. Each is a link to its quest.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task ALockedQuestSaysWhatItNeedsAndWhereToStart()
+        {
+            await OnClient();
+            Book.SelectQuest("qltest:cross-hunt");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+
+            var detail = Book.SingleComposer.GetRichtext("detail");
+            var comps = detail.Components.ToList();
+            string startWith = Lang.Get("questline:start-with").ToUpperInvariant();
+            int start = comps.FindIndex(c => c is RichTextComponent r && r.DisplayText.StartsWith(startWith));
+            Assert.True(start > 0, "a Start with section");
+            var needs = comps.Take(start).OfType<LinkTextComponent>().Select(l => l.DisplayText).ToList();
+            var steps = comps.Skip(start).TakeWhile(c => c is not RuleTextComponent).OfType<LinkTextComponent>().Select(l => l.DisplayText).ToList();
+            Assert.Equal($"{Title("qltest:hunt")}, {Title("qltest:shape-square")}", string.Join(", ", needs));
+            Assert.True(comps.Take(start).OfType<RichTextComponent>().Any(r => r.DisplayText.Contains(ClientSystem.Client.TextOf("qltest:gallery-title"))), "the other chapter named");
+            // The hunt waits on quests that wait on flint; the square is open already.
+            Assert.Equal($"{Title(GatherFlint)}, {Title("qltest:shape-square")}", string.Join(", ", steps));
+            Log(await Shot.Take("questline-needs.png"));
+
+            var link = comps.OfType<LinkTextComponent>().First(l => l.DisplayText == Title("qltest:hunt"));
+            var b = link.BoundsPerLine[0];
+            await ClickAt((int)(detail.Bounds.absX + b.X + b.Width / 2), (int)(detail.Bounds.absY + b.Y + b.Height / 2));
+            await Until(() => Book.SelectedQuest == "qltest:hunt", 60, "the link to go to the hunt");
+            Assert.Equal("qltest:basics", Book.SelectedChapter);
+            Book.TryClose();
+        }
+
+        /// <summary>
+        /// A prerequisite in another chapter is a stub beside the quest it holds up, named by its
+        /// chapter and clear of the chapter's own lines; clicking it goes there, and once it's met it's gone.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task PrerequisitesFromOtherChaptersAreStubsOnTheCanvas()
+        {
+            await OnClient();
+            Book.ForgetViews();
+            Book.SelectChapter("qltest:crossroads");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(20);
+
+            var nodes = Book.Canvas.Nodes.ToList();
+            var stubs = nodes.Where(n => n.Stub).ToList();
+            Assert.Equal("qltest:hunt, qltest:shape-square, qltest:lay-cobble, qltest:read-the-book, qltest:gather-flint", string.Join(", ", stubs.Select(s => s.Id)));
+            Assert.Equal(Title("qltest:hunt"), stubs[0].Title);
+            Assert.Equal(ClientSystem.Client.TextOf("qltest:basics-title"), stubs[0].Note);
+            // Straight left of Follow on is the line to it from After the hunt; the stub goes elsewhere.
+            var cobble = stubs[2];
+            Assert.False(cobble.X == 3 && cobble.Y == 0, $"the stub clear of the chapter's own line, at {cobble.X}, {cobble.Y}");
+            Assert.True(nodes.Single(n => n.Id == "qltest:cross-follow").Prereqs.Contains(nodes.IndexOf(cobble)), "a line from the stub to its quest");
+            // Hovering a stub names it and its chapter.
+            var (x, y) = Book.Canvas.ScreenPosOf(nodes.IndexOf(stubs[1]));
+            await Input.MouseMove(x, y);
+            await Until(() => Book.Canvas.Tooltip == $"{Title("qltest:shape-square")}\n{ClientSystem.Client.TextOf("qltest:gallery-title")}", 30, "the tooltip for the gallery's stub");
+            await Frames.Wait(2);
+            Log(await Shot.Take("questline-stubs.png"));
+
+            await ClickAt(x, y);
+            await Until(() => Book.SelectedQuest == "qltest:shape-square", 60, "the stub to go to its quest");
+            Assert.Equal("qltest:gallery", Book.SelectedChapter);
+
+            await OnServer();
+            Engine.ForceComplete(Me, "qltest:lay-cobble");
+            await OnClient();
+            await Until(() => ClientSystem.Client.IsMet("qltest:lay-cobble"), 60, "lay-cobble met on the client");
+            Book.SelectChapter("qltest:crossroads");
+            await Frames.Wait(5);
+            Assert.False(Book.Canvas.Nodes.Any(n => n.Stub && n.Id == "qltest:lay-cobble"), "a met prerequisite has no stub");
+            Book.TryClose();
+        }
+
+        /// <summary>
+        /// A chapter with nothing open is muted on the rail, and picking it says what its first
+        /// quests need and where to start; it opens as they're met.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task AChapterWithNothingOpenSaysWhatOpensIt()
+        {
+            await OnClient();
+            Book.SelectChapter("qltest:crossroads");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+
+            Assert.True(Book.Rail.Rows.Single(r => r.Id == "qltest:crossroads").Closed, "crossroads muted on the rail");
+            Assert.False(Book.Rail.Rows.Single(r => r.Id == "qltest:basics").Closed, "basics is open");
+            var comps = Book.SingleComposer.GetRichtext("detail").Components.ToList();
+            Assert.True(comps.OfType<RichTextComponent>().Any(r => r.DisplayText.StartsWith(Lang.Get("questline:chapter-closed"))), "says nothing is open");
+            var links = comps.OfType<LinkTextComponent>().Select(l => l.DisplayText).ToList();
+            // Early start is the chapter's earliest way in, and needs only flint; After the hunt,
+            // which waits on the later gallery, isn't what opens it.
+            Assert.Equal(Title(GatherFlint), string.Join(", ", links));
+            Log(await Shot.Take("questline-chapter-closed.png"));
+
+            await OnServer();
+            Engine.ForceComplete(Me, "qltest:hunt");
+            Engine.ForceComplete(Me, "qltest:shape-square");
+            await OnClient();
+            await Until(() => ClientSystem.Client.StateOf("qltest:cross-hunt") == QuestState.Available, 60, "after-the-hunt to open");
+            await Frames.Wait(5);
+            Assert.False(Book.Rail.Rows.Single(r => r.Id == "qltest:crossroads").Closed, "open once its first quest is");
+            Book.TryClose();
+        }
+
+        /// <summary>
+        /// Backspace steps back along the way the book came, across chapters, as a browser's back
+        /// does; but a text field with the focus keeps it, for deleting.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task BackspaceStepsBackThroughAChain()
+        {
+            await OnClient();
+            Book.SelectChapter("qltest:crossroads");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            Book.SelectQuest("qltest:cross-hunt");
+            await Frames.Wait(10);
+
+            // Follow the hunt's link out to Basics, by a click.
+            var detail = Book.SingleComposer.GetRichtext("detail");
+            var link = detail.Components.OfType<LinkTextComponent>().First(l => l.DisplayText == Title("qltest:hunt"));
+            var b = link.BoundsPerLine[0];
+            await ClickAt((int)(detail.Bounds.absX + b.X + b.Width / 2), (int)(detail.Bounds.absY + b.Y + b.Height / 2));
+            await Until(() => Book.SelectedQuest == "qltest:hunt", 60, "the link followed");
+
+            await Input.Press(GlKeys.BackSpace);
+            await Until(() => Book.SelectedQuest == "qltest:cross-hunt", 30, "Backspace back to the quest the link was on");
+            Assert.Equal("qltest:crossroads", Book.SelectedChapter);
+            await Input.Press(GlKeys.BackSpace);
+            await Until(() => Book.SelectedQuest == null, 30, "and back again to the chapter with nothing picked");
+            Assert.Equal("qltest:crossroads", Book.SelectedChapter);
+            Assert.True(Book.StepForward(), "forward again");
+            Assert.Equal("qltest:cross-hunt", Book.SelectedQuest);
+
+            // In the Reference tab's search box, Backspace deletes.
+            Book.SelectTab(1);
+            await Frames.Wait(10);
+            var search = Book.SingleComposer.GetTextInput("ref-search");
+            await ClickAt((int)(search.Bounds.absX + 20), (int)(search.Bounds.absY + search.Bounds.OuterHeight / 2));
+            await Input.Type("ab");
+            await Until(() => Book.SingleComposer.GetTextInput("ref-search").GetText() == "ab", 30, "typed into the search");
+            await Input.Press(GlKeys.BackSpace);
+            await Until(() => Book.SingleComposer.GetTextInput("ref-search").GetText() == "a", 30, "Backspace deleted a letter");
+            Book.SearchReference("");
+            Book.TryClose();
+        }
+
+        /// <summary>
+        /// A quest outside an age is labelled with the latest age its prerequisites lead back to
+        /// (the earliest way through an "any"). On the canvas, the quests later than most of their
+        /// chapter carry that age's icon, which names it on hover; the page says it for every quest.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task QuestsAreLabelledWithTheirAge()
+        {
+            await OnClient();
+            var registry = ClientSystem.Client.Registry;
+            string AgeOf(string id) => registry.AgeOf(registry.Get(id))?.Id;
+            Assert.Equal("qltest:basics", AgeOf("qltest:hunt"), "an age's own quest is that age");
+            Assert.Equal("qltest:gallery", AgeOf("qltest:cross-hunt"), "the later of the two it needs");
+            Assert.Equal("qltest:gallery", AgeOf("qltest:cross-follow"), "through a quest in its own chapter");
+            Assert.Equal("qltest:basics", AgeOf("qltest:cross-either"), "the earlier way through an any");
+
+            Book.ForgetViews();
+            Book.SelectQuest("qltest:cross-follow");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(20);
+            var nodes = Book.Canvas.Nodes.ToList();
+            // Two quests of each age: the earlier is the chapter's own, the later is badged.
+            Assert.Equal("qltest:cross-hunt, qltest:cross-follow", string.Join(", ", nodes.Where(n => n.AgeIcon != null).Select(n => n.Id)));
+            Assert.False(nodes.Any(n => n.Stub && n.AgeIcon != null), "stubs carry no badge");
+            string gallery = ClientSystem.Client.TextOf("qltest:gallery-title");
+            var detail = Book.SingleComposer.GetRichtext("detail").Components.OfType<RichTextComponent>().ToList();
+            Assert.True(detail.Take(4).Any(c => c.DisplayText.Contains(gallery)), "the page names the age beside the state");
+
+            // The badge sits at the frame's top right corner.
+            int follow = nodes.FindIndex(n => n.Id == "qltest:cross-follow");
+            var (x, y) = Book.Canvas.ScreenPosOf(follow);
+            int corner = (int)(GuiElementQuestCanvas.NodeSize / 2 * 0.9f * Book.Canvas.Zoom * RuntimeEnv.GUIScale);
+            await Input.MouseMove(x + corner, y - corner);
+            await Until(() => Book.Canvas.Tooltip == gallery, 30, "the badge's tooltip");
+            await Frames.Wait(2);
+            Log(await Shot.Take("questline-ages.png"));
+            await Input.MouseMove(x - corner, y + corner);
+            await Until(() => Book.Canvas.Tooltip == null, 30, "no tooltip away from the badge");
+            Book.TryClose();
+        }
+
+        /// <summary>
+        /// The default questline's Kitchen and Baking, where this started: their stubs, and a locked
+        /// quest's needs, at 960×600.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task KitchenAndBakingScreens()
+        {
+            await OnClient();
+            foreach (string chapter in new[] { "questline:kitchen", "questline:baking" })
+            {
+                Book.ForgetViews();
+                Book.SelectChapter(chapter);
+                await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+                await Frames.Wait(30);
+                Log($"{chapter}: {Book.Canvas.Nodes.Count(n => n.Stub)} stubs");
+                Log(await Shot.Take($"questline-{chapter[10..]}-closed.png"));
+            }
+            Book.SelectQuest("questline:bake-pie");
+            await Frames.Wait(30);
+            Log(await Shot.Take("questline-baking-bake-pie.png"));
+            Book.TryClose();
+        }
+
         /// <summary>
         /// A press and release handed to the book, as the game's GUI system does it. Input.Click
         /// goes in through the world's mouse state and doesn't reach dialog elements; configkit's

@@ -2,6 +2,7 @@
     "id": "basics",
     "icon": "game:flint",
     "order": 10,
+    "age": true,
     "quests": [
         {
             "id": "gather-flint",

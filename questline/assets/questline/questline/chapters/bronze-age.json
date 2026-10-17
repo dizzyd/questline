@@ -2,6 +2,7 @@
     "id": "bronze-age",
     "order": 50,
     "icon": "game:ingot-tinbronze",
+    "age": true,
     "quests": [
         {
             "id": "make-prospecting-pick",
@@ -105,7 +106,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -164,7 +165,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -186,7 +187,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -208,7 +209,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -232,7 +233,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -254,7 +255,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -276,7 +277,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -300,7 +301,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 4
+                    "count": 1
                 }
             ]
         }

@@ -1,0 +1,156 @@
+{
+    "id": "baking",
+    "order": 44,
+    "icon": "game:pie-perfect",
+    "quests": [
+        {
+            "id": "grind-flour",
+            "pos": [
+                0,
+                0.0
+            ],
+            "requires": "make-quern",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:flour-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "make-dough",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": [
+                "grind-flour",
+                "fire-pottery"
+            ],
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:dough-*",
+                    "count": 2
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 6
+                }
+            ]
+        },
+        {
+            "id": "bake-bread",
+            "pos": [
+                4,
+                0.0
+            ],
+            "requires": [
+                "make-dough",
+                "place-oven"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:bread-*-perfect"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:firewood",
+                    "count": 8
+                }
+            ]
+        },
+        {
+            "id": "bake-pie",
+            "pos": [
+                6,
+                0.0
+            ],
+            "requires": [
+                "bake-bread",
+                "make-table"
+            ],
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:pie-perfect"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "eat-well",
+            "pos": [
+                8,
+                0.0
+            ],
+            "requires": [
+                "cook-stew",
+                "cook-soup",
+                "cook-porridge",
+                "bake-pie"
+            ],
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "game:fruit-*",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:vegetable-*",
+                    "count": 8
+                },
+                {
+                    "type": "obtain",
+                    "item": "game:bread-*-perfect",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:seeds-pumpkin",
+                            "count": 4
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:seeds-carrot",
+                            "count": 6
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 5
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

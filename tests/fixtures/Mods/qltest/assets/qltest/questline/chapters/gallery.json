@@ -1,6 +1,7 @@
 {
     "id": "gallery",
     "order": 60,
+    "age": true,
     "icon": "game:gear-rusty",
     "background": "qltest:questline/map-background.png",
     "art": [

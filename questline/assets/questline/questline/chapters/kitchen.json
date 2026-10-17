@@ -1,7 +1,7 @@
 {
     "id": "kitchen",
     "order": 25,
-    "icon": "game:pie-perfect",
+    "icon": "game:poultry-cooked",
     "quests": [
         {
             "id": "roast-meat",
@@ -48,52 +48,6 @@
                 {
                     "type": "item",
                     "item": "game:redmeat-raw",
-                    "count": 2
-                }
-            ]
-        },
-        {
-            "id": "make-dough",
-            "pos": [
-                0,
-                7.5
-            ],
-            "requires": [
-                "grind-flour",
-                "fire-pottery"
-            ],
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:dough-*",
-                    "count": 2
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:firewood",
-                    "count": 6
-                }
-            ]
-        },
-        {
-            "id": "make-table",
-            "pos": [
-                0,
-                10.5
-            ],
-            "requires": "make-boards",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:table-*"
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:gear-rusty",
                     "count": 2
                 }
             ]
@@ -176,108 +130,6 @@
                     "type": "item",
                     "item": "game:redmeat-raw",
                     "count": 2
-                }
-            ]
-        },
-        {
-            "id": "bake-bread",
-            "pos": [
-                2,
-                7.5
-            ],
-            "requires": [
-                "make-dough",
-                "place-oven"
-            ],
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:bread-*-perfect"
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:firewood",
-                    "count": 8
-                }
-            ]
-        },
-        {
-            "id": "bake-pie",
-            "pos": [
-                4,
-                9.0
-            ],
-            "requires": [
-                "bake-bread",
-                "make-table"
-            ],
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:pie-perfect"
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:gear-rusty",
-                    "count": 3
-                }
-            ]
-        },
-        {
-            "id": "eat-well",
-            "pos": [
-                6,
-                4.5
-            ],
-            "requires": [
-                "cook-stew",
-                "cook-soup",
-                "cook-porridge",
-                "bake-pie"
-            ],
-            "shape": "gear",
-            "size": 1.25,
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:fruit-*",
-                    "count": 8
-                },
-                {
-                    "type": "obtain",
-                    "item": "game:vegetable-*",
-                    "count": 8
-                },
-                {
-                    "type": "obtain",
-                    "item": "game:bread-*-perfect",
-                    "count": 4
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "choice",
-                    "options": [
-                        {
-                            "type": "item",
-                            "item": "game:seeds-pumpkin",
-                            "count": 4
-                        },
-                        {
-                            "type": "item",
-                            "item": "game:seeds-carrot",
-                            "count": 6
-                        },
-                        {
-                            "type": "item",
-                            "item": "game:gear-rusty",
-                            "count": 5
-                        }
-                    ]
                 }
             ]
         }

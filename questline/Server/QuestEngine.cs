@@ -143,11 +143,15 @@ public partial class QuestEngine
         if (uid != null && key != null) Report(uid, "custom", new AssetLocation(key), tree.GetInt("amount", 1));
     }
 
+    /// <summary>The game's currency, which <see cref="QuestlineConfig.GearRewards"/> scales.</summary>
+    public const string GearItem = "game:gear-rusty";
+
     /// <summary>Re-reads every chapter and resends definitions and state to everyone online.</summary>
     public void Reload()
     {
         var loader = new QuestLoader(new ServerFacts(api), api.Logger, Editor?.WorkingDir);
         Registry = loader.Load();
+        Registry.ScaleRewards(GearItem, Config.GearRewards);
         Problems = loader.Problems;
         rawChapters = loader.RawChapters;
         edited = loader.Edited;

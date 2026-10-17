@@ -1,0 +1,54 @@
+{
+    "id": "expandedfoods-baking",
+    "extends": "baking",
+    "requiresMod": [
+        "expandedfoods"
+    ],
+    "quests": [
+        {
+            "id": "roast-grain",
+            "pos": [
+                6,
+                -1.5
+            ],
+            "requires": "bake-bread",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:roastedgrain-*",
+                    "count": 4,
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "make-breadcrumbs",
+            "pos": [
+                6,
+                1.5
+            ],
+            "requires": "bake-bread",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "expandedfoods:breadcrumbs-*",
+                    "count": 4
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        }
+    ]
+}

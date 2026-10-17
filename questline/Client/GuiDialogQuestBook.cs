@@ -267,10 +267,14 @@ public partial class GuiDialogQuestBook : GuiDialog
         if (questId != null && canvasQuests.All(q => q.Id != questId)) questId = null;
 
         var background = chapter?.Background == null ? null : new AssetLocation(PageBlock.TexturePath(chapter.Background));
-        canvas = new GuiElementQuestCanvas(capi, canvasBounds, BuildNodes(canvasQuests), BuildArt(chapter), background)
+        var nodes = BuildNodes(canvasQuests);
+        MarkAges(nodes, canvasQuests, chapter);
+        var stubs = AddStubs(nodes, canvasQuests);
+        canvas = new GuiElementQuestCanvas(capi, canvasBounds, nodes, BuildArt(chapter), background)
         {
             SelectedIndex = canvasQuests.FindIndex(q => q.Id == questId),
-            OnNodeClicked = i => SelectQuest(canvasQuests[i].Id),
+            // A stub takes the book to its quest, in its own chapter.
+            OnNodeClicked = i => SelectQuest(i < canvasQuests.Count ? canvasQuests[i].Id : stubs[i - canvasQuests.Count]),
         };
         if (chapterId != null && views.TryGetValue(chapterId, out var view)) canvas.View = view;
         canvasChapter = chapterId;
@@ -283,9 +287,33 @@ public partial class GuiDialogQuestBook : GuiDialog
     {
         var quests = chapter.Quests.Where(client.IsVisible).ToList();
         int done = quests.Count(q => client.StateOf(q.Id) >= QuestState.Claimable);
-        // A chapter without an icon of its own shows its first quest's.
+        return new(chapter.Id, text.ChapterTitle(chapter.Id), ChapterIcon(chapter), done, quests.Count) { Closed = client.IsClosed(chapter) };
+    }
+
+    /// <summary>A chapter's icon; one without an icon of its own shows its first quest's.</summary>
+    ItemSlot ChapterIcon(ChapterDef chapter)
+    {
         var icon = text.StackFor(chapter.Icon) ?? text.StackFor(chapter.Quests.Select(q => q.Icon ?? q.Tasks.FirstOrDefault()?.Target).FirstOrDefault(c => c != null));
-        return new(chapter.Id, text.ChapterTitle(chapter.Id), icon == null ? null : new DummySlot(icon), done, quests.Count);
+        return icon == null ? null : new DummySlot(icon);
+    }
+
+    /// <summary>
+    /// Badges the quests that come from a later age than most of their chapter with that age, so
+    /// a chapter's late branch stands out. An age's own chapter has none: its quests are that age.
+    /// </summary>
+    void MarkAges(List<QuestCanvasNode> nodes, List<QuestDef> quests, ChapterDef chapter)
+    {
+        if (chapter == null || chapter.Age || quests.Count == 0) return;
+        var ages = quests.Select(client.Registry.AgeOf).ToList();
+        // The chapter's own age: the one most of its quests have, the earlier of two as common.
+        int usual = ages.GroupBy(a => a?.Order ?? int.MinValue)
+            .OrderByDescending(g => g.Count()).ThenBy(g => g.Key).First().Key;
+        for (int i = 0; i < quests.Count; i++)
+        {
+            if (ages[i] is not { } age || age.Order <= usual) continue;
+            nodes[i].AgeIcon = ChapterIcon(age);
+            nodes[i].AgeTitle = text.ChapterTitle(age.Id);
+        }
     }
 
     List<QuestCanvasNode> BuildNodes(List<QuestDef> quests, System.Func<string, string> title = null)
@@ -298,7 +326,7 @@ public partial class GuiDialogQuestBook : GuiDialog
             Title = title(q.Id),
             X = q.Pos.Length > 0 ? q.Pos[0] : 0,
             Y = q.Pos.Length > 1 ? q.Pos[1] : 0,
-            Icon = text.StackFor(q.Icon ?? q.Tasks.FirstOrDefault()?.Target) is { } stack ? new DummySlot(stack) : null,
+            Icon = IconFor(q),
             State = client.StateOf(q.Id),
             Shape = q.Shape,
             Size = Math.Clamp(q.Size, 0.5f, 3f),
@@ -306,6 +334,8 @@ public partial class GuiDialogQuestBook : GuiDialog
             Prereqs = q.Requires?.QuestIds().Where(index.ContainsKey).Select(id => index[id]).Distinct().ToArray() ?? [],
         }).ToList();
     }
+
+    ItemSlot IconFor(QuestDef q) => text.StackFor(q.Icon ?? q.Tasks.FirstOrDefault()?.Target) is { } stack ? new DummySlot(stack) : null;
 
     List<CanvasArt> BuildArt(ChapterDef chapter)
     {
@@ -363,6 +393,7 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     public void SelectChapter(string id)
     {
+        Remember();
         chapterId = id;
         questId = null;
         tab = QuestsTab;
@@ -371,11 +402,89 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     public void SelectQuest(string id)
     {
+        Remember();
         questId = id;
-        if (client.Registry?.Get(id) is { } quest) chapterId = quest.ChapterId;
+        // A prerequisite can be in another questline's chapter; the book follows it there.
+        if (client.Registry?.Get(id) is { } quest)
+        {
+            chapterId = quest.ChapterId;
+            questlineId = client.Registry.ChaptersById[quest.ChapterId].Questline;
+        }
         tab = QuestsTab;
         Show();
     }
+
+    #endregion
+
+    #region History
+
+    /// <summary>Hotkey code for stepping back, Backspace unless the player rebinds it.</summary>
+    public const string BackHotkey = "questline-back";
+
+    /// <summary>A place on the Quests tab: the questline, the chapter and the quest selected in it.</summary>
+    record Place(string Questline, string Chapter, string Quest);
+
+    /// <summary>Where the Quests tab has been and, after stepping back, where it was going; as a browser keeps them.</summary>
+    readonly Stack<Place> placesBack = new(), placesForward = new();
+
+    Place Here => new(questlineId, chapterId, questId);
+
+    public int PlacesBehind => placesBack.Count;
+
+    /// <summary>Keeps where the Quests tab is, before the book goes somewhere else.</summary>
+    void Remember()
+    {
+        if (tab != QuestsTab || chapterId == null) return;
+        if (placesBack.Count == 0 || placesBack.Peek() != Here) placesBack.Push(Here);
+        placesForward.Clear();
+    }
+
+    /// <summary>Goes back to the place before this one on the Quests tab; false when there's none.</summary>
+    public bool StepBack() => Step(placesBack, placesForward);
+
+    public bool StepForward() => Step(placesForward, placesBack);
+
+    bool Step(Stack<Place> from, Stack<Place> to)
+    {
+        // A place can stop existing (a reload, a quest gone hidden); skip past it.
+        while (from.Count > 0)
+        {
+            var place = from.Pop();
+            if (place == Here || place.Chapter == null || !client.Registry.ChaptersById.ContainsKey(place.Chapter)) continue;
+            to.Push(Here);
+            (questlineId, chapterId, questId) = (place.Questline, place.Chapter, place.Quest);
+            tab = QuestsTab;
+            Show();
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>The back key: back a place on the Quests tab, back a page on the Reference tab. A focused text field has it first.</summary>
+    public override void OnKeyDown(KeyEvent args)
+    {
+        base.OnKeyDown(args);
+        if (args.Handled || capi.Input.GetHotKeyByCode(BackHotkey)?.DidPress(args, capi.World, capi.World.Player, true) != true) return;
+        args.Handled = Back();
+    }
+
+    /// <summary>The mouse's back button does the same, over the book.</summary>
+    public override void OnMouseDown(MouseEvent args)
+    {
+        if (args.Button == EnumMouseButton.Button4 && SingleComposer?.Bounds.PointInside(args.X, args.Y) == true)
+        {
+            args.Handled = Back();
+            return;
+        }
+        base.OnMouseDown(args);
+    }
+
+    bool Back() => tab switch
+    {
+        QuestsTab => StepBack(),
+        ReferenceTab => CanGoBack && GoBack(),
+        _ => false,
+    };
 
     #endregion
 
@@ -408,7 +517,10 @@ public partial class GuiDialogQuestBook : GuiDialog
     {
         if (quest == null)
         {
-            return [new RichTextComponent(capi, Lang.Get("questline:pick-a-quest"), Body().WithColor(Muted))];
+            var pick = new RichTextComponent(capi, Lang.Get("questline:pick-a-quest"), Body().WithColor(Muted));
+            return spikeNodes == null && chapterId != null && client.Registry.ChaptersById.TryGetValue(chapterId, out var chapter) && client.IsClosed(chapter)
+                ? [.. ChapterNeeds(chapter), new RuleTextComponent(capi), pick]
+                : [pick];
         }
 
         var state = client.StateOf(quest.Id);
@@ -424,11 +536,13 @@ public partial class GuiDialogQuestBook : GuiDialog
                 : client.InParty ? "questline:mode-party" : "questline:mode-party-alone";
             comps.Add(new RichTextComponent(capi, "   " + Lang.Get(shared), MutedSmall()));
         }
-        comps.Add(new RichTextComponent(capi, "\n", Small()));
-        if (state == QuestState.Locked && quest.Requires != null)
+        // In a chapter on one theme, the age the quest really belongs to.
+        if (client.Registry.AgeOf(quest) is { } age && age.Id != quest.ChapterId)
         {
-            comps.Add(new RichTextComponent(capi, Lang.Get("questline:requires", text.Describe(quest.Requires)) + "\n", MutedSmall()));
+            comps.Add(new RichTextComponent(capi, "  · " + text.ChapterTitle(age.Id), MutedSmall()));
         }
+        comps.Add(new RichTextComponent(capi, "\n", Small()));
+        if (state == QuestState.Locked && quest.Requires != null) AddNeeds(comps, quest);
 
         var page = new List<RichTextComponentBase>();
         if (quest.Page.Count > 0)

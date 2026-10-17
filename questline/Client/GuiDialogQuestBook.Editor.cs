@@ -232,6 +232,11 @@ public partial class GuiDialogQuestBook
         y = AddLabel(composer, Lang.Get("questline:edit-background"), y);
         AddInput(composer, "edit-chapter-background", ElementBounds.Fixed(FormX, y, FormWidth, FieldHeight), chapter.Background,
             v => { chapter.Background = string.IsNullOrWhiteSpace(v) ? null : v.Trim(); Changed(); }, "mypack:questline/map.png");
+        y += FieldHeight + RowGap;
+
+        composer.AddSwitch(on => { chapter.Age = on; Changed(); }, ElementBounds.Fixed(FormX, y, FieldHeight, FieldHeight), "edit-chapter-age", FieldHeight - 8);
+        composer.AddStaticText(Lang.Get("questline:edit-age"), Small(), ElementBounds.Fixed(FormX + FieldHeight + 6, y + 4, FormWidth - FieldHeight - 6, FieldHeight));
+        afterCompose.Add(() => SingleComposer.GetSwitch("edit-chapter-age").SetValue(chapter.Age));
         y += FieldHeight + RowGap * 2;
 
         composer.AddStaticText(Lang.Get("questline:edit-hint"), MutedSmall(), ElementBounds.Fixed(FormX, y, FormWidth, ContentY + PanelHeight - y - Pad));

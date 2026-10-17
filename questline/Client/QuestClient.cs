@@ -213,6 +213,43 @@ public class QuestClient
 
     public QuestState StateOf(string questId) => states.TryGetValue(questId, out var e) ? e.State : QuestState.Locked;
 
+    /// <summary>Whether a quest counts as done for what it unlocks: its tasks are, claimed or not.</summary>
+    public bool IsMet(string questId) => StateOf(questId) >= QuestState.Claimable;
+
+    /// <summary>
+    /// The open quests that lead to <paramref name="questIds"/>: back through every unmet
+    /// prerequisite to the first ones the player can work on, in the order the requirements name
+    /// them. A hidden quest is walked through but not named.
+    /// </summary>
+    public List<QuestDef> NextSteps(IEnumerable<string> questIds)
+    {
+        var found = new List<QuestDef>();
+        var seen = new HashSet<string>();
+        void Walk(string id)
+        {
+            if (!seen.Add(id) || Registry?.Get(id) is not { } quest || IsMet(id)) return;
+            if (StateOf(id) != QuestState.Locked)
+            {
+                if (IsVisible(quest)) found.Add(quest);
+                return;
+            }
+            foreach (var pre in quest.Requires?.QuestIds() ?? []) Walk(pre);
+        }
+        foreach (var id in questIds) Walk(id);
+        return found;
+    }
+
+    /// <summary>Whether nothing in a chapter is open yet: every quest the player can see is locked.</summary>
+    public bool IsClosed(ChapterDef chapter)
+    {
+        var shown = chapter.Quests.Where(IsVisible).ToList();
+        return shown.Count > 0 && shown.All(q => StateOf(q.Id) == QuestState.Locked);
+    }
+
+    /// <summary>A chapter's first quests: those with no prerequisite of their own in it.</summary>
+    public IEnumerable<QuestDef> EntryQuests(ChapterDef chapter) =>
+        chapter.Quests.Where(q => q.Requires?.QuestIds().All(id => Registry?.Get(id)?.ChapterId != chapter.Id) ?? true);
+
     /// <summary>Progress per task; protobuf sends an empty array as null, so this is never null.</summary>
     public int[] TasksOf(QuestDef quest) =>
         states.TryGetValue(quest.Id, out var e) && e.Tasks != null ? e.Tasks : new int[quest.Tasks.Count];

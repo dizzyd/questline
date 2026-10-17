@@ -21,7 +21,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -42,7 +42,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -89,7 +89,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -111,7 +111,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -132,7 +132,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -156,7 +156,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -198,7 +198,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -220,7 +220,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -242,7 +242,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -289,7 +289,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -311,7 +311,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -333,7 +333,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -376,6 +376,48 @@
                             "count": 6
                         }
                     ]
+                }
+            ]
+        },
+        {
+            "id": "make-barrel",
+            "pos": [
+                2,
+                6.0
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:barrel"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "make-table",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "make-boards",
+            "tasks": [
+                {
+                    "type": "craft",
+                    "item": "game:table-*"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
                 }
             ]
         }

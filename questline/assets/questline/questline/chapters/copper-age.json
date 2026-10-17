@@ -2,6 +2,7 @@
     "id": "copper-age",
     "order": 40,
     "icon": "game:ingot-copper",
+    "age": true,
     "quests": [
         {
             "id": "make-pan",
@@ -240,7 +241,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -327,7 +328,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -390,7 +391,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -411,7 +412,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -453,7 +454,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         }

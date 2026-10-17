@@ -26,27 +26,6 @@
             ]
         },
         {
-            "id": "make-barrel",
-            "pos": [
-                0,
-                1.5
-            ],
-            "requires": "make-boards",
-            "tasks": [
-                {
-                    "type": "craft",
-                    "item": "game:barrel"
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:gear-rusty",
-                    "count": 2
-                }
-            ]
-        },
-        {
             "id": "cure-meat",
             "pos": [
                 2,
@@ -114,7 +93,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -202,7 +181,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },

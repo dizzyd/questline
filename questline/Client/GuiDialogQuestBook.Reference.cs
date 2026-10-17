@@ -439,6 +439,8 @@ public partial class GuiDialogQuestBook
         else link.HandleLink();
     }
 
+    bool CanGoBack => back.Count > 0;
+
     public bool GoBack()
     {
         if (back.Count == 0) return true;

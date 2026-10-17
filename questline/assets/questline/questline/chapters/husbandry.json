@@ -1,6 +1,6 @@
 {
     "id": "husbandry",
-    "order": 35,
+    "order": 51,
     "icon": "game:egg-chicken-raw",
     "quests": [
         {
@@ -21,7 +21,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -42,7 +42,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -63,7 +63,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -84,7 +84,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -185,7 +185,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -230,7 +230,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -255,7 +255,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -276,7 +276,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         }

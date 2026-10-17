@@ -2,6 +2,7 @@
     "id": "steel-age",
     "order": 70,
     "icon": "game:ingot-steel",
+    "age": true,
     "quests": [
         {
             "id": "lay-furnace-floor",
@@ -21,7 +22,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 4
+                    "count": 1
                 }
             ]
         },
@@ -42,7 +43,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 4
+                    "count": 1
                 }
             ]
         },
@@ -63,7 +64,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 4
+                    "count": 1
                 }
             ]
         },
@@ -139,7 +140,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 5
+                    "count": 1
                 }
             ]
         },
@@ -198,7 +199,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 6
+                    "count": 1
                 }
             ]
         },
@@ -223,7 +224,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 6
+                    "count": 1
                 }
             ]
         },
@@ -244,7 +245,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 5
+                    "count": 1
                 }
             ]
         },
@@ -269,7 +270,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 8
+                    "count": 1
                 }
             ]
         }

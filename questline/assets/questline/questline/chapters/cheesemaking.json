@@ -21,7 +21,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -111,7 +111,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 3
+                    "count": 1
                 }
             ]
         },
@@ -173,7 +173,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 5
+                    "count": 1
                 }
             ]
         }

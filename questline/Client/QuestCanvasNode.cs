@@ -21,6 +21,20 @@ public class QuestCanvasNode
     public int[] Prereqs = [];
     /// <summary>The editor found something wrong with it; its label is drawn in the problem colour.</summary>
     public bool Problem;
+    /// <summary>
+    /// A prerequisite from another chapter, drawn small beside what it unlocks. It has no label;
+    /// with the mouse over it, its title and <see cref="Note"/> show beside the pointer.
+    /// It never has an age badge.
+    /// </summary>
+    public bool Stub;
+    /// <summary>A stub's chapter, under its title.</summary>
+    public string Note;
+    /// <summary>
+    /// The age the quest comes from, when that's later than the rest of its chapter: its icon is
+    /// drawn small at the frame's corner, and its name shows with the mouse over it.
+    /// </summary>
+    public ItemSlot AgeIcon;
+    public string AgeTitle;
 }
 
 /// <summary>One piece of chapter art, resolved for drawing. Positions are grid cells.</summary>

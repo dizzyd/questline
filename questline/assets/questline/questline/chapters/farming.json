@@ -64,7 +64,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -181,29 +181,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
-                }
-            ]
-        },
-        {
-            "id": "grind-flour",
-            "pos": [
-                8,
-                3.0
-            ],
-            "requires": "make-quern",
-            "tasks": [
-                {
-                    "type": "obtain",
-                    "item": "game:flour-*",
-                    "count": 4
-                }
-            ],
-            "rewards": [
-                {
-                    "type": "item",
-                    "item": "game:firewood",
-                    "count": 8
+                    "count": 1
                 }
             ]
         },
@@ -225,7 +203,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -247,7 +225,7 @@
                 {
                     "type": "item",
                     "item": "game:gear-rusty",
-                    "count": 2
+                    "count": 1
                 }
             ]
         },
@@ -259,7 +237,7 @@
             ],
             "requires": [
                 "grow-vegetables",
-                "grind-flour",
+                "grind-bonemeal",
                 "grow-pumpkin",
                 "make-compost",
                 "grow-flax"

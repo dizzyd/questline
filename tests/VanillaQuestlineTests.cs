@@ -29,7 +29,7 @@ namespace Questline.Tests
             Log($"{chapters.Count} chapters, {chapters.Sum(c => c.Quests.Count)} quests");
 
             Assert.Equal(0, problems.Count, "no problems in the default questline");
-            Assert.Equal(24, chapters.Count(c => c.RequiresMod.Length == 0), "every part of vanilla, beside any chapters for installed mods");
+            Assert.Equal(25, chapters.Count(c => c.RequiresMod.Length == 0), "every part of vanilla, beside any chapters for installed mods");
             Assert.True(chapters.All(c => c.Questline == QuestRegistry.DefaultQuestline));
             Assert.True(chapters.All(c => c.Quests.Count >= 5), "no chapter left a stub");
             Assert.Greater(chapters.Sum(c => c.Quests.Count), 200);
@@ -56,6 +56,54 @@ namespace Questline.Tests
             }
             foreach (var q in quests.Where(q => !reachable.Contains(q.Id))) Log("unreachable: " + q.Id);
             Assert.Equal(quests.Count, reachable.Count, "every quest reachable by doing the ones before it");
+        }
+
+        /// <summary>
+        /// Rusty gears are a reward now and then, not the default one; the server's GearRewards
+        /// scales every gear a quest gives, choices included, and at 0 leaves the rest standing.
+        /// </summary>
+        [VsTest(TimeoutMs = 30000)]
+        public async Task GearRewardsAreSparingAndScale()
+        {
+            await OnServer();
+            QuestRegistry Copy() => QuestRegistry.FromJson(Engine.Registry.ToJson());
+            static int Gears(QuestRegistry r) => r.Quests.Values.Where(q => q.Id.StartsWith("questline:"))
+                .SelectMany(q => q.Rewards.SelectMany(x => x.Type == "choice" ? x.Options : [x]))
+                .Where(x => x.Item == QuestEngine.GearItem).Sum(x => x.Count);
+            var quests = Engine.Registry.Quests.Values.Where(q => q.Id.StartsWith("questline:") && q.Shape != NodeShape.Gear).ToList();
+            var generous = quests.Where(q => q.Rewards.Any(r => r.Item == QuestEngine.GearItem && r.Count > 1)).ToList();
+            foreach (var q in generous) Log("more than one gear: " + q.Id);
+            Assert.Equal(0, generous.Count, "an ordinary quest gives a gear at most");
+
+            int usual = Gears(Copy());
+            var doubled = Copy();
+            doubled.ScaleRewards(QuestEngine.GearItem, 2);
+            Assert.Equal(usual * 2, Gears(doubled));
+            var none = Copy();
+            none.ScaleRewards(QuestEngine.GearItem, 0);
+            Assert.Equal(0, Gears(none));
+            Assert.True(none.Quests.Values.Where(q => q.Id.StartsWith("questline:") && q.Shape == NodeShape.Gear).All(q => q.Rewards.Any(r => r.Type == "choice")), "milestones keep their other choices");
+            Log($"{usual} gears in the questline's rewards");
+        }
+
+        /// <summary>
+        /// The ages run stone, clay and fire, copper, bronze, iron and steel, and a quest in a themed
+        /// chapter belongs to the age the game actually gates it behind.
+        /// </summary>
+        [VsTest(TimeoutMs = 30000)]
+        public async Task QuestsBelongToTheAgeTheyNeed()
+        {
+            await OnServer();
+            var registry = Engine.Registry;
+            var ages = registry.Chapters.Where(c => c.Age && c.Id.StartsWith("questline:")).Select(c => c.Id[10..]);
+            Assert.Equal("stone-age, clay-and-fire, copper-age, bronze-age, iron-age, steel-age", string.Join(", ", ages));
+            string AgeOf(string id) => registry.AgeOf(registry.Get("questline:" + id))?.Id[10..];
+            Assert.Equal("stone-age", AgeOf("knap-hoe"));
+            // The quern takes a metal hammer and chisel; the pie's table, a saw.
+            Assert.Equal("copper-age", AgeOf("make-quern"));
+            Assert.Equal("copper-age", AgeOf("bake-pie"));
+            Assert.Equal("iron-age", AgeOf("build-greenhouse"));
+            Assert.Equal("steel-age", AgeOf("make-steel-plate"));
         }
 
         /// <summary>

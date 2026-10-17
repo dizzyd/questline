@@ -14,13 +14,21 @@ Every phase of the roadmap, minus the VS Quest importer:
 - Tasks: obtain (liquids in a carried bucket count by the litre), kill, mount (rafts, boats,
   elk), place, break, craft (every shift-click batch), knap, clayform, smith, cook (firepit
   output), smelt (molds and bloomeries), trade (bought from a trader), custom, checkbox
-- Rewards: items, pick-one choices and stages, claimed in the book
+- Rewards: items, pick-one choices and stages, claimed in the book. `GearRewards` in
+  `ModConfig/questline.json` scales the rusty gears they give (2 for a trading server, 0 for none)
 - Player history: a quest that unlocks is credited with work done before
   (`CreditEarlierWork` in `ModConfig/questline.json`)
 - `QuestlineApi` for other mods (custom tasks, stages, completion events), also over the
   event bus for mods that don't reference Questline
 - The book (L): a chapter rail, a pannable and zoomable tree, and quest pages with text,
   images, item rows and recipes; a Reference tab that hosts the handbook's item pages
+- Finding the way: a locked quest lists what it needs, with the chapter of each and a link to
+  it, and the open quests to start with; prerequisites from other chapters stand beside their
+  quest on the canvas; a chapter with nothing open says what opens it. Backspace (or the
+  mouse's back button) steps back along the way the book came
+- Ages: chapters marked `"age": true` (stone, clay and fire, copper, bronze, iron, steel in the
+  default questline) label every quest elsewhere with the age its prerequisites lead back to,
+  and a chapter's late branch carries that age's icon
 - Quest modes: each player, the party (pooled, each member claims once) or the whole server
   (pooled; `"claim": "first"` lets the first claim take it). Parties are made in the book's
   Party tab and turned off with `"Parties": false`
@@ -40,7 +48,7 @@ Every phase of the roadmap, minus the VS Quest importer:
   the quests that need it or give it. `.questline handbook off` gives H back to the handbook
 - A recipe graph of every recipe and item property the handbook knows (about 20,600 edges for
   vanilla, built in under 400 ms): `/questline graph <item>` and `/questline graph export`
-- A default questline covering all of vanilla: 322 quests in 24 chapters, from knapping
+- A default questline covering all of vanilla: 322 quests in 25 chapters, from knapping
   through steel, mechanical power, kilns, farming, husbandry, beekeeping, cheese, brewing,
   textiles and leather, boats, riding, arms and armor. It links every one of the game's own
   guides, teaches the mechanics and never the story

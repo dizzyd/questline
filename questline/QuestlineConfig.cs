@@ -22,4 +22,10 @@ public class QuestlineConfig
     /// next things to get, not how) or "discovery" (no planner). Each player can choose less.
     /// </summary>
     public string RevealLevel = "hints";
+
+    /// <summary>
+    /// Multiplies the rusty gears quests give, on top of the pack's own amounts, rounding to whole
+    /// gears: 2 doubles them for a server that trades a lot, 0 gives none at all.
+    /// </summary>
+    public double GearRewards = 1;
 }

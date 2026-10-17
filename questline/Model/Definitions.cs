@@ -84,6 +84,13 @@ public class ChapterDef
     public ChapterVisibility Visibility = ChapterVisibility.Always;
     /// <summary>A texture under assets/&lt;domain&gt;/textures/, drawn behind the whole canvas, e.g. mypack:questline/parchment.png.</summary>
     public string Background;
+    /// <summary>
+    /// A stage of progression, as stone, copper and iron are. A quest in any other chapter is
+    /// labelled with the latest age its prerequisites lead back to, so a chapter on one theme
+    /// shows which of its quests come late. See <see cref="QuestRegistry.AgeOf"/>.
+    /// </summary>
+    [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+    public bool Age;
     /// <summary>Images, labels and arrows placed on the chapter's grid, behind the quests.</summary>
     public List<ArtDef> Art = [];
     public List<QuestDef> Quests = [];

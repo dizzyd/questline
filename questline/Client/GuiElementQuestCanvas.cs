@@ -468,6 +468,8 @@ public class GuiElementQuestCanvas : GuiElement
         RenderVisibleNodes(s, ox, oy);
 
         api.Render.PopScissor();
+        // Outside the scissor: a tooltip near the canvas's edge may run past it.
+        RenderTooltip();
 
         Stats.Record(deltaTime * 1000, Stopwatch.GetElapsedTime(start).TotalMilliseconds);
     }
@@ -549,9 +551,15 @@ public class GuiElementQuestCanvas : GuiElement
                 api.Render.RenderItemstackToGui(n.Icon, sx, sy, 200, size * 0.55f * s, ColorUtil.WhiteArgb, true, false, false);
                 api.Render.PopScissor();
             }
+            if (n.AgeIcon?.Itemstack != null)
+            {
+                var (bx, by, br) = Badge(n);
+                api.Render.RenderItemstackToGui(n.AgeIcon, ox + bx * s, oy + by * s, 210, br * 1.4f * s, ColorUtil.WhiteArgb, true, false, false);
+            }
 
             // Below where the selection ring reaches, so selecting a quest never hides its name.
-            if (showLabels && GetLabel(i, ref labelBudget) is { } tex)
+            // A stub sits too close to its quest for a label; it has a tooltip instead.
+            if (showLabels && !n.Stub && GetLabel(i, ref labelBudget) is { } tex)
             {
                 // Labels scale with the tree, so they keep to the space between quests at any zoom;
                 // a little larger than the grid at high zoom, where they'd otherwise be tiny.
@@ -562,6 +570,54 @@ public class GuiElementQuestCanvas : GuiElement
         }
 
         VisibleNodes = visible;
+    }
+
+    /// <summary>A quest's age badge, in canvas units: its centre at the frame's top right corner, and its radius.</summary>
+    static (float X, float Y, float R) Badge(QuestCanvasNode n)
+    {
+        float half = NodeSize * n.Size / 2;
+        return (n.X * CellSize + half * 0.9f, n.Y * CellSize - half * 0.9f, NodeSize * 0.3f);
+    }
+
+    /// <summary>What the tooltip beside the pointer says now, or null when there's none.</summary>
+    public string Tooltip { get; private set; }
+    LoadedTexture tooltip;
+
+    /// <summary>
+    /// Beside the pointer: a stub's title and chapter while it's over the stub, or the age's name
+    /// while it's over a quest's age badge.
+    /// </summary>
+    void RenderTooltip()
+    {
+        string words = TooltipAt(api.Input.MouseX, api.Input.MouseY);
+        if (words == null)
+        {
+            Tooltip = null;
+            return;
+        }
+        if (words != Tooltip || tooltip == null)
+        {
+            tooltip?.Dispose();
+            var background = new TextBackground { FillColor = GuiStyle.DialogStrongBgColor, Padding = (int)scaled(5), Radius = 3, BorderWidth = 1 };
+            tooltip = api.Gui.TextTexture.GenTextTexture(words, labelFont, (int)scaled(260), background);
+            Tooltip = words;
+        }
+        api.Render.Render2DTexturePremultipliedAlpha(tooltip.TextureId, api.Input.MouseX + scaled(14), api.Input.MouseY + scaled(10), tooltip.Width, tooltip.Height, 300);
+    }
+
+    string TooltipAt(int mx, int my)
+    {
+        if (!Bounds.PointInside(mx, my) || panning) return null;
+        float s = ViewScale;
+        float cx = panX + (float)(mx - Bounds.absX) / s, cy = panY + (float)(my - Bounds.absY) / s;
+        // A badge overhangs its frame, so it's looked for before the quest under it.
+        foreach (var n in nodes.Where(n => n.AgeIcon != null))
+        {
+            var (bx, by, br) = Badge(n);
+            if ((cx - bx) * (cx - bx) + (cy - by) * (cy - by) <= br * br) return n.AgeTitle;
+        }
+        int over = NodeAt(mx, my);
+        return over >= 0 && nodes[over].Stub ? nodes[over].Title + "\n" + nodes[over].Note : null;
     }
 
     // Labels are generated lazily, a few per frame, so a first zoom-in doesn't hitch. They wrap
@@ -803,6 +859,7 @@ public class GuiElementQuestCanvas : GuiElement
         foreach (var ring in rings) ring?.Dispose();
         foreach (var tex in labels.Values) tex.Dispose();
         labels.Clear();
+        tooltip?.Dispose();
         // Images are the render API's cached textures and stay with it; text art is ours.
         foreach (var a in art.Where(a => a.Type == "text")) a.Texture?.Dispose();
     }
