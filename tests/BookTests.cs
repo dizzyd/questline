@@ -8,6 +8,8 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.API.Util;
+using Vintagestory.GameContent;
 using VsTestkit.Testing;
 using static VsTestkit.Testing.Vs;
 
@@ -522,6 +524,90 @@ namespace Questline.Tests
             await Until(() => ClientSystem.Client.StateOf("qltest:cross-hunt") == QuestState.Available, 60, "after-the-hunt to open");
             await Frames.Wait(5);
             Assert.False(Book.Rail.Rows.Single(r => r.Id == "qltest:crossroads").Closed, "open once its first quest is");
+            Book.TryClose();
+        }
+
+        static ItemStack[] HandbookStacks => ObjectCacheUtil.TryGet<ItemStack[]>(Capi, "handbookallstacks");
+
+        /// <summary>Whether the handbook has a page for exactly this stack, as a quest builds it.</summary>
+        static bool HasOwnPage(ItemStack stack)
+        {
+            string code = GuiHandbookItemStackPage.PageCodeForStack(stack);
+            return HandbookStacks.Any(s => GuiHandbookItemStackPage.PageCodeForStack(s) == code);
+        }
+
+        /// <summary>
+        /// Every item a default quest shows, as a task or a reward, opens a page: its own, its
+        /// item's when the handbook keys the page by a particular stack (a pie, a meal), or a search
+        /// for it by name. Never the empty page.
+        /// </summary>
+        [VsTest(TimeoutMs = 180000)]
+        public async Task EveryQuestItemOpensAPage()
+        {
+            await OnClient();
+            await Until(() => HandbookStacks != null, 600, "the handbook's stacks");
+            var registry = ClientSystem.Client.Registry;
+            var text = new QuestText(Capi, ClientSystem.Client);
+            var codes = registry.Quests.Values.Where(q => q.Id.StartsWith("questline:"))
+                .SelectMany(q => q.Tasks.Where(t => t.OnCollectible).Select(t => t.Target)
+                    .Concat(q.Rewards.SelectMany(r => r.Type == "choice" ? r.Options : [r]).Where(r => r.Type == "item").Select(r => r.Item)))
+                .Distinct().ToList();
+            int own = 0, kin = 0, searched = 0;
+            foreach (string code in codes)
+            {
+                if (text.StackFor(code) is not { } stack) continue;
+                bool paged = Book.ShowReference(stack);
+                if (!paged)
+                {
+                    searched++;
+                    Log($"{code}: searched for");
+                    Assert.Null(Book.PageCode, $"{code}: no page left over from before");
+                    Assert.True(Book.Results.Rows.Count > 0, $"{code}: the search finds something");
+                    continue;
+                }
+                // The page shown is this item, or the same kind of thing from the same mod.
+                var shown = HandbookStacks.First(s => "item:" + GuiHandbookItemStackPage.PageCodeForStack(s) == Book.PageCode).Collectible;
+                Assert.True(shown.Code.Domain == stack.Collectible.Code.Domain && shown.FirstCodePart() == stack.Collectible.FirstCodePart(), $"{code} opened {Book.PageCode}");
+                if (HasOwnPage(stack)) own++;
+                else
+                {
+                    kin++;
+                    Log($"{code}: {Book.PageCode}");
+                }
+            }
+            Log($"{codes.Count} codes: {own} with a page of their own, {kin} on their kind's page, {searched} searched for");
+            Book.TryClose();
+        }
+
+        /// <summary>Clicking a quest's item opens its page; Backspace comes back to the quest.</summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task AQuestsItemOpensItsPageAndBackspaceReturns()
+        {
+            await OnClient();
+            await Until(() => HandbookStacks != null, 600, "the handbook's stacks");
+            var registry = ClientSystem.Client.Registry;
+            var text = new QuestText(Capi, ClientSystem.Client);
+            // A quest whose first item has no handbook page of its own: the case that used to open an empty page.
+            var quest = registry.Quests.Values.Where(q => q.Id.StartsWith("questline:"))
+                .FirstOrDefault(q => q.Tasks.FirstOrDefault(t => t.OnCollectible) is { } t && text.StackFor(t.Target) is { } s && !HasOwnPage(s))
+                ?? registry.Get("questline:bake-pie");
+            Log($"clicking the item in {quest.Id}");
+            Book.SelectQuest(quest.Id);
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+
+            var detail = Book.SingleComposer.GetRichtext("detail");
+            var icon = detail.Components.OfType<ItemstackTextComponent>().First();
+            var b = icon.BoundsPerLine[0];
+            await ClickAt((int)(detail.Bounds.absX + b.X + b.Width / 2), (int)(detail.Bounds.absY + b.Y + b.Height / 2));
+            await Until(() => Book.OnReferenceTab, 30, "the Reference tab");
+            Assert.True(Book.PageCode?.StartsWith("item:") == true, $"an item page, not an empty one: {Book.PageCode ?? "none"}");
+            Assert.NotNull(Book.SingleComposer.GetButton("back"), "a Back button");
+            Log(await Shot.Take("questline-quest-item-page.png"));
+
+            await Input.Press(GlKeys.BackSpace);
+            await Until(() => !Book.OnReferenceTab, 30, "Backspace back to the Quests tab");
+            Assert.Equal(quest.Id, Book.SelectedQuest);
             Book.TryClose();
         }
 

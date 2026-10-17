@@ -181,6 +181,7 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     void OnTabClicked(int dataInt)
     {
+        if (dataInt != tab) Remember();
         tab = dataInt;
         Compose();
     }
@@ -188,6 +189,7 @@ public partial class GuiDialogQuestBook : GuiDialog
     /// <summary>Switches to a tab (0 quests, 1 reference, 2 party), opening the book if it's closed.</summary>
     public void SelectTab(int index)
     {
+        if (index != tab) Remember();
         tab = index;
         Show();
     }
@@ -439,51 +441,56 @@ public partial class GuiDialogQuestBook : GuiDialog
     /// <summary>Hotkey code for stepping back, Backspace unless the player rebinds it.</summary>
     public const string BackHotkey = "questline-back";
 
-    /// <summary>A place on the Quests tab: the questline, the chapter and the quest selected in it.</summary>
-    record Place(string Questline, string Chapter, string Quest);
+    /// <summary>
+    /// A place in the book: the tab, and what it shows. The Quests tab's questline, chapter and
+    /// quest are kept on every tab, so the book comes back to them.
+    /// </summary>
+    record Place(int Tab, string Questline, string Chapter, string Quest, string RefPage);
 
-    /// <summary>Where the Quests tab has been and, after stepping back, where it was going; as a browser keeps them.</summary>
+    /// <summary>
+    /// Where the book has been and, after stepping back, where it was going; one history across
+    /// the tabs, as a browser keeps it, so a quest's item page steps back to the quest.
+    /// </summary>
     readonly Stack<Place> placesBack = new(), placesForward = new();
 
-    Place Here => new(questlineId, chapterId, questId);
+    Place Here => new(tab, questlineId, chapterId, questId, refPage);
 
-    public int PlacesBehind => placesBack.Count;
+    public bool CanGoBack => placesBack.Count > 0;
+    public bool CanGoForward => placesForward.Count > 0;
 
-    /// <summary>Keeps where the Quests tab is, before the book goes somewhere else.</summary>
+    /// <summary>Keeps where the book is, before it goes somewhere else.</summary>
     void Remember()
     {
-        if (tab != QuestsTab || chapterId == null) return;
         if (placesBack.Count == 0 || placesBack.Peek() != Here) placesBack.Push(Here);
         placesForward.Clear();
     }
 
-    /// <summary>Goes back to the place before this one on the Quests tab; false when there's none.</summary>
+    /// <summary>Goes back to the place before this one; false when there's none.</summary>
     public bool StepBack() => Step(placesBack, placesForward);
 
     public bool StepForward() => Step(placesForward, placesBack);
 
     bool Step(Stack<Place> from, Stack<Place> to)
     {
-        // A place can stop existing (a reload, a quest gone hidden); skip past it.
+        // A place can stop existing (a reload, a chapter gone); skip past it.
         while (from.Count > 0)
         {
             var place = from.Pop();
-            if (place == Here || place.Chapter == null || !client.Registry.ChaptersById.ContainsKey(place.Chapter)) continue;
+            if (place == Here || (place.Chapter != null && client.Registry?.ChaptersById.ContainsKey(place.Chapter) != true)) continue;
             to.Push(Here);
-            (questlineId, chapterId, questId) = (place.Questline, place.Chapter, place.Quest);
-            tab = QuestsTab;
+            (tab, questlineId, chapterId, questId, refPage) = (place.Tab, place.Questline, place.Chapter, place.Quest, place.RefPage);
             Show();
             return true;
         }
         return false;
     }
 
-    /// <summary>The back key: back a place on the Quests tab, back a page on the Reference tab. A focused text field has it first.</summary>
+    /// <summary>The back key: back a place, on any tab. A focused text field has it first.</summary>
     public override void OnKeyDown(KeyEvent args)
     {
         base.OnKeyDown(args);
         if (args.Handled || capi.Input.GetHotKeyByCode(BackHotkey)?.DidPress(args, capi.World, capi.World.Player, true) != true) return;
-        args.Handled = Back();
+        args.Handled = StepBack();
     }
 
     /// <summary>The mouse's back button does the same, over the book.</summary>
@@ -491,18 +498,11 @@ public partial class GuiDialogQuestBook : GuiDialog
     {
         if (args.Button == EnumMouseButton.Button4 && SingleComposer?.Bounds.PointInside(args.X, args.Y) == true)
         {
-            args.Handled = Back();
+            args.Handled = StepBack();
             return;
         }
         base.OnMouseDown(args);
     }
-
-    bool Back() => tab switch
-    {
-        QuestsTab => StepBack(),
-        ReferenceTab => CanGoBack && GoBack(),
-        _ => false,
-    };
 
     #endregion
 

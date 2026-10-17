@@ -99,6 +99,13 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 - **The canvas holds more nodes than the chapter has quests.** In reading mode, each unmet
   prerequisite from another chapter is a stub (`QuestCanvasNode.Stub`) appended after the chapter's
   quests, so a node index past `canvasQuests.Count` is a stub, not a quest. The editor and plans have none.
+- **The book has one history, across tabs.** `SelectChapter`, `SelectQuest`, `OpenRef` and tab
+  switches call `Remember()` first; Back (the key, the mouse button, the Reference tab's button)
+  restores tab, chapter, quest and page together. Anything new that moves the book should remember too.
+- **A quest's item may have no handbook page of its own.** The handbook keys pages by particular
+  stacks (a lantern's materials, a meal) and leaves some things out (pies), so `ShowReference` falls
+  back to the item's page, then its kind's, then a search. `EveryQuestItemOpensAPage` holds every
+  default quest item to that.
 - **The back key is a hotkey with no handler.** `questline-back` (Backspace) is registered so
   players can rebind it, but the book reads it in its own `OnKeyDown`, after `base.OnKeyDown` has
   given a focused text field the key. A handler would fire while typing in chat or a form.

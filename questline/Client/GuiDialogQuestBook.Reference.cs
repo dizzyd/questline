@@ -17,7 +17,8 @@ namespace questline.Client;
 /// the right. Item pages are the game's own handbook pages, composed into the book, with a
 /// Quests section on top saying which quests need the item and which give it. Guides are the
 /// handbook's guide pages (and any a mod adds), re-read from their text. A quest result shows
-/// a summary with a way back to the quest. Back and Forward walk the pages visited.
+/// a summary with a way back to the quest. Back and Forward walk the book's history, which
+/// runs across tabs: a quest's item steps back to the quest.
 ///
 /// Pages are named "item:&lt;handbook page code&gt;", "guide:&lt;page code&gt;" or "quest:&lt;quest id&gt;".
 /// A "mod:&lt;mod id&gt;" row in the results isn't a page: it searches for that mod's items.
@@ -26,7 +27,6 @@ public partial class GuiDialogQuestBook
 {
     const int MaxResults = 80;
 
-    readonly Stack<string> back = new(), forward = new();
     Dictionary<string, ItemStack> stackByPageCode;
     List<RefItem> items;
     List<GuiHandbookTextPage> guides;
@@ -107,8 +107,8 @@ public partial class GuiDialogQuestBook
         ComposeRefPage(composer, x, width);
 
         double left = x;
-        if (back.Count > 0) left += AddRowButton(composer, Lang.Get("questline:back"), left, false, GoBack, "back") + Gap / 2;
-        if (forward.Count > 0) AddRowButton(composer, Lang.Get("questline:forward"), left, false, GoForward, "forward");
+        if (CanGoBack) left += AddRowButton(composer, Lang.Get("questline:back"), left, false, GoBack, "back") + Gap / 2;
+        if (CanGoForward) AddRowButton(composer, Lang.Get("questline:forward"), left, false, GoForward, "forward");
         if (refPage?.StartsWith("item:") == true && stackByPageCode?.TryGetValue(refPage[5..], out var shown) == true
             && shown.Collectible.Code.ToString() is var code && CanPlan(code))
         {
@@ -393,8 +393,7 @@ public partial class GuiDialogQuestBook
     void OpenRef(string page)
     {
         if (page == refPage && tab == ReferenceTab) { TryOpen(); return; }
-        if (tab == ReferenceTab && refPage != null) back.Push(refPage);
-        forward.Clear();
+        Remember();
         refPage = page;
         tab = ReferenceTab;
         Show();
@@ -420,12 +419,40 @@ public partial class GuiDialogQuestBook
 
     public bool OnReferenceTab => tab == ReferenceTab;
 
-    /// <summary>Shows the Reference tab at an item's page.</summary>
-    public bool ShowReference(ItemStack stack) => OpenPage(GuiHandbookItemStackPage.PageCodeForStack(stack));
+    /// <summary>
+    /// Shows the Reference tab at an item's page, and says whether it found one. A quest names an
+    /// item, often a family of them (chest-*, lantern-*), and the handbook keys its page by a
+    /// particular stack (a pie, a meal, one lantern's materials). So a stack with no page of its
+    /// own opens its item's page, or else a page for the same kind of thing. Some things the
+    /// handbook leaves out altogether (pies); those are searched for, by name and then by kind.
+    /// </summary>
+    public bool ShowReference(ItemStack stack)
+    {
+        EnsureIndex();
+        string code = GuiHandbookItemStackPage.PageCodeForStack(stack);
+        var loc = stack.Collectible.Code;
+        string page = stackByPageCode?.ContainsKey(code) == true ? code
+            : items?.FirstOrDefault(i => i.Stack.Collectible == stack.Collectible)?.PageCode
+            ?? items?.FirstOrDefault(i => i.Stack.Collectible.Code.Domain == loc.Domain && i.Stack.Collectible.FirstCodePart() == stack.Collectible.FirstCodePart())?.PageCode;
+        if (page != null)
+        {
+            OpenPage(page);
+            return true;
+        }
+        // A bare pie is named "Empty pie crust", which finds nothing; "pie" finds its guides.
+        string[] tries = [BaseName(stack.GetName()), stack.Collectible.FirstCodePart()];
+        string query = tries.FirstOrDefault(t => { search = t; return ResultRows().Any(r => !r.Heading); }) ?? tries[0];
+        search = "";
+        SearchReference(query);
+        refPage = null;
+        Compose();
+        return false;
+    }
 
     /// <summary>Shows the Reference tab with a search typed in.</summary>
     public void SearchReference(string query)
     {
+        if (tab != ReferenceTab) Remember();
         search = query ?? "";
         tab = ReferenceTab;
         Show();
@@ -439,23 +466,16 @@ public partial class GuiDialogQuestBook
         else link.HandleLink();
     }
 
-    bool CanGoBack => back.Count > 0;
-
+    // The Back and Forward buttons' handlers, which must return true.
     public bool GoBack()
     {
-        if (back.Count == 0) return true;
-        if (refPage != null) forward.Push(refPage);
-        refPage = back.Pop();
-        Compose();
+        StepBack();
         return true;
     }
 
     public bool GoForward()
     {
-        if (forward.Count == 0) return true;
-        if (refPage != null) back.Push(refPage);
-        refPage = forward.Pop();
-        Compose();
+        StepForward();
         return true;
     }
 }
