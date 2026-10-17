@@ -1,5 +1,5 @@
 """Writes modicon.svg: an open quest book with a small quest tree across its pages.
-Render to the 480x480 modicon.png with: convert -background none modicon.svg modicon.png"""
+Render to the 480x480 modicon.png with: convert -background none modicon.svg -depth 8 modicon.png"""
 import math, sys
 
 S = 480
@@ -30,7 +30,7 @@ svg = f'''<svg xmlns="http://www.w3.org/2000/svg" width="{S}" height="{S}" viewB
   <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2c75c"/><stop offset="1" stop-color="#c8902c"/></linearGradient>
   <linearGradient id="done" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fae5a"/><stop offset="1" stop-color="#4f7d35"/></linearGradient>
 </defs>
-<rect x="0" y="0" width="{S}" height="{S}" rx="64" fill="#2a1c12"/>
+<rect x="0" y="0" width="{S}" height="{S}" fill="#2a1c12"/>
 <circle cx="240" cy="210" r="230" fill="#33241a"/>
 <circle cx="240" cy="210" r="170" fill="#3b2a1e"/>
 <!-- cover -->
