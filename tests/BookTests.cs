@@ -54,6 +54,27 @@ namespace Questline.Tests
             Log(await Shot.Take("questline-book-chapter.png"));
         }
 
+        /// <summary>The rail lists the ages first under a heading of their own, in order, and every other chapter under another.</summary>
+        [VsTest(TimeoutMs = 30000)]
+        public async Task TheRailPutsTheAgesFirst()
+        {
+            await OnClient();
+            Book.SelectChapter("qltest:basics");
+            await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+            await Frames.Wait(10);
+
+            var rows = Book.Rail.Rows.ToList();
+            var chapters = ClientSystem.Client.Registry.ChaptersById;
+            int topics = rows.FindIndex(r => r.Id == "#topics");
+            Assert.Equal("#ages", rows[0].Id);
+            Assert.Greater(topics, 1, "a Topics heading after the ages");
+            Assert.True(rows.Skip(1).Take(topics - 1).All(r => chapters[r.Id].Age), "only ages above it");
+            Assert.True(rows.Skip(topics + 1).All(r => !r.Heading && !chapters[r.Id].Age), "the rest below");
+            Assert.Equal("qltest:basics, questline:stone-age, questline:clay-and-fire", string.Join(", ", rows.Skip(1).Take(3).Select(r => r.Id)));
+            Log(await Shot.Take("questline-rail-ages.png"));
+            Book.TryClose();
+        }
+
         [VsTest(TimeoutMs = 30000)]
         public async Task ClickingAQuestShowsItAndClaimingGivesTheReward()
         {

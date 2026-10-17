@@ -194,9 +194,27 @@ public partial class GuiDialogQuestBook : GuiDialog
 
     #region Quests tab
 
+    /// <summary>
+    /// The chapters the rail lists, in its order: the ages first, then the rest, each in chapter
+    /// order. A questline with no ages (or nothing but) keeps plain chapter order.
+    /// </summary>
     List<ChapterDef> VisibleChapters() => client.Registry.Chapters
         .Where(c => c.Questline == questlineId && client.IsVisible(c))
+        .OrderBy(c => c.Age ? 0 : 1)
         .ToList();
+
+    /// <summary>The rail's rows: the ages and the rest under a heading each, when there are both.</summary>
+    List<GuiElementChapterRail.Row> RailRows(List<ChapterDef> chapters)
+    {
+        if (chapters.All(c => c.Age) || chapters.All(c => !c.Age)) return chapters.Select(RailRow).ToList();
+        return
+        [
+            new("#ages", Lang.Get("questline:rail-ages"), null, 0, 0) { Heading = true },
+            .. chapters.Where(c => c.Age).Select(RailRow),
+            new("#topics", Lang.Get("questline:rail-topics"), null, 0, 0) { Heading = true },
+            .. chapters.Where(c => !c.Age).Select(RailRow),
+        ];
+    }
 
     void ComposeQuests(GuiComposer composer)
     {
@@ -259,7 +277,7 @@ public partial class GuiDialogQuestBook : GuiDialog
         if (chapterId == null || chapters.All(c => c.Id != chapterId)) chapterId = chapters.FirstOrDefault()?.Id;
 
         rail = new GuiElementChapterRail(capi, ElementBounds.Fixed(0, railTop, RailWidth, ContentHeight - (railTop - ContentY)),
-            chapters.Select(RailRow).ToList(), chapterId, SelectChapter);
+            RailRows(chapters), chapterId, SelectChapter);
         composer.AddInteractiveElement(rail, "rail");
 
         var chapter = chapterId == null ? null : client.Registry.ChaptersById[chapterId];
