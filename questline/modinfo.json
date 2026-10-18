@@ -6,6 +6,6 @@
         "dizzyd"
     ],
     "description": "A quest book for long progressions: chapters of dependency trees, tasks detected automatically, rewards claimed in the book.",
-    "version": "0.10.0",
+    "version": "0.11.0",
     "dependencies": { "game": "1.22.0" }
 }
