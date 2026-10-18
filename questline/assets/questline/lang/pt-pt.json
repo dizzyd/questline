@@ -708,6 +708,7 @@
     "task-cook": "Cozinhar: {0}",
     "task-smelt": "Fundir: {0}",
     "task-trade": "Comprar a um comerciante: {0}",
+    "task-visit": "Visita {0}",
     "task-checkbox": "Marca a caixa quando terminares",
     "task-checkbox-hud": "Marca-a no livro de missões",
     "any-of": "qualquer {0}",

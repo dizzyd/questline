@@ -708,6 +708,7 @@
     "task-cook": "調理：{0}",
     "task-smelt": "鋳造または製錬：{0}",
     "task-trade": "商人から購入：{0}",
+    "task-visit": "{0}を訪れる",
     "task-checkbox": "済んだらチェックを入れる",
     "task-checkbox-hud": "クエストブックでチェックを入れる",
     "any-of": "いずれかの{0}",

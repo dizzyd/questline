@@ -708,6 +708,7 @@
     "task-cook": "{0} 요리",
     "task-smelt": "{0} 주조 또는 제련",
     "task-trade": "상인에게서 {0} 구매",
+    "task-visit": "{0} 방문하기",
     "task-checkbox": "완료하면 체크하세요",
     "task-checkbox-hud": "퀘스트 북에서 체크하세요",
     "any-of": "아무 {0}",

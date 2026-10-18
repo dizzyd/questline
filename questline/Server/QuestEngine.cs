@@ -40,11 +40,14 @@ public partial class QuestEngine
     readonly Dictionary<string, Action<int>> inventoryWatchers = [];
 
     public QuestRegistry Registry { get; private set; } = new();
+
+    /// <summary>The structures worldgen places, by the codes visit tasks name them with.</summary>
+    public StructureCodes Structures { get; private set; }
     public QuestlineConfig Config { get; set; } = new();
 
     // Task types a player's history records. Obtain follows the inventory instead, and a
     // checkbox has nothing to remember.
-    static readonly HashSet<string> HistoryTypes = ["kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "custom"];
+    static readonly HashSet<string> HistoryTypes = ["kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "visit", "custom"];
     public List<string> Problems { get; private set; } = [];
 
     /// <summary>
@@ -118,6 +121,7 @@ public partial class QuestEngine
             .SetMessageHandler<PartyRequest>(OnPartyRequest);
 
         Editor = new QuestEditor(api, this);
+        Structures = new StructureCodes(api);
         // The graph checks need every recipe, which the game has only once the world is running.
         api.Event.ServerRunPhase(EnumServerRunPhase.RunGame, () =>
         {
@@ -149,7 +153,7 @@ public partial class QuestEngine
     /// <summary>Re-reads every chapter and resends definitions and state to everyone online.</summary>
     public void Reload()
     {
-        var loader = new QuestLoader(new ServerFacts(api), api.Logger, Editor?.WorkingDir);
+        var loader = new QuestLoader(new ServerFacts(api, Structures), api.Logger, Editor?.WorkingDir);
         Registry = loader.Load();
         Registry.ScaleRewards(GearItem, Config.GearRewards);
         Problems = loader.Problems;
@@ -189,6 +193,7 @@ public partial class QuestEngine
         Blocks = api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()).ToList(),
         Entities = api.World.EntityTypes.Select(e => e.Code.ToString()).ToList(),
         Lang = SnapshotText(),
+        Structures = Structures.All.ToList(),
         Graph = Graph,
     };
 
@@ -435,6 +440,17 @@ public partial class QuestEngine
         FlushSync();
     }
 
+    /// <summary>
+    /// A player is inside a structure worldgen placed. The first time, each code it answers to
+    /// counts towards visit tasks, and the history keeps it for quests not open yet.
+    /// </summary>
+    public void Visit(string playerUid, GeneratedStructure placed)
+    {
+        var loc = placed.Location;
+        if (!ProgressOf(playerUid).Visited.Add($"{placed.Code}@{loc.MinX},{loc.MinY},{loc.MinZ}")) return;
+        foreach (string code in Structures.Of(placed)) Report(playerUid, "visit", new AssetLocation(code), 1);
+    }
+
     /// <summary>Ticks a checkbox task, on the player's request from the book.</summary>
     public void Check(IServerPlayer player, string questId, int taskIndex)
     {
@@ -654,7 +670,7 @@ public partial class QuestEngine
 
     #region Discovery
 
-    /// <summary>Whether the player has carried, made, killed, placed or broken anything matching the pattern.</summary>
+    /// <summary>Whether the player has carried, made, killed, placed, broken or visited anything matching the pattern.</summary>
     public bool HasDiscovered(string playerUid, string pattern)
     {
         var loc = new AssetLocation(pattern);
@@ -792,6 +808,7 @@ public partial class QuestEngine
             own.Quests.Clear();
             own.Stages.Clear();
             own.History.Clear();
+            own.Visited.Clear();
             party?.Progress.Quests.Clear();
             party?.Progress.Stages.Clear();
         }

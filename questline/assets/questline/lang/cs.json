@@ -708,6 +708,7 @@
     "task-cook": "Uvař: {0}",
     "task-smelt": "Odlij nebo roztav: {0}",
     "task-trade": "Kup od obchodníka: {0}",
+    "task-visit": "Navštiv {0}",
     "task-checkbox": "Až budeš hotov, zaškrtni políčko",
     "task-checkbox-hud": "Odškrtni to v knize úkolů",
     "any-of": "{0} (libovolná varianta)",

@@ -1,0 +1,34 @@
+{
+    "id": "places",
+    "order": 90,
+    "icon": "game:map",
+    "quests": [
+        {
+            "id": "find-a-trader",
+            "pos": [
+                0,
+                0
+            ],
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "game:trader-*"
+                }
+            ]
+        },
+        {
+            "id": "two-ruins",
+            "pos": [
+                0,
+                1.5
+            ],
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "game:undergroundruin",
+                    "count": 2
+                }
+            ]
+        }
+    ]
+}

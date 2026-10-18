@@ -46,6 +46,7 @@ public class QuestlineModSystem : ModSystem
         Engine.Start();
         Engine.Reload();
         new Trackers(api, Engine).Start();
+        new VisitTracker(api, Engine).Start();
         // Server side only: in singleplayer both sides share this assembly, and patching from
         // Start() would register every patch twice.
         harmony = StationPatches.Apply(Engine, api.Logger);
@@ -201,6 +202,17 @@ public class QuestlineModSystem : ModSystem
                     var snapshot = Engine.Snapshot();
                     System.IO.File.WriteAllText(file, snapshot.ToJson());
                     return TextCommandResult.Success($"Saved {snapshot.Items.Count + snapshot.Blocks.Count} items and blocks, {snapshot.Graph.Edges.Count} recipe edges to {file}");
+                })
+            .EndSubCommand()
+            .BeginSubCommand("structures")
+                .WithDescription("Name the worldgen structures you are standing in, as a visit task would")
+                .HandleWith(args =>
+                {
+                    if (args.Caller.Entity is not { } entity) return TextCommandResult.Error("Stand somewhere first");
+                    var here = VisitTracker.At(api, entity.Pos.AsBlockPos)
+                        .Select(s => $"{string.Join(", ", Engine.Structures.Of(s).DefaultIfEmpty("(no worldgen config names it)"))}  [{s.Code}, group {s.Group}]")
+                        .ToList();
+                    return TextCommandResult.Success(here.Count == 0 ? "No structure here" : string.Join("\n", here));
                 })
             .EndSubCommand()
             .BeginSubCommand("resetserver")

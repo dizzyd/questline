@@ -18,7 +18,7 @@ namespace questline.Server;
 /// </summary>
 public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = null)
 {
-    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "custom", "checkbox"];
+    public static readonly HashSet<string> TaskTypes = ["obtain", "kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "visit", "custom", "checkbox"];
     static readonly HashSet<string> BlockTasks = ["place", "break"];
     static readonly HashSet<string> RewardTypes = ["item", "choice", "stage"];
 
@@ -317,6 +317,8 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
 
             if (task.Target == null) yield return $"{task.Type} task names nothing to match";
             else if (!TargetExists(task)) yield return $"{task.Type} task target {task.Target} matches nothing";
+            // Structures have no names of their own in the game.
+            else if (task.Type == "visit" && !facts.HasLang(TaskDef.StructureNameKey(task.Target))) yield return $"visit task target {task.Target} has no name: no lang entry {TaskDef.StructureNameKey(task.Target)}";
         }
 
         foreach (var reward in quest.Rewards)
@@ -411,6 +413,7 @@ public class QuestLoader(IGameFacts facts, ILogger logger, string workingDir = n
     bool TargetExists(TaskDef task)
     {
         if (task.OnEntity) return facts.AnyMatches("entity", task.Target);
+        if (task.Type == "visit") return facts.AnyMatches("structure", task.Target);
         if (BlockTasks.Contains(task.Type)) return facts.AnyMatches("block", task.Target);
         return facts.AnyMatches("collectible", task.Target);
     }

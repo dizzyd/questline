@@ -13,7 +13,12 @@ Every phase of the roadmap, minus the VS Quest importer:
 - `requires` as a tree of `all`, `any`, `atLeast`, quest ids and mod gates
 - Tasks: obtain (liquids in a carried bucket count by the litre), kill, mount (rafts, boats,
   elk), place, break, craft (every shift-click batch), knap, clayform, smith, cook (firepit
-  output), smelt (molds and bloomeries), trade (bought from a trader), custom, checkbox
+  output), smelt (molds and bloomeries), trade (bought from a trader), visit (standing inside a
+  structure worldgen placed, each structure once), custom, checkbox. A visit names the structure by
+  its code in the worldgen config, with that file's domain (`game:trader-*`,
+  `betterruins:largeforlornhopetower`), and its place by the lang entry `<domain>:structure-<code>`;
+  `/questline structures` names whatever you are standing in, and a `discovered` gate sees places
+  visited
 - Rewards: items, pick-one choices and stages, claimed in the book. `GearRewards` in
   `ModConfig/questline.json` scales the rusty gears they give (2 for a trading server, 0 for none)
 - Player history: a quest that unlocks is credited with work done before
@@ -66,7 +71,7 @@ Every phase of the roadmap, minus the VS Quest importer:
 - The book takes 80% of the screen, and opens each chapter on all of it or on twenty quests
   around the player
 - `/questline reload | complete <quest> [player] | unlock <quest> [player] |
-  reset [quest] [player] | resetserver | export | graph <item> | snapshot`
+  reset [quest] [player] | resetserver | export | graph <item> | structures | snapshot`
 
 ## Translations
 

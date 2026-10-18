@@ -708,6 +708,7 @@
     "task-cook": "Gătește: {0}",
     "task-smelt": "Toarnă sau topește: {0}",
     "task-trade": "Cumpără de la un negustor: {0}",
+    "task-visit": "Vizitează {0}",
     "task-checkbox": "Bifează căsuța când e gata",
     "task-checkbox-hud": "Bifează în cartea misiunilor",
     "any-of": "orice {0}",

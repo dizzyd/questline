@@ -61,7 +61,7 @@ namespace Questline.Tests
             Assert.NotNull(registry.Get("qltest:fine"), "a valid quest beside broken ones");
             Assert.False(registry.ChaptersById.ContainsKey("qltest:gated"), "chapter gated on a missing mod");
 
-            foreach (var id in new[] { "unknown-prereq", "unknown-task", "unknown-item", "cycle-a", "cycle-b" })
+            foreach (var id in new[] { "unknown-prereq", "unknown-task", "unknown-item", "cycle-a", "cycle-b", "unknown-structure", "unnamed-structure" })
             {
                 Assert.True(registry.Get("qltest:" + id) == null, $"{id} should be disabled");
                 Assert.True(Engine.Problems.Any(p => p.StartsWith("qltest:" + id + ":")), $"{id} should be reported");

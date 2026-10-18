@@ -22,6 +22,7 @@
         <Compile Include="../../questline/Server/GraphChecks.cs" Link="Shared/Server/GraphChecks.cs" />
         <Compile Include="../../questline/Server/PackFacts.cs" Link="Shared/Server/PackFacts.cs" />
         <Compile Include="../../questline/Server/GameFacts.cs" Link="Shared/Server/GameFacts.cs" />
+        <Compile Include="../../questline/Server/Structures.cs" Link="Shared/Server/Structures.cs" />
     </ItemGroup>
 
     <ItemGroup>

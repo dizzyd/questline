@@ -708,6 +708,7 @@
     "task-cook": "Cuire : {0}",
     "task-smelt": "Couler ou fondre : {0}",
     "task-trade": "Acheter à un marchand : {0}",
+    "task-visit": "Visiter {0}",
     "task-checkbox": "Cochez la case une fois fait",
     "task-checkbox-hud": "Cochez-la dans le livre de quêtes",
     "any-of": "n'importe quel(le) {0}",

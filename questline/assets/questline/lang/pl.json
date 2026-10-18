@@ -708,6 +708,7 @@
     "task-cook": "Ugotuj: {0}",
     "task-smelt": "Odlej lub wytop: {0}",
     "task-trade": "Kup od handlarza: {0}",
+    "task-visit": "Odwiedź {0}",
     "task-checkbox": "Zaznacz pole, gdy skończysz",
     "task-checkbox-hud": "Odhacz to w księdze zadań",
     "any-of": "{0} (dowolny rodzaj)",

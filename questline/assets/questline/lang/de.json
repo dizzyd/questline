@@ -708,6 +708,7 @@
     "task-cook": "Koche: {0}",
     "task-smelt": "Gieße oder schmelze: {0}",
     "task-trade": "Kaufe bei einem Händler: {0}",
+    "task-visit": "Besuche {0}",
     "task-checkbox": "Hake das Kästchen ab, wenn erledigt",
     "task-checkbox-hud": "Hake es im Questbuch ab",
     "any-of": "{0} (beliebig)",

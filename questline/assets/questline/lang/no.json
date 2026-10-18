@@ -708,6 +708,7 @@
     "task-cook": "Tilbered {0}",
     "task-smelt": "Støp eller smelt {0}",
     "task-trade": "Kjøp {0} fra en handelsmann",
+    "task-visit": "Besøk {0}",
     "task-checkbox": "Huk av når det er gjort",
     "task-checkbox-hud": "Huk av i oppdragsboken",
     "any-of": "{0} (hvilken som helst)",

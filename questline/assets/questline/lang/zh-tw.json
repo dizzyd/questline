@@ -708,6 +708,7 @@
     "task-cook": "烹煮：{0}",
     "task-smelt": "鑄造或熔鍊：{0}",
     "task-trade": "向商人購買：{0}",
+    "task-visit": "探訪{0}",
     "task-checkbox": "完成後勾選此項",
     "task-checkbox-hud": "在任務書中勾選",
     "any-of": "任一{0}",

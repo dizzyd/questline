@@ -708,6 +708,7 @@
     "task-cook": "Tilbered: {0}",
     "task-smelt": "Støb eller smelt: {0}",
     "task-trade": "Køb af en handelsmand: {0}",
+    "task-visit": "Besøg {0}",
     "task-checkbox": "Sæt flueben, når det er gjort",
     "task-checkbox-hud": "Sæt flueben i opgavebogen",
     "any-of": "enhver {0}",

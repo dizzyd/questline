@@ -81,5 +81,10 @@
     "workshop-absent-desc": "Its mod isn't installed.",
     "workshop-addon-label": "With the addon",
     "check-unchecked-title": "Trust the author",
-    "check-unchecked-desc": "The same wrong method, marked unchecked: the graph checks skip it."
+    "check-unchecked-desc": "The same wrong method, marked unchecked: the graph checks skip it.",
+    "places-title": "Places",
+    "find-a-trader-title": "Find a trader",
+    "two-ruins-title": "Explore two underground ruins",
+    "game:structure-trader": "a trader's camp",
+    "game:structure-undergroundruin": "an underground ruin"
 }

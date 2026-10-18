@@ -14,7 +14,7 @@ namespace questline.Server;
 /// <summary>
 /// What a running game knows that checking a quest pack needs, saved to one file by
 /// <c>/questline snapshot</c>: the game version, the loaded mods, every item, block and
-/// creature code, every lang entry, and the recipe graph.
+/// creature code, every worldgen structure, every lang entry, and the recipe graph.
 /// </summary>
 public class GameSnapshot
 {
@@ -24,6 +24,8 @@ public class GameSnapshot
     public List<string> Blocks = [];
     public List<string> Entities = [];
     public Dictionary<string, string> Lang = [];
+    /// <summary>Every worldgen structure's code, with its domain, as visit tasks name them.</summary>
+    public List<string> Structures = [];
     public RecipeGraph Graph;
 
     public string ToJson() => JsonConvert.SerializeObject(this);
@@ -45,7 +47,7 @@ public class GameSnapshot
 public class PackFacts : IGameFacts
 {
     readonly GameSnapshot snapshot;
-    readonly HashSet<string> collectibles, blocks, entities, mods;
+    readonly HashSet<string> collectibles, blocks, entities, structures, mods;
     readonly Dictionary<string, string> lang;
     readonly List<(string Domain, string Path, Func<byte[]> Read)> files = [];
     readonly string gameAssets;
@@ -61,6 +63,7 @@ public class PackFacts : IGameFacts
         collectibles = [.. snapshot.Items, .. snapshot.Blocks];
         blocks = [.. snapshot.Blocks];
         entities = [.. snapshot.Entities];
+        structures = [.. snapshot.Structures ?? []];
         mods = [.. snapshot.Mods];
         lang = new Dictionary<string, string>(snapshot.Lang);
 
@@ -137,7 +140,7 @@ public class PackFacts : IGameFacts
 
     public bool AnyMatches(string kind, string pattern)
     {
-        var set = kind switch { "entity" => entities, "block" => blocks, _ => collectibles };
+        var set = kind switch { "entity" => entities, "block" => blocks, "structure" => structures, _ => collectibles };
         if (!TaskDef.IsPattern(pattern)) return set.Contains(Qualified(pattern));
         var loc = new AssetLocation(pattern);
         return set.Any(c => WildcardUtil.Match(loc, new AssetLocation(c)));

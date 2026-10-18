@@ -708,6 +708,7 @@
     "task-cook": "Tillaga: {0}",
     "task-smelt": "Gjut eller smält: {0}",
     "task-trade": "Köp av en köpman: {0}",
+    "task-visit": "Besök {0}",
     "task-checkbox": "Bocka i rutan när det är klart",
     "task-checkbox-hud": "Bocka av i uppdragsboken",
     "any-of": "valfri {0}",

@@ -708,6 +708,7 @@
     "task-cook": "Išvirti ar iškepti: {0}",
     "task-smelt": "Išlieti ar išlydyti: {0}",
     "task-trade": "Nupirkti iš prekeivio: {0}",
+    "task-visit": "Aplankyk {0}",
     "task-checkbox": "Pažymėk langelį, kai atliksi",
     "task-checkbox-hud": "Pažymėk užduočių knygoje",
     "any-of": "bet koks {0}",

@@ -159,11 +159,16 @@ public class PageBlock
 
 public class TaskDef
 {
-    /// <summary>obtain, kill, mount, place, break, craft, knap, clayform, smith, cook, smelt, trade, custom or checkbox.</summary>
+    /// <summary>obtain, kill, mount, place, break, craft, knap, clayform, smith, cook, smelt, trade, visit, custom or checkbox.</summary>
     public string Type;
     public string Item;
     public string Block;
     public string Entity;
+    /// <summary>
+    /// visit only: a structure worldgen places, by its code in the worldgen config that places it
+    /// and that file's domain: game:tobiascave, betterruins:largeforlornhopetower.
+    /// </summary>
+    public string Structure;
     /// <summary>custom only: the key another mod reports progress under, e.g. mymod:caught-salmon.</summary>
     public string Key;
     public int Count = 1;
@@ -176,7 +181,7 @@ public class TaskDef
     public bool Unchecked;
 
     /// <summary>The code the task matches, whichever field the author used. May carry wildcards.</summary>
-    [JsonIgnore] public string Target => Item ?? Block ?? Entity ?? Key;
+    [JsonIgnore] public string Target => Item ?? Block ?? Entity ?? Structure ?? Key;
 
     /// <summary>
     /// Whether a code stands for many: a wildcard (game:saw-*) or, as the game's own matcher
@@ -188,7 +193,18 @@ public class TaskDef
     [JsonIgnore] public bool OnEntity => Type is "kill" or "mount";
 
     /// <summary>Whether the target is an item or a block, one the book can show.</summary>
-    [JsonIgnore] public bool OnCollectible => !OnEntity && Type is not ("custom" or "checkbox");
+    [JsonIgnore] public bool OnCollectible => !OnEntity && Type is not ("custom" or "checkbox" or "visit");
+
+    /// <summary>
+    /// The lang entry naming a visit task's place: <c>&lt;domain&gt;:structure-&lt;code&gt;</c>, a wildcard's
+    /// star left off, so betterruins:megastructures-* is named by betterruins:structure-megastructures.
+    /// </summary>
+    public static string StructureNameKey(string code)
+    {
+        int colon = code.IndexOf(':');
+        string domain = colon > 0 ? code[..colon] : "game", path = code[(colon + 1)..];
+        return domain + ":structure-" + path.Replace("*", "").Trim('-');
+    }
 }
 
 public class RewardDef

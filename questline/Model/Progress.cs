@@ -39,6 +39,8 @@ public class PlayerProgress
     public HashSet<string> Stages = [];
     /// <summary>Everything the player has done that a task could count, as "type|code" to a running total.</summary>
     public Dictionary<string, int> History = [];
+    /// <summary>Each structure the player has been inside, by its code and corner, so a visit counts once.</summary>
+    public HashSet<string> Visited = [];
 
     public static string HistoryKey(string type, string code) => type + "|" + code;
 

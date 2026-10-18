@@ -26,7 +26,10 @@ public interface IGameFacts
     /// <summary>An item or block with exactly this code.</summary>
     bool CollectibleExists(string code);
 
-    /// <summary>Whether any item or block (<paramref name="kind"/> "collectible"), block ("block") or creature ("entity") matches a code, wildcards allowed.</summary>
+    /// <summary>
+    /// Whether any item or block (<paramref name="kind"/> "collectible"), block ("block"), creature
+    /// ("entity") or worldgen structure ("structure") matches a code, wildcards allowed.
+    /// </summary>
     bool AnyMatches(string kind, string pattern);
 
     bool HasLang(string key);
@@ -36,7 +39,7 @@ public interface IGameFacts
 }
 
 /// <summary>The running server's answers.</summary>
-public class ServerFacts(ICoreServerAPI api) : IGameFacts
+public class ServerFacts(ICoreServerAPI api, StructureCodes structures) : IGameFacts
 {
     public IEnumerable<(string Domain, string Name, string Json)> Chapters() => api.Assets.GetMany("questline/chapters/")
         .Where(a => a.Name.EndsWith(".json"))
@@ -61,6 +64,7 @@ public class ServerFacts(ICoreServerAPI api) : IGameFacts
         {
             "entity" => api.World.EntityTypes.Any(e => WildcardUtil.Match(loc, e.Code)),
             "block" => api.World.Blocks.Any(b => b.Code != null && WildcardUtil.Match(loc, b.Code)),
+            "structure" => structures.All.Any(s => WildcardUtil.Match(loc, new AssetLocation(s))),
             _ => api.World.Collectibles.Any(c => c.Code != null && WildcardUtil.Match(loc, c.Code)),
         };
     }

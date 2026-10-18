@@ -708,6 +708,7 @@
     "task-cook": "Főzd vagy süsd meg: {0}",
     "task-smelt": "Öntsd vagy olvaszd ki: {0}",
     "task-trade": "Vedd meg egy kereskedőtől: {0}",
+    "task-visit": "Látogasd meg: {0}",
     "task-checkbox": "Pipáld ki, ha kész",
     "task-checkbox-hud": "Pipáld ki a küldetéskönyvben",
     "any-of": "bármilyen {0}",

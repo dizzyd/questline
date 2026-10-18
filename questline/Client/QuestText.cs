@@ -45,6 +45,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
     {
         if (task.Type == "checkbox") return Lang.Get("questline:task-checkbox");
         if (task.Type == "custom") return Named(task.Key);
+        if (task.Type == "visit") return Lang.Get("questline:task-visit", Get(TaskDef.StructureNameKey(task.Structure)));
         return Lang.Get("questline:task-" + task.Type, TargetName(task));
     }
 

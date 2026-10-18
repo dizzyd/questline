@@ -708,6 +708,7 @@
     "task-cook": "Kypsennä: {0}",
     "task-smelt": "Valaa tai sulata: {0}",
     "task-trade": "Osta kauppiaalta: {0}",
+    "task-visit": "Käy kohteessa {0}",
     "task-checkbox": "Merkitse tehdyksi, kun olet valmis",
     "task-checkbox-hud": "Merkitse se tehtäväkirjassa",
     "any-of": "mikä tahansa {0}",

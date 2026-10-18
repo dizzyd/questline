@@ -708,6 +708,7 @@
     "task-cook": "Pişir: {0}",
     "task-smelt": "Dök ya da ergit: {0}",
     "task-trade": "Tüccardan satın al: {0}",
+    "task-visit": "{0} yerini ziyaret et",
     "task-checkbox": "Bitince kutuyu işaretle",
     "task-checkbox-hud": "Görev kitabında işaretle",
     "any-of": "herhangi bir {0}",

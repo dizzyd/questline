@@ -99,6 +99,11 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 - **The client builds its own recipe graph and sees less.** A dedicated client has no server-side
   entity behaviour config, so butchering drops are server-only, and milking and picking up fall
   back to the game's own defaults. `MultiplayerTests` holds the two graphs to the same counts.
+- **Visit tasks read what worldgen recorded, not the configs.** Each placed structure is in its map
+  region's `GeneratedStructures` under a code the game makes up (`<schematic>/<structure>` for ruins,
+  `<structure>:<schematic>` for story locations, a dungeon's pieces by group), without a domain.
+  `StructureCodes` turns that back into the config's code and domain. Tests add records of their own
+  (`VisitTests.Place`) and must take them out again.
 - **Some things fire no event to credit.** Putting things in ground storage never calls
   `DidPlaceBlock`; every pot meal is the same `claypot-*-cooked` (the recipe is an attribute);
   grafting and planting place the same cutting; quenching, kiln firing and anvil welding change

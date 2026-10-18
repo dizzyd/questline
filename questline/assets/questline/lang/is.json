@@ -708,6 +708,7 @@
     "task-cook": "Elda: {0}",
     "task-smelt": "Steypa eða bræða: {0}",
     "task-trade": "Kaupa af kaupmanni: {0}",
+    "task-visit": "Heimsæktu {0}",
     "task-checkbox": "Hakaðu í reitinn þegar því er lokið",
     "task-checkbox-hud": "Hakaðu við það í verkefnabókinni",
     "any-of": "hvaða {0} sem er",
