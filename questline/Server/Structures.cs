@@ -11,7 +11,7 @@ namespace questline.Server;
 /// betterruins:largeforlornhopetower).
 ///
 /// The game records each structure it places in its map region, under a code of its own making:
-/// "&lt;schematic&gt;/&lt;structure&gt;" for ruins (GenStructures), "&lt;structure&gt;:&lt;schematic&gt;" for story
+/// "&lt;schematic&gt;/&lt;structure&gt;" for ruins and each building of a village (GenStructures), "&lt;structure&gt;:&lt;schematic&gt;" for story
 /// locations (GenStoryStructures), and a tiled dungeon's pieces with the dungeon's code as their
 /// group. None of them carries the structure's domain, so that comes from the configs.
 /// </summary>
@@ -29,6 +29,7 @@ public class StructureCodes
         {
             Add(ruins, asset, "structures");
         }
+        foreach (var asset in api.Assets.GetMany("worldgen/villages.json")) Add(ruins, asset, "villageTypes");
         foreach (var asset in api.Assets.GetMany("worldgen/storystructures.json")) Add(story, asset, "structures");
         foreach (var asset in api.Assets.GetMany("worldgen/tileddungeons.json")) Add(dungeons, asset, "dungeons");
     }

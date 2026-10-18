@@ -17,8 +17,8 @@ Every phase of the roadmap, minus the VS Quest importer:
   structure worldgen placed, each structure once), custom, checkbox. A visit names the structure by
   its code in the worldgen config, with that file's domain (`game:trader-*`,
   `betterruins:largeforlornhopetower`), and its place by the lang entry `<domain>:structure-<code>`;
-  `/questline structures` names whatever you are standing in, and a `discovered` gate sees places
-  visited
+  a village counts each of its buildings. `/questline structures` names whatever you are standing
+  in, and a `discovered` gate sees places visited
 - Rewards: items, pick-one choices and stages, claimed in the book. `GearRewards` in
   `ModConfig/questline.json` scales the rusty gears they give (2 for a trading server, 0 for none)
 - Player history: a quest that unlocks is credited with work done before
@@ -59,7 +59,8 @@ Every phase of the roadmap, minus the VS Quest importer:
   guides, teaches the mechanics and never the story
 - Quests for popular mods, melded into the base chapters when the mod is installed: Expanded
   Foods (with A Culinary Artillery and its modules), Hex's Mech, Seafarer, Bricklayers, Charcoal
-  Kiln, Wool, Tailor's Delight and From Golden Combs. 172 quests in all; a chapter file can
+  Kiln, Wool, Tailor's Delight, From Golden Combs and Better Ruins (its ruins, hidden places and the
+  far story locations its maps lead to). 194 quests in all; a chapter file can
   `extend` a base chapter and replace a base quest whose mechanic the mod changes
 - A goal planner: "Plan how to make this" on an item page works it back through the recipe
   graph to what the player carries. `RevealLevel` in `ModConfig/questline.json` caps what it

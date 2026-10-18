@@ -1,0 +1,572 @@
+{
+    "id": "ruins",
+    "order": 96,
+    "requiresMod": [
+        "betterruins"
+    ],
+    "icon": "betterruins:locatormap-undergroundruins",
+    "quests": [
+        {
+            "id": "explore-ruin",
+            "pos": [
+                0,
+                3.0
+            ],
+            "requires": "find-rusty-gears",
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:largeruins-*"
+                }
+            ],
+            "icon": "game:creature-drifter-normal",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "explore-megastructure",
+            "pos": [
+                2,
+                0.0
+            ],
+            "requires": "explore-ruin",
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:megastructures-*"
+                }
+            ],
+            "icon": "game:gear-temporal",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "find-waystone",
+            "pos": [
+                2,
+                1.5
+            ],
+            "requires": "explore-ruin",
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:*-waystones"
+                }
+            ],
+            "icon": "game:rock-granite",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "find-blueprint",
+            "pos": [
+                2,
+                3.0
+            ],
+            "requires": "explore-ruin",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "betterruins:br-schematic-*",
+                    "unchecked": true
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "find-hidden-passage",
+            "pos": [
+                2,
+                4.5
+            ],
+            "requires": "explore-ruin",
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:gates"
+                }
+            ],
+            "icon": "betterruins:locatormap-gates",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "find-hidden-tomb",
+            "pos": [
+                2,
+                6.0
+            ],
+            "requires": "explore-ruin",
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:graves"
+                }
+            ],
+            "icon": "betterruins:locatormap-graves",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "buy-hideout-map",
+            "pos": [
+                0,
+                7.5
+            ],
+            "requires": "visit-trader",
+            "tasks": [
+                {
+                    "type": "obtain",
+                    "item": "betterruins:locatormap-undergroundruins"
+                }
+            ],
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "find-hideout",
+            "pos": [
+                2,
+                7.5
+            ],
+            "requires": "buy-hideout-map",
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:undergroundruins"
+                }
+            ],
+            "icon": "betterruins:locatormap-undergroundruins",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-forlorn-tower",
+            "pos": [
+                0,
+                9.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-forlornhopetower"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:largeforlornhopetower"
+                }
+            ],
+            "icon": "betterruins:locatormap-forlornhopetower",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-forlorn-bastion",
+            "pos": [
+                2,
+                9.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "all": [
+                    "visit-forlorn-tower",
+                    {
+                        "discovered": "betterruins:locatormap-forlornhopedungeon"
+                    }
+                ]
+            },
+            "shape": "gear",
+            "size": 1.25,
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:forlornhopedungeon"
+                }
+            ],
+            "icon": "betterruins:locatormap-forlornhopedungeon",
+            "rewards": [
+                {
+                    "type": "choice",
+                    "options": [
+                        {
+                            "type": "item",
+                            "item": "game:gear-rusty",
+                            "count": 10
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:gear-temporal",
+                            "count": 1
+                        },
+                        {
+                            "type": "item",
+                            "item": "game:rope",
+                            "count": 6
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "visit-university",
+            "pos": [
+                4,
+                9.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-university"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:university"
+                }
+            ],
+            "icon": "betterruins:locatormap-university",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-crossroads",
+            "pos": [
+                0,
+                12.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-crossroadsbelow"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:crossroads"
+                }
+            ],
+            "icon": "betterruins:locatormap-crossroadsbelow",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-mansion",
+            "pos": [
+                2,
+                10.5
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "all": [
+                    "visit-crossroads",
+                    {
+                        "discovered": "betterruins:locatormap-mansion"
+                    }
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:mansion"
+                }
+            ],
+            "icon": "betterruins:locatormap-mansion",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-panopticon",
+            "pos": [
+                2,
+                12.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "all": [
+                    "visit-crossroads",
+                    {
+                        "discovered": "betterruins:locatormap-thepanopticon"
+                    }
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:thepanopticon"
+                }
+            ],
+            "icon": "betterruins:locatormap-thepanopticon",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-dome-mall",
+            "pos": [
+                2,
+                13.5
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "all": [
+                    "visit-crossroads",
+                    {
+                        "discovered": "betterruins:locatormap-shoppingcentre"
+                    }
+                ]
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:shoppingcentre"
+                }
+            ],
+            "icon": "betterruins:locatormap-shoppingcentre",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-coal-mine",
+            "pos": [
+                4,
+                10.5
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-coalmine"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:coalmine"
+                }
+            ],
+            "icon": "betterruins:locatormap-coalmine",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-abandoned-mine",
+            "pos": [
+                4,
+                12.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-mine*"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:mine*"
+                }
+            ],
+            "icon": "betterruins:locatormap-mine1",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-huaca",
+            "pos": [
+                4,
+                13.5
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-huaca"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:huaca"
+                }
+            ],
+            "icon": "betterruins:locatormap-huaca",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-sunrift",
+            "pos": [
+                0,
+                15.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-*sunrift"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:sunrift"
+                }
+            ],
+            "icon": "betterruins:locatormap-sunrift",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-calix",
+            "pos": [
+                2,
+                15.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-calix"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:calix"
+                }
+            ],
+            "icon": "betterruins:locatormap-calix",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-halite-quarry",
+            "pos": [
+                4,
+                15.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-halitequarry"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:halitequarry"
+                }
+            ],
+            "icon": "betterruins:locatormap-halitequarry",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        },
+        {
+            "id": "visit-forgotten-village",
+            "pos": [
+                6,
+                15.0
+            ],
+            "visibility": "whenUnlocked",
+            "requires": {
+                "discovered": "betterruins:locatormap-forgottenvillage"
+            },
+            "tasks": [
+                {
+                    "type": "visit",
+                    "structure": "betterruins:forgottenvillage"
+                }
+            ],
+            "icon": "betterruins:locatormap-forgottenvillage",
+            "rewards": [
+                {
+                    "type": "item",
+                    "item": "game:gear-rusty",
+                    "count": 1
+                }
+            ]
+        }
+    ]
+}

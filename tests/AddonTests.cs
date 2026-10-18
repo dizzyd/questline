@@ -35,5 +35,42 @@ namespace Questline.Tests
             foreach (var p in Engine.Problems.Where(p => p.Contains("workshop"))) Log(p);
             Assert.False(Engine.Problems.Any(p => p.Contains("workshop")), "no problems from either");
         }
+
+        /// <summary>
+        /// Better Ruins' places, by the codes its ruins chapter visits, and every structure worldgen
+        /// recorded in the loaded map regions known by one of them: a recorded code the mapping
+        /// can't read would be a place no visit task ever counts.
+        /// </summary>
+        [VsTest]
+        public async Task BetterRuinsPlacesAreKnown()
+        {
+            await OnServer();
+            if (!Sapi.ModLoader.IsModEnabled("betterruins")) Skip("Better Ruins isn't loaded; pass --mods with the addon mods");
+
+            var codes = Engine.Structures;
+            foreach (string code in new[] { "betterruins:largeforlornhopetower", "betterruins:crossroads", "betterruins:mine1", "betterruins:graves", "betterruins:quentin-waystones" })
+            {
+                Assert.True(codes.All.Contains(code), code);
+            }
+            Assert.Equal(22, Engine.Registry.ChaptersById["questline:ruins"].Quests.Count, "the ruins chapter loaded");
+
+            int size = Sapi.WorldManager.RegionSize, found = 0;
+            var unknown = new System.Collections.Generic.List<string>();
+            var spawn = Sapi.World.DefaultSpawnPosition.AsBlockPos;
+            for (int rx = spawn.X / size - 4; rx <= spawn.X / size + 4; rx++)
+            {
+                for (int rz = spawn.Z / size - 4; rz <= spawn.Z / size + 4; rz++)
+                {
+                    foreach (var placed in Sapi.WorldManager.GetMapRegion(rx, rz)?.GeneratedStructures?.ToList() ?? [])
+                    {
+                        found++;
+                        if (codes.Of(placed).Count == 0) unknown.Add($"{placed.Code} ({placed.Group})");
+                    }
+                }
+            }
+            Log($"{found} structures recorded around spawn");
+            foreach (string u in unknown.Distinct().Take(20)) Log("unknown: " + u);
+            Assert.Equal(0, unknown.Count, "every recorded structure known by its config's code");
+        }
     }
 }

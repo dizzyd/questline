@@ -100,7 +100,7 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   entity behaviour config, so butchering drops are server-only, and milking and picking up fall
   back to the game's own defaults. `MultiplayerTests` holds the two graphs to the same counts.
 - **Visit tasks read what worldgen recorded, not the configs.** Each placed structure is in its map
-  region's `GeneratedStructures` under a code the game makes up (`<schematic>/<structure>` for ruins,
+  region's `GeneratedStructures` under a code the game makes up (`<schematic>/<structure>` for ruins and each building of a village,
   `<structure>:<schematic>` for story locations, a dungeon's pieces by group), without a domain.
   `StructureCodes` turns that back into the config's code and domain. Tests add records of their own
   (`VisitTests.Place`) and must take them out again.
@@ -133,7 +133,8 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
   the pack checker. Without the mods the addons must load to nothing, quietly.
 - **The graph can't see a mod's own machines** (Hex's Mech's furnaces, Expanded Foods' mixing
   bowl, Seafarer's prep table). A task for their output carries `"unchecked": true`, which skips
-  the "how is it made" checks; the code must still exist. Use it only for that.
+  the "how is it made" checks; the code must still exist. Use it only for that, and for loot
+  only worldgen's schematics hold (Better Ruins' blueprints), which the graph can't read either.
 - **A target can be a regular expression,** as the game's matcher allows: `game:@(redmeat|poultry)-cooked`.
   Use it where a wildcard would take in things the quest doesn't mean.
 - **The whole of Dizzy's Best Pack runs on the box** for a release check. The pack targets 1.22.7,
