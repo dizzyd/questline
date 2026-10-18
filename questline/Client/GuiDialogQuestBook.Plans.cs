@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using questline.Graph;
 using questline.Model;
+using questline.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -192,12 +193,12 @@ public partial class GuiDialogQuestBook
         return comps.ToArray();
     }
 
-    static string KindName(string kind) => Lang.HasTranslation("questline:plan-kind-" + kind, true, false) ? Lang.Get("questline:plan-kind-" + kind) : kind;
+    static string KindName(string kind) => Translations.Has("questline:plan-kind-" + kind) ? Lang.Get("questline:plan-kind-" + kind) : kind;
 
     static string EntityName(string code)
     {
         var loc = new AssetLocation(code);
         string key = loc.Domain + ":item-creature-" + loc.Path;
-        return Lang.HasTranslation(key, true, false) ? Lang.Get(key) : code;
+        return Translations.Has(key) ? Lang.Get(key) : code;
     }
 }

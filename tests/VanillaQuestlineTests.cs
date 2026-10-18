@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using questline;
 using questline.Model;
 using questline.Server;
+using Vintagestory.API.Config;
 using VsTestkit.Testing;
 using static VsTestkit.Testing.Vs;
 
@@ -56,6 +57,31 @@ namespace Questline.Tests
             }
             foreach (var q in quests.Where(q => !reachable.Contains(q.Id))) Log("unreachable: " + q.Id);
             Assert.Equal(quests.Count, reachable.Count, "every quest reachable by doing the ones before it");
+        }
+
+        /// <summary>
+        /// Questline's text is English only, and the game shows English where a language has no
+        /// entry, so on a German game nothing is missing either.
+        /// </summary>
+        [VsTest(TimeoutMs = 60000)]
+        public async Task TextCountsInAnotherLanguage()
+        {
+            await OnServer();
+            string language = Lang.CurrentLocale;
+            var english = Engine.Problems.Where(p => p.Contains("no lang entry")).ToHashSet();
+            try
+            {
+                Lang.ChangeLanguage("de");
+                Engine.Reload();
+                var missing = Engine.Problems.Where(p => p.Contains("no lang entry") && !english.Contains(p)).ToList();
+                foreach (var p in missing.Take(5)) Log(p);
+                Assert.Equal(0, missing.Count, "English text counts when the game is in German");
+            }
+            finally
+            {
+                Lang.ChangeLanguage(language);
+                Engine.Reload();
+            }
         }
 
         /// <summary>

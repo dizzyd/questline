@@ -1,5 +1,6 @@
 using System.Linq;
 using questline.Model;
+using questline.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -13,7 +14,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
     /// <summary>A lang entry. The editor's own text, sent with the definitions, comes first.</summary>
     public string Get(string key) => client.Registry?.Text.TryGetValue(key, out var value) == true ? value : Lang.Get(key);
 
-    public bool Has(string key) => client.Registry?.Text.ContainsKey(key) == true || Lang.HasTranslation(key, true, false);
+    public bool Has(string key) => client.Registry?.Text.ContainsKey(key) == true || Translations.Has(key);
 
     public string Title(string questId) => Get(questId + "-title");
 
@@ -65,7 +66,7 @@ public class QuestText(ICoreClientAPI capi, QuestClient client)
             {
                 string prefix = loc.Path[..loc.Path.IndexOf('*')].TrimEnd('-');
                 string key = loc.Domain + ":item-creature-" + prefix;
-                string kind = Lang.HasTranslation(key, true, false) ? Lang.Get(key) : prefix.Replace('-', ' ');
+                string kind = Translations.Has(key) ? Lang.Get(key) : prefix.Replace('-', ' ');
                 return Lang.Get("questline:any-of", kind);
             }
             return capi.World.EntityTypes.Any(e => e.Code.Equals(loc)) ? Lang.Get(loc.Domain + ":item-creature-" + loc.Path) : task.Target;

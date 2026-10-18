@@ -188,9 +188,21 @@ public partial class QuestEngine
         Items = api.World.Items.Where(i => i?.Code != null).Select(i => i.Code.ToString()).ToList(),
         Blocks = api.World.Blocks.Where(b => b?.Code != null).Select(b => b.Code.ToString()).ToList(),
         Entities = api.World.EntityTypes.Select(e => e.Code.ToString()).ToList(),
-        Lang = Vintagestory.API.Config.Lang.GetAllEntries().ToDictionary(e => e.Key, e => e.Value),
+        Lang = SnapshotText(),
         Graph = Graph,
     };
+
+    /// <summary>The game's text: English, which the game falls back to, then the player's language over it.</summary>
+    static Dictionary<string, string> SnapshotText()
+    {
+        var text = new Dictionary<string, string>();
+        if (Vintagestory.API.Config.Lang.AvailableLanguages.TryGetValue(Vintagestory.API.Config.Lang.DefaultLocale, out var fallback))
+        {
+            foreach (var (key, value) in fallback.GetAllEntries()) text[key] = value;
+        }
+        foreach (var (key, value) in Vintagestory.API.Config.Lang.GetAllEntries()) text[key] = value;
+        return text;
+    }
 
     // What the checks know of the game, kept across reloads: only the quests change.
     GraphIndex graphIndex;

@@ -65,7 +65,18 @@ public class ServerFacts(ICoreServerAPI api) : IGameFacts
         };
     }
 
-    public bool HasLang(string key) => Lang.HasTranslation(key, true, false);
+    public bool HasLang(string key) => Translations.Has(key);
 
     public byte[] Texture(string location) => api.Assets.TryGet(new AssetLocation(location))?.Data;
+}
+
+/// <summary>
+/// Whether there's text for a key. <c>Lang.HasTranslation</c> looks only in the player's
+/// language, but <c>Lang.Get</c> falls back to English, so a key only English has is still
+/// shown; on a German game every one of Questline's keys would otherwise count as missing.
+/// </summary>
+public static class Translations
+{
+    public static bool Has(string key) => Lang.HasTranslation(key, true, false)
+        || (Lang.AvailableLanguages.TryGetValue(Lang.DefaultLocale, out var fallback) && fallback.HasTranslation(key, true, false));
 }
