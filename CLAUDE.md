@@ -83,6 +83,13 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 - **The loader and checks must not touch the running game directly.** They get everything through
   `IGameFacts` (`ServerFacts` in game, `PackFacts` in the checker); `PackCheckTests` requires
   both to find the same problems on the fixture.
+- **Ask `Translations.Has`, not `Lang.HasTranslation`.** The game's check looks only in the
+  player's language, while `Lang.Get` falls back to English; on a German game every key German
+  lacked counted as missing (364 problems, all of them false).
+- **Every line is in 33 languages.** `TranslationTests` fails when a key in `en.json` is missing
+  from any of them, so a new or reworded line means translating it into every `lang/*.json`, with
+  the game's own word for each item; `tools/lang/check.py` checks keys, `{0}` arguments and
+  handbook links without the game.
 - **Look item codes up, don't guess them.** Variant codes differ from the file names: keep a
   headless session (`run.sh ... --keep`) and ask `bash scripts/vstk eval` what exists.
 - **The graph stands an ingot in for the metal.** Casting takes anything that melts into it;

@@ -718,6 +718,44 @@ namespace Questline.Tests
         }
 
         /// <summary>
+        /// The book at 960×600 in languages whose words run long (German, Russian) and in other
+        /// scripts (Chinese, Arabic), to look at for text that overflows its panel or button.
+        /// </summary>
+        [VsTest(TimeoutMs = 90000)]
+        public async Task TheBookInOtherLanguages()
+        {
+            await OnClient();
+            string language = Lang.CurrentLocale;
+            try
+            {
+                foreach (string code in new[] { "de", "ru", "zh-cn", "ar" })
+                {
+                    Book.TryClose();
+                    await Frames.Wait(5);
+                    Lang.ChangeLanguage(code);
+                    for (int open = 0; open < 2; open++)
+                    {
+                        Book.TryClose();
+                        await Frames.Wait(5);
+                        Book.ForgetViews();
+                        Book.SelectChapter("questline:stone-age");
+                        Book.SelectQuest("questline:make-firestarter");
+                        await VsTestkit.Testing.Gui.WaitFor<GuiDialogQuestBook>();
+                        await Frames.Wait(30);
+                    }
+                    Assert.Equal("questline:make-firestarter", Book.SelectedQuest);
+                    Log(await Shot.Take($"questline-lang-{code}.png"));
+                }
+            }
+            finally
+            {
+                Book.TryClose();
+                Lang.ChangeLanguage(language);
+                Book.ForgetViews();
+            }
+        }
+
+        /// <summary>
         /// A press and release handed to the book, as the game's GUI system does it. Input.Click
         /// goes in through the world's mouse state and doesn't reach dialog elements; configkit's
         /// suite clicks its dialogs the same way.

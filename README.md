@@ -68,6 +68,13 @@ Every phase of the roadmap, minus the VS Quest importer:
 - `/questline reload | complete <quest> [player] | unlock <quest> [player] |
   reset [quest] [player] | resetserver | export | graph <item> | snapshot`
 
+## Translations
+
+Questline is in every language the game ships (`questline/assets/questline/lang/`), translated
+by machine with the game's own word for every item, and not yet checked by native speakers.
+Corrections are welcome. A new or changed line in `en.json` needs the same in every language;
+`python3 tools/lang/check.py` checks each file's keys, arguments and handbook links.
+
 ## Checking a quest pack
 
 `tools/packcheck` runs every check the server runs (missing items and text, broken requirements,
