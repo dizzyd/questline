@@ -3,6 +3,9 @@
     "icon": "game:flint",
     "order": 10,
     "age": true,
+    "aliases": {
+        "pick-up-flint": "gather-flint"
+    },
     "quests": [
         {
             "id": "gather-flint",

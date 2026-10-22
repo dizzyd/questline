@@ -612,6 +612,9 @@ public partial class GuiDialogQuestBook : GuiDialog
             }
         }
 
+        // The id the admin commands and .questline pin take, last so it moves nothing above it.
+        comps.Add(new RichTextComponent(capi, "\n" + quest.Id, MutedSmall()));
+
         return comps.ToArray();
     }
 

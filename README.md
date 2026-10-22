@@ -41,7 +41,8 @@ Every phase of the roadmap, minus the VS Quest importer:
 - Quest modes: each player, the party (pooled, each member claims once) or the whole server
   (pooled; `"claim": "first"` lets the first claim take it). Parties are made in the book's
   Party tab and turned off with `"Parties": false`
-- Up to three quests pinned under the minimap; `.questline toasts on|off` per player
+- Up to three quests pinned under the minimap, from the book or with `.questline pin <quest>`
+  (`.questline pins` lists them); `.questline toasts on|off` per player
 - Text size per player: A− and A+ beside the book's tabs, or `.questline textsize <percent>`
   (90, 100, 115 (the default), 130 or 150)
 - Chapter art: a background, images, labels and arrows; quests as squares, circles, hexagons
@@ -77,6 +78,8 @@ Every phase of the roadmap, minus the VS Quest importer:
   around the player
 - `/questline reload | complete <quest> [player] | unlock <quest> [player] |
   catchup [player] | reset [quest] [player] | resetserver | export | graph <item> | structures | snapshot`
+- A quest's id is at the foot of its page in the book; commands take it without its domain
+  (`cast-anvil`), the default questline's quest winning where two domains share one
 
 ## Translations
 

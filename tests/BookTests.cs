@@ -417,6 +417,39 @@ namespace Questline.Tests
             await Player.Hold("game:stick", 1);
         }
 
+        [VsTest(TimeoutMs = 30000)]
+        public async Task PinCommandTogglesAQuestByItsId()
+        {
+            await OnClient();
+            var client = ClientSystem.Client;
+            foreach (var id in client.Pins.ToList()) client.Unpin(id);
+
+            Assert.Equal(EnumCommandStatus.Success, Run(".questline pin station-craft").Status, "pinned by the id without its domain");
+            Assert.True(client.IsPinned("qltest:station-craft"));
+            Assert.True(Run(".questline pins").StatusMessage.Contains("qltest:station-craft"), "the list names the pin by its id");
+            Assert.Equal(EnumCommandStatus.Success, Run(".questline pin station-craft").Status, "unpinned");
+            Assert.False(client.IsPinned("qltest:station-craft"));
+            Assert.Equal(EnumCommandStatus.Error, Run(".questline pin no-such-quest").Status);
+
+            await OnServer();
+            Engine.ForceComplete(Me, GatherFlint);
+            Assert.Equal(null, Engine.Claim(Me, GatherFlint, null));
+            await OnClient();
+            await Until(() => client.StateOf(GatherFlint) == QuestState.Done, 60, "the claim to reach the client");
+            Assert.Equal(EnumCommandStatus.Error, Run(".questline pin " + GatherFlint).Status, "a claimed quest isn't pinned, as in the book");
+            Assert.False(client.IsPinned(GatherFlint));
+        }
+
+        // A client command, run as the player typing it in chat would: the game gives client
+        // commands every privilege, since they act only on the player's own game.
+        static TextCommandResult Run(string command)
+        {
+            TextCommandResult result = null;
+            var caller = new Caller { Type = EnumCallerType.Player, Player = Capi.World.Player, CallerPrivileges = ["*"] };
+            Capi.ChatCommands.ExecuteUnparsed(command, new TextCommandCallingArgs { Caller = caller }, r => result = r);
+            return result;
+        }
+
         static string Title(string questId) => ClientSystem.Client.TextOf(questId + "-title");
 
         /// <summary>

@@ -53,6 +53,19 @@ namespace Questline.Tests
         }
 
         [VsTest]
+        public void RegistryFindsAQuestWithoutItsDomain()
+        {
+            var registry = Engine.Registry;
+            Assert.Equal(GatherFlint, registry.Find(GatherFlint)?.Id, "the full id");
+            Assert.Equal("qltest:station-craft", registry.Find("station-craft")?.Id, "the id without its domain");
+            Assert.Equal("questline:gather-flint", registry.Find("gather-flint")?.Id, "the default questline's, when two domains share the id");
+            Assert.Equal(GatherFlint, registry.Find("qltest:pick-up-flint")?.Id, "an alias");
+            Assert.Equal(GatherFlint, registry.Find("pick-up-flint")?.Id, "an alias without its domain");
+            Assert.Null(registry.Find("qltest:no-such-quest"));
+            Assert.Null(registry.Find("no-such-quest"));
+        }
+
+        [VsTest]
         public void LoadsChaptersAndDisablesBrokenQuests()
         {
             var registry = Engine.Registry;

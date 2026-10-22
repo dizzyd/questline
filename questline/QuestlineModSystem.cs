@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using questline.Client;
+using questline.Model;
 using questline.Server;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -101,6 +102,36 @@ public class QuestlineModSystem : ModSystem
                     Client.SetToasts((bool)args[0]);
                     return TextCommandResult.Success((bool)args[0] ? "Quest toasts on" : "Quest toasts off");
                 })
+            .EndSubCommand()
+            .BeginSubCommand("pins")
+                .WithDescription("List the quests pinned to the HUD, with their ids")
+                .HandleWith(_ =>
+                {
+                    var text = new QuestText(api, Client);
+                    return TextCommandResult.Success(Client.Pins.Count == 0
+                        ? "No quests pinned"
+                        : string.Join("\n", Client.Pins.Select(id => $"{id}: {text.Title(id)}")));
+                })
+            .EndSubCommand()
+            .BeginSubCommand("pin")
+                .WithDescription("Pin a quest to the HUD by its id, or unpin it if it is pinned")
+                .WithArgs(api.ChatCommands.Parsers.Word("quest id"))
+                .HandleWith(args =>
+                {
+                    string typed = (string)args[0];
+                    if (!Client.Ready) return TextCommandResult.Error("The quests haven't arrived from the server yet");
+                    if (Client.Registry.Find(typed)?.Id is not { } id) return NoQuest(typed);
+                    if (Client.IsPinned(id))
+                    {
+                        Client.Unpin(id);
+                        return TextCommandResult.Success($"Unpinned {id}");
+                    }
+                    // As in the book, which offers no pin once a quest is claimed.
+                    if (Client.StateOf(id) == QuestState.Done) return TextCommandResult.Error($"{id} is done; there's nothing left to track");
+                    return Client.Pin(id)
+                        ? TextCommandResult.Success($"Pinned {id}")
+                        : TextCommandResult.Error($"{ClientSettings.MaxPins} quests are already pinned; unpin one first");
+                })
             .EndSubCommand();
 
         api.Input.RegisterHotKey("questline", "Open the quest book", GlKeys.L, HotkeyType.GUIOrOtherControls);
@@ -129,12 +160,12 @@ public class QuestlineModSystem : ModSystem
 
         TextCommandResult ForQuest(TextCommandCallingArgs args, Action<string, string> act, string done)
         {
-            string id = (string)args[0];
-            if (Engine.Registry.Get(id) == null) return TextCommandResult.Error($"No quest {id}");
+            string typed = (string)args[0];
+            if (Engine.Registry.Find(typed) is not { } quest) return NoQuest(typed);
             var (uid, name) = Target(args, 1);
             if (uid == null) return TextCommandResult.Error("Name a player");
-            act(uid, id);
-            return TextCommandResult.Success(string.Format(done, id, name));
+            act(uid, quest.Id);
+            return TextCommandResult.Success(string.Format(done, quest.Id, name));
         }
 
         api.ChatCommands.Create("questline")
@@ -176,12 +207,13 @@ public class QuestlineModSystem : ModSystem
                 .WithArgs(parsers.OptionalWord("quest id"), parsers.OptionalPlayerUids("player"))
                 .HandleWith(args =>
                 {
-                    string id = (string)args[0];
-                    if (id != null && Engine.Registry.Get(id) == null) return TextCommandResult.Error($"No quest {id}");
+                    string typed = (string)args[0];
+                    var quest = typed == null ? null : Engine.Registry.Find(typed);
+                    if (typed != null && quest == null) return NoQuest(typed);
                     var (uid, name) = Target(args, 1);
                     if (uid == null) return TextCommandResult.Error("Name a player");
-                    Engine.Reset(uid, id);
-                    return TextCommandResult.Success(id == null ? $"Reset every quest for {name}" : $"Reset {id} for {name}");
+                    Engine.Reset(uid, quest?.Id);
+                    return TextCommandResult.Success(quest == null ? $"Reset every quest for {name}" : $"Reset {quest.Id} for {name}");
                 })
             .EndSubCommand()
             .BeginSubCommand("export")
@@ -237,6 +269,9 @@ public class QuestlineModSystem : ModSystem
                 })
             .EndSubCommand();
     }
+
+    static TextCommandResult NoQuest(string id) =>
+        TextCommandResult.Error($"No quest {id}. The book shows a quest's id at the foot of its page");
 
     public override void Dispose()
     {

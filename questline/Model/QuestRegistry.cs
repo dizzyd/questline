@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -10,7 +11,9 @@ namespace questline.Model;
 /// </summary>
 public class QuestRegistry
 {
-    public const string DefaultQuestline = "questline:default";
+    /// <summary>The domain of the default questline, which ships with the mod.</summary>
+    public const string DefaultDomain = "questline";
+    public const string DefaultQuestline = DefaultDomain + ":default";
 
     public List<QuestlineDef> Questlines = [];
     public List<ChapterDef> Chapters = [];
@@ -28,6 +31,25 @@ public class QuestRegistry
     [JsonIgnore] public Dictionary<string, List<QuestDef>> Dependents { get; private set; } = [];
 
     public QuestDef Get(string questId) => questId != null && Quests.TryGetValue(questId, out var q) ? q : null;
+
+    /// <summary>
+    /// A quest as a player types it in a command: its full id, or the id without its domain
+    /// (<c>cast-anvil</c> for <c>questline:cast-anvil</c>), either one current or an alias a
+    /// chapter keeps for a renamed quest. Where two domains have the same id, the default
+    /// questline's is the one meant; between two others, neither.
+    /// </summary>
+    public QuestDef Find(string id)
+    {
+        if (Current(id) is { } quest) return quest;
+        if (id == null || id.Contains(':')) return null;
+        if (Current(DefaultDomain + ":" + id) is { } ours) return ours;
+        var matches = Quests.Keys.Concat(Aliases.Keys)
+            .Where(full => full.EndsWith(":" + id, StringComparison.Ordinal))
+            .Select(Current).Where(q => q != null).Distinct().Take(2).ToList();
+        return matches.Count == 1 ? matches[0] : null;
+
+        QuestDef Current(string full) => Get(full) ?? (full != null && Aliases.TryGetValue(full, out var renamed) ? Get(renamed) : null);
+    }
 
     /// <summary>
     /// Multiplies every reward of <paramref name="item"/>, choice options included, rounding to
