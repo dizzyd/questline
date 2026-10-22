@@ -172,11 +172,15 @@ public class QuestlineModSystem : ModSystem
             .WithDescription("Quest book administration")
             .RequiresPrivilege(Privilege.controlserver)
             .BeginSubCommand("reload")
-                .WithDescription("Re-read every chapter and resend it to clients")
+                .WithDescription("Re-read ModConfig/questline.json and every chapter, and resend them to clients")
                 .HandleWith(_ =>
                 {
+                    string unread = Engine.ReadConfig();
                     Engine.Reload();
-                    return TextCommandResult.Success($"{Engine.Registry.Quests.Count} quests loaded, {Engine.Problems.Count} problems (see the server log)");
+                    string loaded = $"{Engine.Registry.Quests.Count} quests loaded, {Engine.Problems.Count} problems (see the server log)";
+                    return unread == null
+                        ? TextCommandResult.Success(loaded)
+                        : TextCommandResult.Error($"{loaded}; can't read {QuestlineConfig.FileName}, so the settings are unchanged: {unread}");
                 })
             .EndSubCommand()
             .BeginSubCommand("complete")

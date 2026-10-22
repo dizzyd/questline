@@ -96,15 +96,7 @@ public partial class QuestEngine
 
     public void Start()
     {
-        try
-        {
-            Config = api.LoadModConfig<QuestlineConfig>(QuestlineConfig.FileName) ?? new QuestlineConfig();
-            api.StoreModConfig(Config, QuestlineConfig.FileName);
-        }
-        catch (Exception e)
-        {
-            api.Logger.Error("[questline] can't read ModConfig/{0}, using defaults: {1}", QuestlineConfig.FileName, e.Message);
-        }
+        ReadConfig();
 
         channel = api.Network.RegisterChannel(ChannelName)
             .RegisterMessageType<DefinitionsPacket>()
@@ -158,6 +150,7 @@ public partial class QuestEngine
         var loader = new QuestLoader(new ServerFacts(api, Structures), api.Logger, Editor?.WorkingDir);
         Registry = loader.Load();
         Registry.ScaleRewards(GearItem, Config.GearRewards);
+        if (!Config.ItemRewards) Registry.RemoveItemRewards();
         Problems = loader.Problems;
         rawChapters = loader.RawChapters;
         edited = loader.Edited;
@@ -181,6 +174,28 @@ public partial class QuestEngine
             SendDefinitions(player);
             inventoryDirty.Add(player.PlayerUID);
         }
+    }
+
+    /// <summary>
+    /// Reads ModConfig/questline.json, writing back any setting it lacks. A file that can't be read
+    /// leaves the settings as they were: the defaults at startup, the running ones on a reload.
+    /// Each setting is read where it's used, so only the party tab needs telling; a reload after
+    /// this resends the rest. Returns why the file couldn't be read, or null.
+    /// </summary>
+    public string ReadConfig()
+    {
+        try
+        {
+            Config = api.LoadModConfig<QuestlineConfig>(QuestlineConfig.FileName) ?? Config;
+            api.StoreModConfig(Config, QuestlineConfig.FileName);
+        }
+        catch (Exception e)
+        {
+            api.Logger.Error("[questline] can't read ModConfig/{0}, keeping the settings it had: {1}", QuestlineConfig.FileName, e.Message);
+            return e.Message;
+        }
+        foreach (IServerPlayer player in api.World.AllOnlinePlayers) SendParty(player.PlayerUID);
+        return null;
     }
 
     bool recipesReady;

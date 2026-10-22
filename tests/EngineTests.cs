@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using questline;
@@ -226,6 +227,61 @@ namespace Questline.Tests
             finally
             {
                 Engine.Config.CreditEarlierWork = true;
+            }
+        }
+
+        [VsTest(TimeoutMs = 30000)]
+        public async Task WithItemRewardsOffQuestsGiveOnlyStages()
+        {
+            await Player.Hold("game:flint", 3);
+            await Until(() => StateOf(GatherFlint) == QuestState.Claimable, 60, "with item rewards, a claim to make");
+
+            Engine.Config.ItemRewards = false;
+            try
+            {
+                Engine.Reload();
+                var rewards = Engine.Registry.Quests.Values
+                    .SelectMany(q => q.Rewards.SelectMany(r => r.Type == "choice" ? r.Options : [r]))
+                    .ToList();
+                Assert.Equal(0, rewards.Count(r => r.Type == "item"), "no item rewards, choices included");
+                Assert.True(Engine.Registry.Get("qltest:forge-ahead").Rewards.Any(r => r.Type == "stage"), "stages stay");
+
+                // Nothing left to give, so nothing to claim, and a claim gives nothing.
+                Assert.Equal(QuestState.Done, StateOf(GatherFlint), "the waiting claim gone");
+                Assert.Equal(null, Engine.Claim(Me, GatherFlint, null));
+                Assert.Equal(0, CountCarried("game:stick"), "no sticks given");
+
+                // A hand-in that gives nothing takes nothing.
+                await Player.Hold("game:stick", 2);
+                await Until(() => StateOf(TradeSticks) == QuestState.Done, 60, "the hand-in done without a claim");
+                Assert.Equal(2, CountCarried("game:stick"), "the sticks kept");
+            }
+            finally
+            {
+                Engine.Config.ItemRewards = true;
+                Engine.Reload();
+            }
+        }
+
+        [VsTest]
+        public void ReadConfigTakesTheFileOrKeepsTheSettings()
+        {
+            var running = Engine.Config;
+            string file = Path.Combine(GamePaths.ModConfig, QuestlineConfig.FileName);
+            try
+            {
+                Sapi.StoreModConfig(new QuestlineConfig { ItemRewards = false }, QuestlineConfig.FileName);
+                Assert.Equal(null, Engine.ReadConfig());
+                Assert.False(Engine.Config.ItemRewards, "the file's setting");
+
+                File.WriteAllText(file, "{ not json");
+                Assert.NotNull(Engine.ReadConfig(), "an unreadable file");
+                Assert.False(Engine.Config.ItemRewards, "the settings it had");
+            }
+            finally
+            {
+                Sapi.StoreModConfig(running, QuestlineConfig.FileName);
+                Engine.ReadConfig();
             }
         }
 

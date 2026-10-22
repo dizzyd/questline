@@ -20,7 +20,9 @@ Every phase of the roadmap, minus the VS Quest importer:
   a village counts each of its buildings. `/questline structures` names whatever you are standing
   in, and a `discovered` gate sees places visited
 - Rewards: items, pick-one choices and stages, claimed in the book. `GearRewards` in
-  `ModConfig/questline.json` scales the rusty gears they give (2 for a trading server, 0 for none)
+  `ModConfig/questline.json` scales the rusty gears they give (2 for a trading server, 0 for none);
+  `"ItemRewards": false` gives no items at all (stages still), so quests finish without a claim,
+  for a server that only tracks progression. `/questline reload` re-reads these settings
 - Player history: a quest that unlocks is credited with work done before it unlocked, since
   Questline was installed (`CreditEarlierWork` in `ModConfig/questline.json`). The game keeps no
   record of its own, so for a world played before then, `/questline catchup [player]` completes

@@ -59,18 +59,35 @@ public class QuestRegistry
     public void ScaleRewards(string item, double factor)
     {
         if (factor == 1) return;
-        foreach (var quest in Quests.Values) Scale(quest.Rewards);
-
-        void Scale(List<RewardDef> rewards)
+        foreach (var r in Quests.Values.SelectMany(q => Flatten(q.Rewards)).Where(r => r.Type == "item" && r.Item == item))
         {
-            foreach (var r in rewards)
-            {
-                if (r.Type == "choice") Scale(r.Options);
-                else if (r.Type == "item" && r.Item == item) r.Count = (int)System.Math.Round(r.Count * factor, System.MidpointRounding.AwayFromZero);
-            }
-            rewards.RemoveAll(r => (r.Type == "item" && r.Count <= 0) || (r.Type == "choice" && r.Options.Count == 0));
+            r.Count = (int)Math.Round(r.Count * factor, MidpointRounding.AwayFromZero);
+        }
+        DropRewards(r => r.Type == "item" && r.Count <= 0);
+    }
+
+    /// <summary>
+    /// Drops every item reward, choice options included; stages stay. Like
+    /// <see cref="ScaleRewards"/>, a server setting applied to the loaded registry, not the files;
+    /// clients receive the result.
+    /// </summary>
+    public void RemoveItemRewards() => DropRewards(r => r.Type == "item");
+
+    /// <summary>Drops the rewards that match, choice options included, then any choice left with no options.</summary>
+    void DropRewards(Predicate<RewardDef> drop)
+    {
+        foreach (var quest in Quests.Values) Drop(quest.Rewards);
+
+        void Drop(List<RewardDef> rewards)
+        {
+            foreach (var choice in rewards.Where(r => r.Type == "choice")) Drop(choice.Options);
+            rewards.RemoveAll(r => drop(r) || (r.Type == "choice" && r.Options.Count == 0));
         }
     }
+
+    /// <summary>Rewards with each choice's options in its place.</summary>
+    static IEnumerable<RewardDef> Flatten(List<RewardDef> rewards) =>
+        rewards.SelectMany(r => r.Type == "choice" ? Flatten(r.Options) : [r]);
 
     readonly Dictionary<string, ChapterDef> ages = [];
 

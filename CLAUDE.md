@@ -121,8 +121,9 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
 - **The back key is a hotkey with no handler.** `questline-back` (Backspace) is registered so
   players can rebind it, but the book reads it in its own `OnKeyDown`, after `base.OnKeyDown` has
   given a focused text field the key. A handler would fire while typing in chat or a form.
-- **Gear rewards are scaled on the server's registry, not in the files.** `GearRewards` multiplies
-  them after loading, so claims and the book agree; the editor's raw chapters keep the pack's amounts.
+- **Gear scaling and `ItemRewards` apply to the server's registry, not the files.** `GearRewards`
+  multiplies gears after loading and `ItemRewards: false` drops every item, so claims and the book
+  agree; the editor's raw chapters keep the pack's rewards.
   An ordinary quest gives one gear at most (`GearRewardsAreSparingAndScale`); milestones offer more.
 - **Edit the default questline with the layout in mind.** Quests sit on columns 2 apart and rows
   1.5 apart; a quest's in-chapter prerequisites sit to its left; no line may pass behind a quest.
