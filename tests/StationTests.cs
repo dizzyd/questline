@@ -53,7 +53,7 @@ namespace Questline.Tests
                 Assert.True(prefixes <= 1 && postfixes <= 1, $"{method} is patched more than once");
             }
             int methods = attached.Count;
-            Assert.Equal(9, methods, "every station patch attached");
+            Assert.Equal(10, methods, "every station patch attached");
         }
 
         [VsTest(TimeoutMs = 30000)]
@@ -186,6 +186,55 @@ namespace Questline.Tests
             Method(typeof(BlockEntityIngotMold), "TryTakeIngot").Invoke(ingotMold, [Me, new Vec3d(0.25, 0.1, 0.5)]);
             Assert.Equal(0, ingotMold.FillLevelLeft, "the left ingot was taken");
             Assert.Equal(2, Progress("smelt"));
+        }
+
+        [VsTest]
+        public void BreakingAnAnvilOutOfItsMoldCountsAsSmelting()
+        {
+            // The anvil mold refuses a right-click; breaking it is the only way the anvil comes out.
+            var pos = FullAnvilMold(P(15, 1, 3));
+            BreakAs(EnumGameMode.Survival, pos);
+            Assert.Equal(1, Progress("smelt"));
+        }
+
+        [VsTest]
+        public void BreakingAMoldInCreativeOrWithAChiselCountsNothing()
+        {
+            // Creative drops nothing.
+            var pos = FullAnvilMold(P(15, 1, 5));
+            BreakAs(EnumGameMode.Creative, pos);
+            Assert.Equal(0, Progress("smelt"), "a creative break");
+
+            // A chisel, with a hammer in the other hand, takes metal bits and leaves the mold.
+            pos = FullAnvilMold(P(15, 1, 7));
+            var hand = Me.InventoryManager.ActiveHotbarSlot;
+            var offhand = Me.Entity.LeftHandItemSlot;
+            var (held, offheld) = (hand.Itemstack, offhand.Itemstack);
+            hand.Itemstack = World.Stack("game:chisel-copper");
+            offhand.Itemstack = World.Stack("game:hammer-copper");
+            try { BreakAs(EnumGameMode.Survival, pos); }
+            finally { (hand.Itemstack, offhand.Itemstack) = (held, offheld); }
+            Assert.Equal(0, World.BE<BlockEntityToolMold>(pos).FillLevel, "the chisel emptied the mold");
+            Assert.Equal(0, Progress("smelt"), "a chiselled mold");
+        }
+
+        static BlockPos FullAnvilMold(BlockPos pos)
+        {
+            World.SetBlock("game:toolmold-blue-fired-anvil", pos);
+            var mold = World.BE<BlockEntityToolMold>(pos);
+            Assert.True(mold.BreaksWhenFilled, "the anvil mold breaks when filled");
+            mold.MetalContent = World.Stack("game:ingot-copper");
+            mold.FillLevel = (int)Field(typeof(BlockEntityToolMold), "requiredUnits").GetValue(mold);
+            return pos;
+        }
+
+        // The test world may be creative, so each break says which mode it is in.
+        static void BreakAs(EnumGameMode mode, BlockPos pos)
+        {
+            var was = Me.WorldData.CurrentGameMode;
+            Me.WorldData.CurrentGameMode = mode;
+            try { Sapi.World.BlockAccessor.GetBlock(pos).OnBlockBroken(Sapi.World, pos, Me); }
+            finally { Me.WorldData.CurrentGameMode = was; }
         }
 
         [VsTest]

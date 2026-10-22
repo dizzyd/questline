@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using Vintagestory.API.Common;
+using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
@@ -11,8 +12,9 @@ namespace questline.Server;
 
 /// <summary>
 /// Crafting stations have no shared "made something" event, so each finish is patched. Every
-/// patch is a postfix (with a prefix where the method clears what it made) that reports to the
-/// engine on the server only: in singleplayer both sides run the same patched methods.
+/// patch is a postfix, with a prefix where the method clears what it made, or a prefix alone
+/// where the method removes the block entity it would read (a bloomery broken). Each reports to
+/// the engine on the server only: in singleplayer both sides run the same patched methods.
 /// docs/phase1-findings.md has the survey these targets came from.
 /// </summary>
 public static class StationPatches
@@ -151,6 +153,30 @@ public static class StationPatches
         static void Postfix(BlockEntityToolMold __instance, IPlayer byPlayer, List<ItemStack> __state)
         {
             if (__state == null || __instance.FillLevel != 0) return;
+            foreach (var stack in __state) Credit(byPlayer, "smelt", stack);
+        }
+    }
+
+    /// <summary>
+    /// A cast broken out of its mold. An anvil's mold refuses a right-click and gives up the anvil
+    /// only this way; any other full mold broken with a pickaxe drops its cast too. Creative drops
+    /// nothing. A chisel and hammer take metal bits and leave the empty mold standing, and a block
+    /// behavior can stop the break, so the postfix credits only once the mold is gone.
+    /// </summary>
+    [HarmonyPatch(typeof(BlockToolMold), nameof(BlockToolMold.OnBlockBroken))]
+    static class ToolMoldBroken
+    {
+        static void Prefix(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, out ItemStack[] __state)
+        {
+            __state = world.Side == EnumAppSide.Server && byPlayer?.WorldData.CurrentGameMode != EnumGameMode.Creative
+                && world.BlockAccessor.GetBlockEntity(pos) is BlockEntityToolMold { IsFull: true, Shattered: false } mold
+                ? mold.GetStateAwareMoldedStacks()
+                : null;
+        }
+
+        static void Postfix(IWorldAccessor world, BlockPos pos, IPlayer byPlayer, ItemStack[] __state)
+        {
+            if (__state == null || world.BlockAccessor.GetBlock(pos).Id != 0) return;
             foreach (var stack in __state) Credit(byPlayer, "smelt", stack);
         }
     }
