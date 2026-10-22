@@ -2,3 +2,4 @@ bin/
 obj/
 Releases/
 screenshots/
+tests/fixtures/Toolsmith/

@@ -14,7 +14,9 @@ namespace questline.Server;
 /// Crafting stations have no shared "made something" event, so each finish is patched. Every
 /// patch is a postfix, with a prefix where the method clears what it made, or a prefix alone
 /// where the method removes the block entity it would read (a bloomery broken). Each reports to
-/// the engine on the server only: in singleplayer both sides run the same patched methods.
+/// the engine on the server only: in singleplayer both sides run the same patched methods. Where
+/// the method that makes a thing can't see the player, a patch on its caller records who acts
+/// (Toolsmith's workbench).
 /// docs/phase1-findings.md has the survey these targets came from.
 /// </summary>
 public static class StationPatches
@@ -22,6 +24,11 @@ public static class StationPatches
     public const string HarmonyId = "com.dizzyd.questline";
 
     static QuestEngine engine;
+
+    // Toolsmith's types, when it's installed; its patches stand down without them. Kept here, not
+    // in a class of their own, because Apply finds patches among this class's direct nested types.
+    static readonly Type ToolsmithUtility = AccessTools.TypeByName("Toolsmith.ToolTinkering.TinkeringUtility");
+    static readonly Type ToolsmithWorkbench = AccessTools.TypeByName("Toolsmith.ToolTinkering.Blocks.BlockEntityWorkbench");
 
     /// <summary>
     /// Attaches each patch on its own, so one station whose method moved in a game update costs
@@ -222,6 +229,58 @@ public static class StationPatches
         static void Prefix(BlockEntityBloomery __instance, IPlayer byPlayer, InventoryGeneric ___bloomeryInv)
         {
             if (OnServer(__instance) && ___bloomeryInv?[2].Itemstack is { } bloom) Credit(byPlayer, "smelt", bloom);
+        }
+    }
+
+    /// <summary>
+    /// A Toolsmith tool assembled in the hands, from a bundle of head and handle and a binding in
+    /// the other hand. Toolsmith works outside the crafting grid, but its tool is the vanilla item,
+    /// so it counts toward the same craft tasks. Only a finished tool replaces the bundle in its slot.
+    /// </summary>
+    [HarmonyPatch]
+    static class ToolsmithInHand
+    {
+        static bool Prepare() => ToolsmithUtility != null;
+
+        static MethodBase TargetMethod() => AccessTools.Method(ToolsmithUtility, "AssembleFullTool");
+
+        static void Prefix(ItemSlot bundleSlot, out ItemStack __state) => __state = bundleSlot.Itemstack;
+
+        static void Postfix(ItemSlot bundleSlot, EntityAgent byEntity, ItemStack __state)
+        {
+            if (bundleSlot.Itemstack != __state && byEntity is EntityPlayer { Player: { } player }) Credit(player, "craft", bundleSlot.Itemstack);
+        }
+    }
+
+    /// <summary>
+    /// Who is striking a Toolsmith workbench. The tool is made by a method that sees only the
+    /// bench's slots and dropped on the bench, so the strike keeps the player for it.
+    /// </summary>
+    [HarmonyPatch]
+    static class ToolsmithWorkbenchStrike
+    {
+        [ThreadStatic] public static IPlayer Striking;
+
+        static bool Prepare() => ToolsmithWorkbench != null;
+
+        static MethodBase TargetMethod() => AccessTools.Method(ToolsmithWorkbench, "AttemptToCraft");
+
+        static void Prefix(IPlayer byPlayer) => Striking = byPlayer;
+
+        static void Finalizer() => Striking = null;
+    }
+
+    /// <summary>A Toolsmith tool made on the workbench, for whoever struck it.</summary>
+    [HarmonyPatch]
+    static class ToolsmithWorkbenchTool
+    {
+        static bool Prepare() => ToolsmithUtility != null;
+
+        static MethodBase TargetMethod() => AccessTools.Method(ToolsmithUtility, "TryCraftToolFromSlots");
+
+        static void Postfix(ItemStack __result)
+        {
+            if (__result != null) Credit(ToolsmithWorkbenchStrike.Striking, "craft", __result);
         }
     }
 }

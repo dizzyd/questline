@@ -30,7 +30,7 @@ namespace Questline.Tests
         {
             string serverPatches = await Remote.Eval("return questline.Server.StationPatches.Attached().Count;");
             Log($"server: {serverPatches} patched methods; client: {StationPatches.Attached().Count}");
-            Assert.Equal("10", serverPatches.Trim());
+            Assert.Equal(StationTests.StationPatchCount(Capi).ToString(), serverPatches.Trim());
             Assert.Equal(0, StationPatches.Attached().Count, "the client process patches nothing");
         }
 

@@ -28,9 +28,12 @@ namespace Questline.Tests
 
         // Plain reflection, not Harmony's helpers: on a dedicated server the in-game compiler
         // can't see 0Harmony, so a test that names it doesn't compile there.
-        const BindingFlags Any = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        const BindingFlags Any = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
         static FieldInfo Field(System.Type type, string name) => type.GetField(name, Any);
         static MethodInfo Method(System.Type type, string name) => type.GetMethod(name, Any);
+
+        /// <summary>The methods StationPatches patches: three more of Toolsmith's when it's installed.</summary>
+        public static int StationPatchCount(ICoreAPI api) => 10 + (api.ModLoader.IsModEnabled("toolsmith") ? 3 : 0);
 
         static int Progress(string type) => Engine.ProgressOf(Me.PlayerUID).Find("qltest:station-" + type)?.Tasks[0] ?? 0;
 
@@ -52,8 +55,7 @@ namespace Questline.Tests
                 Log($"{method}: {prefixes} prefix, {postfixes} postfix");
                 Assert.True(prefixes <= 1 && postfixes <= 1, $"{method} is patched more than once");
             }
-            int methods = attached.Count;
-            Assert.Equal(10, methods, "every station patch attached");
+            Assert.Equal(StationPatchCount(Sapi), attached.Count, "every station patch attached");
         }
 
         [VsTest(TimeoutMs = 30000)]

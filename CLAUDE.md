@@ -149,6 +149,12 @@ game install on the box (`~/.cairn/games/1.22.6/questline-*.png`).
       --mods "$HOME/questline-pack-mods" --mods "$HOME/vstestkit-questline/mods/questline/tests/fixtures/Mods" --client
   ```
   On 1.22.6 two of its mods refuse to load and the client gives up before the world opens.
+- **Toolsmith is patched where it's installed, and tested against the real mod.** It assembles
+  tools outside the grid, so `StationPatches` has three patches of its own that stand down
+  (`Prepare`) without it; `StationPatchCount` expects them only when it's loaded. Run
+  `tests/fixtures/fetch.sh` and add `--mods "$HOME/vstestkit-questline/mods/questline/tests/fixtures/Toolsmith"`
+  for `ToolsmithTests`, which skip without it. It is kept out of `fixtures/Mods` so the other
+  suites run on a vanilla game.
 - **Tests write `VsTestkit.Testing.Gui` in full.** A pack mod (`gui`) has a top-level `Gui`
   namespace, which hides the testkit's class, and an alias can't share its name.
 - **The book draws in the handbook's layer** (`DrawOrder` 0.2, with chests, barrels and firepits),
