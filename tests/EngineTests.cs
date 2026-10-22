@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using questline;
@@ -107,6 +108,68 @@ namespace Questline.Tests
 
             Assert.NotNull(Engine.Claim(Me, GatherFlint, null), "a second claim");
             Assert.Equal(4, CountCarried("game:stick"));
+        }
+
+        [VsTest(TimeoutMs = 30000)]
+        public async Task CatchingUpCompletesWhatTheInventoryProves()
+        {
+            // gather-flint is open, and a tick's inventory scan would complete it the ordinary way
+            // first: no await between filling the slots and catching up.
+            var done = CatchUpCarrying(("qltest:gizmo-part", 1), ("game:flint", 3));
+
+            // A crafted part proves its quest was done, and the gizmo quest it needs before it.
+            Assert.True(done.Contains("qltest:check-late-part"), "the quest the part proves");
+            Assert.True(done.Contains("qltest:check-early-gizmo"), "the quest it needs");
+            Assert.False(done.Contains("qltest:check-gizmo-after"), "a gizmo quest nothing carried proves");
+
+            // Rewards for earlier work are spent: done, not claimable, and nothing given.
+            Assert.Equal(QuestState.Done, StateOf(GatherFlint));
+            Assert.Equal(0, CountCarried("game:stick"));
+
+            // Not proven: a count the inventory doesn't reach, a break task, a checkbox.
+            Assert.False(done.Contains("qltest:station-craft"), "a count the inventory doesn't reach");
+            Assert.Equal(QuestState.Available, StateOf(DigSoil));
+            Assert.Equal(QuestState.Available, StateOf(ReadTheBook));
+
+            await Until(() => Client.StateOf("qltest:check-late-part") == QuestState.Done, 60, "the client to hear about it");
+        }
+
+        [VsTest]
+        public void CatchingUpTakesOnlyTheProvenSideOfAChoice()
+        {
+            // cu-wax needs either quest; the honeycomb proves the second, so the first stays undone
+            // (and its reward unspent), though Unlock would pick it.
+            var done = CatchUpCarrying(("game:beeswax", 1), ("game:honeycomb", 1));
+            Assert.True(done.Contains("qltest:cu-wax"), "the proven quest");
+            Assert.True(done.Contains("qltest:cu-harvest"), "the proven option");
+            Assert.Equal(QuestState.Available, StateOf("qltest:cu-raid"), "the option nothing proves");
+
+            // With neither option proven there's nothing to go on, and the quest is left locked.
+            Engine.Reset(Me);
+            done = CatchUpCarrying(("game:beeswax", 1));
+            Assert.Equal(0, done.Count);
+            Assert.Equal(QuestState.Locked, StateOf("qltest:cu-wax"));
+        }
+
+        [VsTest]
+        public void CatchingUpGrantsTheStagesItsQuestsGive()
+        {
+            // cu-gated comes first in the chapter, before the quest whose stage opens it.
+            var done = CatchUpCarrying(("game:feather", 1), ("game:resin", 1));
+            Assert.True(done.Contains("qltest:cu-staged"), "the quest giving the stage");
+            Assert.True(Engine.HasStage(Me.PlayerUID, "qltest:cu-stage"), "its stage, though its reward is spent");
+            Assert.True(done.Contains("qltest:cu-gated"), "the quest the stage opens");
+        }
+
+        [VsTest]
+        public void CatchingUpLeavesWhatItCantMeet()
+        {
+            // The bone proves both quests, but one needs a server quest and the other a discovery.
+            var done = CatchUpCarrying(("game:bone", 1));
+            Assert.Equal(0, done.Count);
+            Assert.False(Engine.IsComplete(Me.PlayerUID, "qltest:cu-server"), "a server quest isn't one player's to complete");
+            Assert.Equal(QuestState.Locked, StateOf("qltest:cu-after-server"));
+            Assert.Equal(QuestState.Locked, StateOf("qltest:cu-undiscovered"));
         }
 
         [VsTest(TimeoutMs = 60000)]
@@ -265,6 +328,20 @@ namespace Questline.Tests
             .Where(inv => inv != null)
             .SelectMany(inv => inv)
             .ToArray();
+
+        /// <summary>Carries only these stacks and catches up, in the same tick.</summary>
+        static List<string> CatchUpCarrying(params (string Code, int Count)[] stacks)
+        {
+            var slots = Carried();
+            for (int i = 0; i < slots.Length; i++)
+            {
+                slots[i].Itemstack = i < stacks.Length ? World.Stack(stacks[i].Code, stacks[i].Count) : null;
+                slots[i].MarkDirty();
+            }
+            var done = Engine.CatchUp(Me);
+            foreach (var id in done) Log(id);
+            return done;
+        }
 
         static int CountCarried(string code) => Carried()
             .Where(s => s.Itemstack?.Collectible.Code.ToString() == code)

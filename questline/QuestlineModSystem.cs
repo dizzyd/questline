@@ -158,6 +158,19 @@ public class QuestlineModSystem : ModSystem
                 .WithArgs(parsers.Word("quest id"), parsers.OptionalPlayerUids("player"))
                 .HandleWith(args => ForQuest(args, Engine.Unlock, "Unlocked {0} for {1}"))
             .EndSubCommand()
+            .BeginSubCommand("catchup")
+                .WithDescription("Complete the quests a player's carried items show they've done (for worlds older than Questline)")
+                .WithArgs(parsers.OptionalPlayerUids("player"))
+                .HandleWith(args =>
+                {
+                    var (uid, name) = Target(args, 0);
+                    if (api.World.PlayerByUid(uid) is not IServerPlayer { ConnectionState: EnumClientState.Playing } player) return TextCommandResult.Error("Name a player who is playing");
+                    int count = Engine.CatchUp(player).Count;
+                    return TextCommandResult.Success(count == 0
+                        ? $"Nothing {name} carries completes a quest: only tools and goods in the hotbar or backpack count"
+                        : $"Caught {name} up: {count} quests completed");
+                })
+            .EndSubCommand()
             .BeginSubCommand("reset")
                 .WithDescription("Forget a player's progress on one quest, or on all of them (their party's too)")
                 .WithArgs(parsers.OptionalWord("quest id"), parsers.OptionalPlayerUids("player"))

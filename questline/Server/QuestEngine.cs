@@ -48,6 +48,8 @@ public partial class QuestEngine
     // Task types a player's history records. Obtain follows the inventory instead, and a
     // checkbox has nothing to remember.
     static readonly HashSet<string> HistoryTypes = ["kill", "mount", "place", "break", "craft", "knap", "clayform", "smith", "cook", "smelt", "trade", "visit", "custom"];
+    // Task types an item carried now proves were done: the item is what the task gets or makes.
+    static readonly HashSet<string> ProofTypes = ["obtain", "craft", "knap", "clayform", "smith", "smelt", "cook"];
     public List<string> Problems { get; private set; } = [];
 
     /// <summary>
@@ -746,48 +748,127 @@ public partial class QuestEngine
     public void ForceComplete(string playerUid, string questId)
     {
         var quest = Registry.Get(questId) ?? throw new ArgumentException($"No quest {questId}");
+        CompleteTasks(playerUid, quest);
+        FlushSync();
+    }
+
+    // ForceComplete without the sync, for callers that complete several at once.
+    void CompleteTasks(string playerUid, QuestDef quest)
+    {
         var qp = Holder(quest, playerUid).GetOrCreate(quest);
         for (int i = 0; i < quest.Tasks.Count; i++) qp.Tasks[i] = quest.Tasks[i].Count;
         TryComplete(quest, playerUid, qp);
         Touch(quest, playerUid);
-        FlushSync();
     }
 
     /// <summary>
     /// Makes a quest available to a player by meeting its requirements: completes the quests it
     /// needs (and theirs, all the way back), and grants the stages. Where it may pick, as in an
-    /// any or an at-least, it meets the first options. A missing mod can't be met.
+    /// any or an at-least, it meets the first options until enough hold. A missing mod can't be met.
     /// </summary>
     public void Unlock(string playerUid, string questId)
     {
         var quest = Registry.Get(questId) ?? throw new ArgumentException($"No quest {questId}");
-        if (quest.Requires != null) Satisfy(playerUid, quest.Requires, []);
+        if (quest.Requires != null) Satisfy(playerUid, quest.Requires, new Satisfying());
         Touch(quest, playerUid);
         FlushSync();
     }
 
-    void Satisfy(string playerUid, Requirement r, HashSet<string> seen)
+    /// <summary>
+    /// Catches a player up from what they carry, for a world played before Questline was added:
+    /// every quest whose tasks are all things they now hold, as many as each asks, is completed
+    /// along with everything it needs, without guessing (see <see cref="Satisfying.Proven"/>).
+    /// Rewards for what was done before are spent, so the quests it completes are marked claimed,
+    /// for every member of a party; their stages are granted as they complete, since later quests
+    /// need them. Returns the quests it completed.
+    /// </summary>
+    public List<string> CatchUp(IServerPlayer player)
     {
+        string uid = player.PlayerUID;
+        var before = Registry.Quests.Keys.Where(id => IsComplete(uid, id)).ToHashSet();
+        var proven = Registry.Quests.Values
+            .Where(q => q.Mode != QuestMode.Server && q.Tasks.Count > 0
+                && q.Tasks.All(t => ProofTypes.Contains(t.Type) && CountCarried(player, Pattern(t)) >= t.Count))
+            .Select(q => q.Id).ToHashSet();
+
+        // A stage one quest gives can unlock a quest the pass has already left locked, so pass
+        // again until a pass completes nothing.
+        int complete = before.Count, last;
+        do
+        {
+            last = complete;
+            var pass = new Satisfying { Proven = proven };
+            foreach (string id in proven) Satisfy(uid, new QuestRequirement(id), pass);
+            complete = Registry.Quests.Keys.Count(id => IsComplete(uid, id));
+        } while (complete > last);
+
+        var done = Registry.Quests.Values.Where(q => !before.Contains(q.Id) && IsComplete(uid, q.Id)).ToList();
+        foreach (var quest in done)
+        {
+            foreach (string sharer in Sharers(quest, uid))
+            {
+                ClaimHolder(quest, sharer).GetOrCreate(quest).Claimed = true;
+                // Forget what they were sent, so the next sync is a full one: the book toasts only
+                // on a partial sync, and this would be a toast for every quest.
+                sent.Remove(sharer);
+            }
+            Touch(quest, uid);
+        }
+        FlushSync();
+        return done.Select(q => q.Id).ToList();
+    }
+
+    /// <summary>One pass of <see cref="Satisfy"/> over requirement trees.</summary>
+    sealed class Satisfying
+    {
+        public readonly HashSet<string> Seen = [];
+
+        /// <summary>
+        /// When catching up, the quests what the player carries proves. Satisfy then guesses
+        /// nothing: at a choice it takes only these, it grants no stage but those the quests it
+        /// completes give, it leaves alone a quest still locked once its requirements are met
+        /// as far as they can be (a discovery, a missing mod), and a server quest isn't one
+        /// player's to complete.
+        /// </summary>
+        public HashSet<string> Proven;
+
+        public bool CatchingUp => Proven != null;
+
+        /// <summary>The options of a choice to try, in order.</summary>
+        public IEnumerable<Requirement> Choices(List<Requirement> of) =>
+            CatchingUp ? of.Where(o => o is QuestRequirement q && Proven.Contains(q.QuestId)) : of;
+    }
+
+    void Satisfy(string playerUid, Requirement r, Satisfying pass)
+    {
+        var ctx = new PlayerContext(this, playerUid);
+        if (r.Evaluate(ctx)) return;
+
         switch (r)
         {
-            case QuestRequirement q when Registry.Get(q.QuestId) is { } pre && seen.Add(pre.Id):
-                if (pre.Requires != null) Satisfy(playerUid, pre.Requires, seen);
-                if (!IsComplete(playerUid, pre.Id)) ForceComplete(playerUid, pre.Id);
+            case QuestRequirement q when Registry.Get(q.QuestId) is { } pre && pass.Seen.Add(pre.Id):
+                if (pass.CatchingUp && pre.Mode == QuestMode.Server) break;
+                if (pre.Requires != null) Satisfy(playerUid, pre.Requires, pass);
+                if (pass.CatchingUp && !IsUnlocked(pre, playerUid)) break;
+                CompleteTasks(playerUid, pre);
+                if (!pass.CatchingUp) break;
+                foreach (var reward in pre.Rewards.Where(w => w.Type == "stage")) SetStage(StageHolder(pre, playerUid), reward.Stage, Sharers(pre, playerUid));
                 break;
-            case StageRequirement s when !HasStage(playerUid, s.Stage):
+            case StageRequirement s when !pass.CatchingUp:
                 SetStage(ProgressOf(playerUid), s.Stage, [playerUid]);
                 break;
             case ChapterCompleteRequirement c when Registry.ChaptersById.TryGetValue(c.ChapterId, out var chapter):
-                foreach (var each in chapter.Quests) Satisfy(playerUid, new QuestRequirement(each.Id), seen);
+                foreach (var each in chapter.Quests) Satisfy(playerUid, new QuestRequirement(each.Id), pass);
                 break;
             case AllRequirement all:
-                foreach (var each in all.Of) Satisfy(playerUid, each, seen);
+                foreach (var each in all.Of) Satisfy(playerUid, each, pass);
                 break;
-            case AnyRequirement any when any.Of.Count > 0:
-                Satisfy(playerUid, any.Of[0], seen);
-                break;
-            case AtLeastRequirement atLeast:
-                foreach (var each in atLeast.Of.Take(atLeast.N)) Satisfy(playerUid, each, seen);
+            case CompositeRequirement choice: // any or at least; all is above
+                foreach (var each in pass.Choices(choice.Of))
+                {
+                    Satisfy(playerUid, each, pass);
+                    if (r.Evaluate(ctx)) break;
+                }
                 break;
         }
     }

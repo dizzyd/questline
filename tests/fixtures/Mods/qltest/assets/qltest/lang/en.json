@@ -86,5 +86,15 @@
     "find-a-trader-title": "Find a trader",
     "two-ruins-title": "Explore two underground ruins",
     "game:structure-trader": "a trader's camp",
-    "game:structure-undergroundruin": "an underground ruin"
+    "game:structure-undergroundruin": "an underground ruin",
+    "catchup-title": "Catching up",
+    "cu-wax-title": "Collect beeswax",
+    "cu-raid-title": "Raid a wild hive",
+    "cu-harvest-title": "Harvest honeycomb",
+    "cu-gated-title": "Gather feathers",
+    "cu-staged-title": "Collect resin",
+    "cu-server-title": "A server goal",
+    "cu-after-server-title": "After the server goal",
+    "cu-undiscovered-title": "After a discovery",
+    "cu-party-title": "Make charcoal together"
 }

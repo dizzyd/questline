@@ -61,6 +61,26 @@ namespace Questline.Tests
         }
 
         [VsTest]
+        public void CatchingUpSpendsEveryMembersClaim()
+        {
+            PartyWithGhost();
+            var slot = Me.InventoryManager.ActiveHotbarSlot;
+            slot.Itemstack = World.Stack("game:charcoal", 1);
+            slot.MarkDirty();
+            try
+            {
+                Assert.True(Engine.CatchUp(Me).Contains("qltest:cu-party"), "the charcoal proves the party quest");
+                Assert.Equal(QuestState.Done, Engine.StateOf(MyUid, "qltest:cu-party"));
+                Assert.Equal(QuestState.Done, Engine.StateOf(Ghost, "qltest:cu-party"), "the ghost's claim is spent too");
+            }
+            finally
+            {
+                slot.Itemstack = null;
+                slot.MarkDirty();
+            }
+        }
+
+        [VsTest]
         public void PartyPoolsWorkAndEachMemberClaimsOnce()
         {
             PartyWithGhost();
